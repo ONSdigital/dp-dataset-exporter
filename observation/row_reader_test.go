@@ -1,11 +1,11 @@
 package observation_test
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"github.com/ONSdigital/dp-dataset-exporter/observation/observationtest"
 	. "github.com/smartystreets/goconvey/convey"
-	"testing"
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"io"
+	"testing"
 )
 
 func TestBoltRowReader_Read(t *testing.T) {
@@ -19,7 +19,7 @@ func TestBoltRowReader_Read(t *testing.T) {
 				return nil
 			},
 			NextNeoFunc: func() ([]interface{}, map[string]interface{}, error) {
-				return []interface{}{ expectedCSVRow }, nil, nil
+				return []interface{}{expectedCSVRow}, nil, nil
 			},
 		}
 
@@ -74,7 +74,7 @@ func TestBoltRowReader_Read_NoDataError(t *testing.T) {
 				return nil
 			},
 			NextNeoFunc: func() ([]interface{}, map[string]interface{}, error) {
-				return []interface{}{ }, nil, nil
+				return []interface{}{}, nil, nil
 			},
 		}
 
@@ -93,7 +93,6 @@ func TestBoltRowReader_Read_NoDataError(t *testing.T) {
 	})
 }
 
-
 func TestBoltRowReader_Read_TypeError(t *testing.T) {
 
 	Convey("Given a row reader with a mock Bolt reader that returns a row with no data.", t, func() {
@@ -103,7 +102,7 @@ func TestBoltRowReader_Read_TypeError(t *testing.T) {
 				return nil
 			},
 			NextNeoFunc: func() ([]interface{}, map[string]interface{}, error) {
-				return []interface{}{ 666 }, nil, nil
+				return []interface{}{666}, nil, nil
 			},
 		}
 

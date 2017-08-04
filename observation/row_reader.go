@@ -8,6 +8,10 @@ import (
 //go:generate moq -out observationtest/bolt_rows.go -pkg observationtest . BoltRows
 type BoltRows bolt.Rows
 
+type CSVRowReader interface {
+	Read() (string, error)
+}
+
 // Neo4JRowReader translates Neo4j rows to CSV rows.
 type BoltRowReader struct {
 	rows BoltRows
@@ -16,7 +20,7 @@ type BoltRowReader struct {
 // NewBoltRowReader returns a new reader instace for the given bolt rows.
 func NewBoltRowReader(rows BoltRows) *BoltRowReader {
 	return &BoltRowReader{
-		rows:rows,
+		rows: rows,
 	}
 }
 
@@ -45,6 +49,6 @@ func (reader *BoltRowReader) Read() (string, error) {
 }
 
 // Close the reader.
-func (reader *BoltRowReader) Close() (error) {
+func (reader *BoltRowReader) Close() error {
 	return reader.rows.Close()
 }
