@@ -16,7 +16,7 @@ type MessageConsumer interface {
 
 // Handler represents a handler for processing a single event.
 type Handler interface {
-	Handle(filterJobSubmittedEvent FilterJobSubmitted) error
+	Handle(filterJobSubmittedEvent *FilterJobSubmitted) error
 }
 
 // Consume converts messages to event instances, and pass the event to the provided handler.
@@ -31,7 +31,7 @@ func Consume(messageConsumer MessageConsumer, handler Handler) {
 
 		log.Debug("event received", log.Data{"event": event})
 
-		err = handler.Handle(*event)
+		err = handler.Handle(event)
 		if err != nil {
 			log.Error(err, log.Data{"message": "failed to handle event"})
 			continue

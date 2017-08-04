@@ -17,7 +17,7 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 
 		handlerMock := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent event.FilterJobSubmitted) error {
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
 				return nil
 			},
 		}
@@ -49,7 +49,7 @@ func TestConsume(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		handlerMock := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent event.FilterJobSubmitted) error {
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
 				return nil
 			},
 		}
