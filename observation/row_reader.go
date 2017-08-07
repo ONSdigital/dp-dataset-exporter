@@ -6,10 +6,12 @@ import (
 )
 
 //go:generate moq -out observationtest/bolt_rows.go -pkg observationtest . BoltRows
+//go:generate moq -out observationtest/row_reader.go -pkg observationtest . CSVRowReader
 type BoltRows bolt.Rows
 
 type CSVRowReader interface {
 	Read() (string, error)
+	Close() error
 }
 
 // Neo4JRowReader translates Neo4j rows to CSV rows.
