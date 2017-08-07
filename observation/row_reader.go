@@ -7,14 +7,17 @@ import (
 
 //go:generate moq -out observationtest/bolt_rows.go -pkg observationtest . BoltRows
 //go:generate moq -out observationtest/row_reader.go -pkg observationtest . CSVRowReader
+
+// BoltRows provides an interface to each row of results returned from the database.
 type BoltRows bolt.Rows
 
+// CSVRowReader provides a reader of individual rows (lines) of a CSV file.
 type CSVRowReader interface {
 	Read() (string, error)
 	Close() error
 }
 
-// Neo4JRowReader translates Neo4j rows to CSV rows.
+// BoltRowReader translates Neo4j rows to CSV rows.
 type BoltRowReader struct {
 	rows BoltRows
 }
@@ -26,11 +29,11 @@ func NewBoltRowReader(rows BoltRows) *BoltRowReader {
 	}
 }
 
-// NoDataReturnedError is returned if a Neo4j row has no data.
-var NoDataReturnedError = errors.New("No data returned in this row.")
+// ErrNoDataReturned is returned if a Neo4j row has no data.
+var ErrNoDataReturned = errors.New("no data returned in this row")
 
-// UnrecognisedTypeError is returned if a Neo4j row does not have the expected string value.
-var UnrecognisedTypeError = errors.New("The value returned was not a string.")
+// ErrUnrecognisedType is returned if a Neo4j row does not have the expected string value.
+var ErrUnrecognisedType = errors.New("the value returned was not a string")
 
 // Read the next row, or return io.EOF
 func (reader *BoltRowReader) Read() (string, error) {
@@ -40,14 +43,14 @@ func (reader *BoltRowReader) Read() (string, error) {
 	}
 
 	if len(data) < 1 {
-		return "", NoDataReturnedError
+		return "", ErrNoDataReturned
 	}
 
 	if csvRow, ok := data[0].(string); ok {
 		return csvRow, nil
 	}
 
-	return "", UnrecognisedTypeError
+	return "", ErrUnrecognisedType
 }
 
 // Close the reader.

@@ -86,7 +86,7 @@ func TestBoltRowReader_Read_NoDataError(t *testing.T) {
 
 			Convey("The expected error is returned", func() {
 				So(err, ShouldNotBeNil)
-				So(err, ShouldEqual, observation.NoDataReturnedError)
+				So(err, ShouldEqual, observation.ErrNoDataReturned)
 				So(row, ShouldEqual, "")
 			})
 		})
@@ -114,7 +114,7 @@ func TestBoltRowReader_Read_TypeError(t *testing.T) {
 
 			Convey("The expected error is returned", func() {
 				So(err, ShouldNotBeNil)
-				So(err, ShouldEqual, observation.UnrecognisedTypeError)
+				So(err, ShouldEqual, observation.ErrUnrecognisedType)
 				So(row, ShouldEqual, "")
 			})
 		})
