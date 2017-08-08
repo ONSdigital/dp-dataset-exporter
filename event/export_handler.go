@@ -30,7 +30,7 @@ func NewExportHandler(filterStore FilterStore, observationStore ObservationStore
 // FilterStore provides existing filter data.
 type FilterStore interface {
 	GetFilter(filterJobID string) (*observation.Filter, error)
-	PutCSVData(filterJobID string, csvURL string, size int64) error
+	PutCSVData(filterJobID string, csvURL string, csvSize int64) error
 }
 
 // ObservationStore provides filtered observation data in CSV rows.
@@ -40,7 +40,7 @@ type ObservationStore interface {
 
 // FileStore provides storage for filtered output files.
 type FileStore interface {
-	PutFile(reader io.Reader) error
+	PutFile(reader io.Reader, filter *observation.Filter) (url string, err error)
 }
 
 // Handle the export of a single filter job.
@@ -60,12 +60,16 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 
 	// upload to file store
 	reader := observation.NewReader(csvRowReader)
-	err = handler.fileStore.PutFile(reader)
+	fileURL, err := handler.fileStore.PutFile(reader, filter)
 	if err != nil {
 		return err
 	}
 
 	// write url and file size to filter API
+	err = handler.filterStore.PutCSVData(filter.JobID, fileURL, reader.TotalBytesRead())
+	if err != nil {
+		return err
+	} // todo: test err
 
 	// write output message
 

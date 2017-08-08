@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"io"
 	"sync"
 )
@@ -18,7 +19,7 @@ var (
 //
 //         // make and configure a mocked FileStore
 //         mockedFileStore := &FileStoreMock{
-//             PutFileFunc: func(reader io.Reader) error {
+//             PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
 // 	               panic("TODO: mock out the PutFile method")
 //             },
 //         }
@@ -29,7 +30,7 @@ var (
 //     }
 type FileStoreMock struct {
 	// PutFileFunc mocks the PutFile method.
-	PutFileFunc func(reader io.Reader) error
+	PutFileFunc func(reader io.Reader, filter *observation.Filter) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -37,24 +38,28 @@ type FileStoreMock struct {
 		PutFile []struct {
 			// Reader is the reader argument value.
 			Reader io.Reader
+			// Filter is the filter argument value.
+			Filter *observation.Filter
 		}
 	}
 }
 
 // PutFile calls PutFileFunc.
-func (mock *FileStoreMock) PutFile(reader io.Reader) error {
+func (mock *FileStoreMock) PutFile(reader io.Reader, filter *observation.Filter) (string, error) {
 	if mock.PutFileFunc == nil {
 		panic("moq: FileStoreMock.PutFileFunc is nil but FileStore.PutFile was just called")
 	}
 	callInfo := struct {
 		Reader io.Reader
+		Filter *observation.Filter
 	}{
 		Reader: reader,
+		Filter: filter,
 	}
 	lockFileStoreMockPutFile.Lock()
 	mock.calls.PutFile = append(mock.calls.PutFile, callInfo)
 	lockFileStoreMockPutFile.Unlock()
-	return mock.PutFileFunc(reader)
+	return mock.PutFileFunc(reader, filter)
 }
 
 // PutFileCalls gets all the calls that were made to PutFile.
@@ -62,9 +67,11 @@ func (mock *FileStoreMock) PutFile(reader io.Reader) error {
 //     len(mockedFileStore.PutFileCalls())
 func (mock *FileStoreMock) PutFileCalls() []struct {
 	Reader io.Reader
+	Filter *observation.Filter
 } {
 	var calls []struct {
 		Reader io.Reader
+		Filter *observation.Filter
 	}
 	lockFileStoreMockPutFile.RLock()
 	calls = mock.calls.PutFile

@@ -109,8 +109,8 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader) error {
-				return expectedError
+			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+				return "", expectedError
 			},
 		}
 
@@ -146,6 +146,9 @@ func TestExportHandler_Handle(t *testing.T) {
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
+			PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
+				return nil
+			},
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
@@ -155,8 +158,8 @@ func TestExportHandler_Handle(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader) error {
-				return nil
+			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+				return "", nil
 			},
 		}
 
