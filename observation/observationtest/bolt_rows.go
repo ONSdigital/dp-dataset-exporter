@@ -8,11 +8,11 @@ import (
 )
 
 var (
-	lockBoltRowsMockAll	sync.RWMutex
-	lockBoltRowsMockClose	sync.RWMutex
-	lockBoltRowsMockColumns	sync.RWMutex
-	lockBoltRowsMockMetadata	sync.RWMutex
-	lockBoltRowsMockNextNeo	sync.RWMutex
+	lockBoltRowsMockAll      sync.RWMutex
+	lockBoltRowsMockClose    sync.RWMutex
+	lockBoltRowsMockColumns  sync.RWMutex
+	lockBoltRowsMockMetadata sync.RWMutex
+	lockBoltRowsMockNextNeo  sync.RWMutex
 )
 
 // BoltRowsMock is a mock implementation of BoltRows.
@@ -20,7 +20,7 @@ var (
 //     func TestSomethingThatUsesBoltRows(t *testing.T) {
 //
 //         // make and configure a mocked BoltRows
-//         mockedBoltRows := &BoltRowsMock{ 
+//         mockedBoltRows := &BoltRowsMock{
 //             AllFunc: func() ([][]interface{}, map[string]interface{}, error) {
 // 	               panic("TODO: mock out the All method")
 //             },
@@ -40,7 +40,7 @@ var (
 //
 //         // TODO: use mockedBoltRows in code that requires BoltRows
 //         //       and then make assertions.
-// 
+//
 //     }
 type BoltRowsMock struct {
 	// AllFunc mocks the All method.
@@ -84,8 +84,7 @@ func (mock *BoltRowsMock) All() ([][]interface{}, map[string]interface{}, error)
 		panic("moq: BoltRowsMock.AllFunc is nil but BoltRows.All was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockBoltRowsMockAll.Lock()
 	mock.calls.All = append(mock.calls.All, callInfo)
 	lockBoltRowsMockAll.Unlock()
@@ -96,7 +95,7 @@ func (mock *BoltRowsMock) All() ([][]interface{}, map[string]interface{}, error)
 // Check the length with:
 //     len(mockedBoltRows.AllCalls())
 func (mock *BoltRowsMock) AllCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockBoltRowsMockAll.RLock()
@@ -111,8 +110,7 @@ func (mock *BoltRowsMock) Close() error {
 		panic("moq: BoltRowsMock.CloseFunc is nil but BoltRows.Close was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockBoltRowsMockClose.Lock()
 	mock.calls.Close = append(mock.calls.Close, callInfo)
 	lockBoltRowsMockClose.Unlock()
@@ -123,7 +121,7 @@ func (mock *BoltRowsMock) Close() error {
 // Check the length with:
 //     len(mockedBoltRows.CloseCalls())
 func (mock *BoltRowsMock) CloseCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockBoltRowsMockClose.RLock()
@@ -138,8 +136,7 @@ func (mock *BoltRowsMock) Columns() []string {
 		panic("moq: BoltRowsMock.ColumnsFunc is nil but BoltRows.Columns was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockBoltRowsMockColumns.Lock()
 	mock.calls.Columns = append(mock.calls.Columns, callInfo)
 	lockBoltRowsMockColumns.Unlock()
@@ -150,7 +147,7 @@ func (mock *BoltRowsMock) Columns() []string {
 // Check the length with:
 //     len(mockedBoltRows.ColumnsCalls())
 func (mock *BoltRowsMock) ColumnsCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockBoltRowsMockColumns.RLock()
@@ -165,8 +162,7 @@ func (mock *BoltRowsMock) Metadata() map[string]interface{} {
 		panic("moq: BoltRowsMock.MetadataFunc is nil but BoltRows.Metadata was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockBoltRowsMockMetadata.Lock()
 	mock.calls.Metadata = append(mock.calls.Metadata, callInfo)
 	lockBoltRowsMockMetadata.Unlock()
@@ -177,7 +173,7 @@ func (mock *BoltRowsMock) Metadata() map[string]interface{} {
 // Check the length with:
 //     len(mockedBoltRows.MetadataCalls())
 func (mock *BoltRowsMock) MetadataCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockBoltRowsMockMetadata.RLock()
@@ -192,8 +188,7 @@ func (mock *BoltRowsMock) NextNeo() ([]interface{}, map[string]interface{}, erro
 		panic("moq: BoltRowsMock.NextNeoFunc is nil but BoltRows.NextNeo was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockBoltRowsMockNextNeo.Lock()
 	mock.calls.NextNeo = append(mock.calls.NextNeo, callInfo)
 	lockBoltRowsMockNextNeo.Unlock()
@@ -204,7 +199,7 @@ func (mock *BoltRowsMock) NextNeo() ([]interface{}, map[string]interface{}, erro
 // Check the length with:
 //     len(mockedBoltRows.NextNeoCalls())
 func (mock *BoltRowsMock) NextNeoCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockBoltRowsMockNextNeo.RLock()

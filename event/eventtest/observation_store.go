@@ -4,12 +4,12 @@
 package eventtest
 
 import (
-	"sync"
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"sync"
 )
 
 var (
-	lockObservationStoreMockGetCSVRows	sync.RWMutex
+	lockObservationStoreMockGetCSVRows sync.RWMutex
 )
 
 // ObservationStoreMock is a mock implementation of ObservationStore.
@@ -17,7 +17,7 @@ var (
 //     func TestSomethingThatUsesObservationStore(t *testing.T) {
 //
 //         // make and configure a mocked ObservationStore
-//         mockedObservationStore := &ObservationStoreMock{ 
+//         mockedObservationStore := &ObservationStoreMock{
 //             GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
 // 	               panic("TODO: mock out the GetCSVRows method")
 //             },
@@ -25,7 +25,7 @@ var (
 //
 //         // TODO: use mockedObservationStore in code that requires ObservationStore
 //         //       and then make assertions.
-// 
+//
 //     }
 type ObservationStoreMock struct {
 	// GetCSVRowsFunc mocks the GetCSVRows method.
@@ -61,8 +61,8 @@ func (mock *ObservationStoreMock) GetCSVRows(filter *observation.Filter) (observ
 // Check the length with:
 //     len(mockedObservationStore.GetCSVRowsCalls())
 func (mock *ObservationStoreMock) GetCSVRowsCalls() []struct {
-		Filter *observation.Filter
-	} {
+	Filter *observation.Filter
+} {
 	var calls []struct {
 		Filter *observation.Filter
 	}

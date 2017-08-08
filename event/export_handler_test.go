@@ -128,7 +128,6 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 	})
 }
 
-
 func TestExportHandler_Handle(t *testing.T) {
 
 	Convey("Given a handler with a mocked dependencies", t, func() {

@@ -4,12 +4,12 @@
 package filtertest
 
 import (
-	"sync"
 	"net/http"
+	"sync"
 )
 
 var (
-	lockHTTPClientMockDo	sync.RWMutex
+	lockHTTPClientMockDo sync.RWMutex
 )
 
 // HTTPClientMock is a mock implementation of HTTPClient.
@@ -17,7 +17,7 @@ var (
 //     func TestSomethingThatUsesHTTPClient(t *testing.T) {
 //
 //         // make and configure a mocked HTTPClient
-//         mockedHTTPClient := &HTTPClientMock{ 
+//         mockedHTTPClient := &HTTPClientMock{
 //             DoFunc: func(req *http.Request) (*http.Response, error) {
 // 	               panic("TODO: mock out the Do method")
 //             },
@@ -25,7 +25,7 @@ var (
 //
 //         // TODO: use mockedHTTPClient in code that requires HTTPClient
 //         //       and then make assertions.
-// 
+//
 //     }
 type HTTPClientMock struct {
 	// DoFunc mocks the Do method.
@@ -61,8 +61,8 @@ func (mock *HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 // Check the length with:
 //     len(mockedHTTPClient.DoCalls())
 func (mock *HTTPClientMock) DoCalls() []struct {
-		Req *http.Request
-	} {
+	Req *http.Request
+} {
 	var calls []struct {
 		Req *http.Request
 	}

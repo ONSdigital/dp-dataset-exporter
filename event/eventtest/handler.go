@@ -4,12 +4,12 @@
 package eventtest
 
 import (
-	"sync"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
+	"sync"
 )
 
 var (
-	lockHandlerMockHandle	sync.RWMutex
+	lockHandlerMockHandle sync.RWMutex
 )
 
 // HandlerMock is a mock implementation of Handler.
@@ -17,7 +17,7 @@ var (
 //     func TestSomethingThatUsesHandler(t *testing.T) {
 //
 //         // make and configure a mocked Handler
-//         mockedHandler := &HandlerMock{ 
+//         mockedHandler := &HandlerMock{
 //             HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
 // 	               panic("TODO: mock out the Handle method")
 //             },
@@ -25,7 +25,7 @@ var (
 //
 //         // TODO: use mockedHandler in code that requires Handler
 //         //       and then make assertions.
-// 
+//
 //     }
 type HandlerMock struct {
 	// HandleFunc mocks the Handle method.
@@ -61,8 +61,8 @@ func (mock *HandlerMock) Handle(filterJobSubmittedEvent *event.FilterJobSubmitte
 // Check the length with:
 //     len(mockedHandler.HandleCalls())
 func (mock *HandlerMock) HandleCalls() []struct {
-		FilterJobSubmittedEvent *event.FilterJobSubmitted
-	} {
+	FilterJobSubmittedEvent *event.FilterJobSubmitted
+} {
 	var calls []struct {
 		FilterJobSubmittedEvent *event.FilterJobSubmitted
 	}

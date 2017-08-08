@@ -4,12 +4,12 @@
 package observationtest
 
 import (
-	"sync"
 	"github.com/johnnadratowski/golang-neo4j-bolt-driver"
+	"sync"
 )
 
 var (
-	lockDBConnectionMockQueryNeo	sync.RWMutex
+	lockDBConnectionMockQueryNeo sync.RWMutex
 )
 
 // DBConnectionMock is a mock implementation of DBConnection.
@@ -17,7 +17,7 @@ var (
 //     func TestSomethingThatUsesDBConnection(t *testing.T) {
 //
 //         // make and configure a mocked DBConnection
-//         mockedDBConnection := &DBConnectionMock{ 
+//         mockedDBConnection := &DBConnectionMock{
 //             QueryNeoFunc: func(query string, params map[string]interface{}) (golangNeo4jBoltDriver.Rows, error) {
 // 	               panic("TODO: mock out the QueryNeo method")
 //             },
@@ -25,7 +25,7 @@ var (
 //
 //         // TODO: use mockedDBConnection in code that requires DBConnection
 //         //       and then make assertions.
-// 
+//
 //     }
 type DBConnectionMock struct {
 	// QueryNeoFunc mocks the QueryNeo method.
@@ -49,10 +49,10 @@ func (mock *DBConnectionMock) QueryNeo(query string, params map[string]interface
 		panic("moq: DBConnectionMock.QueryNeoFunc is nil but DBConnection.QueryNeo was just called")
 	}
 	callInfo := struct {
-		Query string
+		Query  string
 		Params map[string]interface{}
 	}{
-		Query: query,
+		Query:  query,
 		Params: params,
 	}
 	lockDBConnectionMockQueryNeo.Lock()
@@ -65,11 +65,11 @@ func (mock *DBConnectionMock) QueryNeo(query string, params map[string]interface
 // Check the length with:
 //     len(mockedDBConnection.QueryNeoCalls())
 func (mock *DBConnectionMock) QueryNeoCalls() []struct {
-		Query string
-		Params map[string]interface{}
-	} {
+	Query  string
+	Params map[string]interface{}
+} {
 	var calls []struct {
-		Query string
+		Query  string
 		Params map[string]interface{}
 	}
 	lockDBConnectionMockQueryNeo.RLock()

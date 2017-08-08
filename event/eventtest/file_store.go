@@ -4,12 +4,12 @@
 package eventtest
 
 import (
-	"sync"
 	"io"
+	"sync"
 )
 
 var (
-	lockFileStoreMockPutFile	sync.RWMutex
+	lockFileStoreMockPutFile sync.RWMutex
 )
 
 // FileStoreMock is a mock implementation of FileStore.
@@ -17,7 +17,7 @@ var (
 //     func TestSomethingThatUsesFileStore(t *testing.T) {
 //
 //         // make and configure a mocked FileStore
-//         mockedFileStore := &FileStoreMock{ 
+//         mockedFileStore := &FileStoreMock{
 //             PutFileFunc: func(reader io.Reader) error {
 // 	               panic("TODO: mock out the PutFile method")
 //             },
@@ -25,7 +25,7 @@ var (
 //
 //         // TODO: use mockedFileStore in code that requires FileStore
 //         //       and then make assertions.
-// 
+//
 //     }
 type FileStoreMock struct {
 	// PutFileFunc mocks the PutFile method.
@@ -61,8 +61,8 @@ func (mock *FileStoreMock) PutFile(reader io.Reader) error {
 // Check the length with:
 //     len(mockedFileStore.PutFileCalls())
 func (mock *FileStoreMock) PutFileCalls() []struct {
-		Reader io.Reader
-	} {
+	Reader io.Reader
+} {
 	var calls []struct {
 		Reader io.Reader
 	}

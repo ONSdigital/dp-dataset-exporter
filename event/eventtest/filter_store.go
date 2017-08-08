@@ -4,13 +4,13 @@
 package eventtest
 
 import (
-	"sync"
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"sync"
 )
 
 var (
-	lockFilterStoreMockGetFilter	sync.RWMutex
-	lockFilterStoreMockPutCSVData	sync.RWMutex
+	lockFilterStoreMockGetFilter  sync.RWMutex
+	lockFilterStoreMockPutCSVData sync.RWMutex
 )
 
 // FilterStoreMock is a mock implementation of FilterStore.
@@ -18,7 +18,7 @@ var (
 //     func TestSomethingThatUsesFilterStore(t *testing.T) {
 //
 //         // make and configure a mocked FilterStore
-//         mockedFilterStore := &FilterStoreMock{ 
+//         mockedFilterStore := &FilterStoreMock{
 //             GetFilterFunc: func(filterJobID string) (*observation.Filter, error) {
 // 	               panic("TODO: mock out the GetFilter method")
 //             },
@@ -29,7 +29,7 @@ var (
 //
 //         // TODO: use mockedFilterStore in code that requires FilterStore
 //         //       and then make assertions.
-// 
+//
 //     }
 type FilterStoreMock struct {
 	// GetFilterFunc mocks the GetFilter method.
@@ -77,8 +77,8 @@ func (mock *FilterStoreMock) GetFilter(filterJobID string) (*observation.Filter,
 // Check the length with:
 //     len(mockedFilterStore.GetFilterCalls())
 func (mock *FilterStoreMock) GetFilterCalls() []struct {
-		FilterJobID string
-	} {
+	FilterJobID string
+} {
 	var calls []struct {
 		FilterJobID string
 	}
@@ -95,12 +95,12 @@ func (mock *FilterStoreMock) PutCSVData(filterJobID string, csvURL string, size 
 	}
 	callInfo := struct {
 		FilterJobID string
-		CsvURL string
-		Size int64
+		CsvURL      string
+		Size        int64
 	}{
 		FilterJobID: filterJobID,
-		CsvURL: csvURL,
-		Size: size,
+		CsvURL:      csvURL,
+		Size:        size,
 	}
 	lockFilterStoreMockPutCSVData.Lock()
 	mock.calls.PutCSVData = append(mock.calls.PutCSVData, callInfo)
@@ -112,14 +112,14 @@ func (mock *FilterStoreMock) PutCSVData(filterJobID string, csvURL string, size 
 // Check the length with:
 //     len(mockedFilterStore.PutCSVDataCalls())
 func (mock *FilterStoreMock) PutCSVDataCalls() []struct {
-		FilterJobID string
-		CsvURL string
-		Size int64
-	} {
+	FilterJobID string
+	CsvURL      string
+	Size        int64
+} {
 	var calls []struct {
 		FilterJobID string
-		CsvURL string
-		Size int64
+		CsvURL      string
+		Size        int64
 	}
 	lockFilterStoreMockPutCSVData.RLock()
 	calls = mock.calls.PutCSVData

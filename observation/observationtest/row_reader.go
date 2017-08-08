@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	lockCSVRowReaderMockClose	sync.RWMutex
-	lockCSVRowReaderMockRead	sync.RWMutex
+	lockCSVRowReaderMockClose sync.RWMutex
+	lockCSVRowReaderMockRead  sync.RWMutex
 )
 
 // CSVRowReaderMock is a mock implementation of CSVRowReader.
@@ -17,7 +17,7 @@ var (
 //     func TestSomethingThatUsesCSVRowReader(t *testing.T) {
 //
 //         // make and configure a mocked CSVRowReader
-//         mockedCSVRowReader := &CSVRowReaderMock{ 
+//         mockedCSVRowReader := &CSVRowReaderMock{
 //             CloseFunc: func() error {
 // 	               panic("TODO: mock out the Close method")
 //             },
@@ -28,7 +28,7 @@ var (
 //
 //         // TODO: use mockedCSVRowReader in code that requires CSVRowReader
 //         //       and then make assertions.
-// 
+//
 //     }
 type CSVRowReaderMock struct {
 	// CloseFunc mocks the Close method.
@@ -54,8 +54,7 @@ func (mock *CSVRowReaderMock) Close() error {
 		panic("moq: CSVRowReaderMock.CloseFunc is nil but CSVRowReader.Close was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockCSVRowReaderMockClose.Lock()
 	mock.calls.Close = append(mock.calls.Close, callInfo)
 	lockCSVRowReaderMockClose.Unlock()
@@ -66,7 +65,7 @@ func (mock *CSVRowReaderMock) Close() error {
 // Check the length with:
 //     len(mockedCSVRowReader.CloseCalls())
 func (mock *CSVRowReaderMock) CloseCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockCSVRowReaderMockClose.RLock()
@@ -81,8 +80,7 @@ func (mock *CSVRowReaderMock) Read() (string, error) {
 		panic("moq: CSVRowReaderMock.ReadFunc is nil but CSVRowReader.Read was just called")
 	}
 	callInfo := struct {
-	}{
-	}
+	}{}
 	lockCSVRowReaderMockRead.Lock()
 	mock.calls.Read = append(mock.calls.Read, callInfo)
 	lockCSVRowReaderMockRead.Unlock()
@@ -93,7 +91,7 @@ func (mock *CSVRowReaderMock) Read() (string, error) {
 // Check the length with:
 //     len(mockedCSVRowReader.ReadCalls())
 func (mock *CSVRowReaderMock) ReadCalls() []struct {
-	} {
+} {
 	var calls []struct {
 	}
 	lockCSVRowReaderMockRead.RLock()
