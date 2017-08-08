@@ -19,7 +19,7 @@ func TestExportHandler_Handle_FilterStoreError(t *testing.T) {
 		mockError := errors.New("get filters failed")
 
 		mockFilterStore := &eventtest.FilterStoreMock{
-			GetFiltersFunc: func(filterJobId string) (*observation.Filter, error) {
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return nil, mockError
 			},
 		}
@@ -48,14 +48,14 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 
 		filter := &observation.Filter{
 			DataSetFilterID: "888",
-			DimensionFilters: []observation.DimensionFilter{
+			DimensionFilters: []*observation.DimensionFilter{
 				{Name: "age", Values: []string{"29", "30"}},
 				{Name: "sex", Values: []string{"male", "female"}},
 			},
 		}
 
 		mockFilterStore := &eventtest.FilterStoreMock{
-			GetFiltersFunc: func(filterJobId string) (*observation.Filter, error) {
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
 		}
@@ -90,14 +90,14 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		filter := &observation.Filter{
 			DataSetFilterID: "888",
-			DimensionFilters: []observation.DimensionFilter{
+			DimensionFilters: []*observation.DimensionFilter{
 				{Name: "age", Values: []string{"29", "30"}},
 				{Name: "sex", Values: []string{"male", "female"}},
 			},
 		}
 
 		mockFilterStore := &eventtest.FilterStoreMock{
-			GetFiltersFunc: func(filterJobId string) (*observation.Filter, error) {
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
 		}
@@ -137,14 +137,14 @@ func TestExportHandler_Handle(t *testing.T) {
 
 		filter := &observation.Filter{
 			DataSetFilterID: "888",
-			DimensionFilters: []observation.DimensionFilter{
+			DimensionFilters: []*observation.DimensionFilter{
 				{Name: "age", Values: []string{"29", "30"}},
 				{Name: "sex", Values: []string{"male", "female"}},
 			},
 		}
 
 		mockFilterStore := &eventtest.FilterStoreMock{
-			GetFiltersFunc: func(filterJobId string) (*observation.Filter, error) {
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
 		}
@@ -173,9 +173,9 @@ func TestExportHandler_Handle(t *testing.T) {
 
 			Convey("The filter store is called with the correct filter job ID", func() {
 
-				So(len(mockFilterStore.GetFiltersCalls()), ShouldEqual, 1)
+				So(len(mockFilterStore.GetFilterCalls()), ShouldEqual, 1)
 
-				actualFilterID := mockFilterStore.GetFiltersCalls()[0].FilterJobID
+				actualFilterID := mockFilterStore.GetFilterCalls()[0].FilterJobID
 				So(actualFilterID, ShouldEqual, filterJobEvent.FilterJobID)
 			})
 

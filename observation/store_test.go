@@ -14,7 +14,7 @@ func TestSpec(t *testing.T) {
 
 		filter := &observation.Filter{
 			DataSetFilterID: "888",
-			DimensionFilters: []observation.DimensionFilter{
+			DimensionFilters: []*observation.DimensionFilter{
 				{Name: "age", Values: []string{"29", "30"}},
 				{Name: "sex", Values: []string{"male", "female"}},
 			},

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	lockFilterStoreMockGetFilters	sync.RWMutex
+	lockFilterStoreMockGetFilter	sync.RWMutex
 	lockFilterStoreMockPutCSVData	sync.RWMutex
 )
 
@@ -19,8 +19,8 @@ var (
 //
 //         // make and configure a mocked FilterStore
 //         mockedFilterStore := &FilterStoreMock{ 
-//             GetFiltersFunc: func(filterJobID string) (*observation.Filter, error) {
-// 	               panic("TODO: mock out the GetFilters method")
+//             GetFilterFunc: func(filterJobID string) (*observation.Filter, error) {
+// 	               panic("TODO: mock out the GetFilter method")
 //             },
 //             PutCSVDataFunc: func(filterJobID string, url string, size int64) error {
 // 	               panic("TODO: mock out the PutCSVData method")
@@ -32,16 +32,16 @@ var (
 // 
 //     }
 type FilterStoreMock struct {
-	// GetFiltersFunc mocks the GetFilters method.
-	GetFiltersFunc func(filterJobID string) (*observation.Filter, error)
+	// GetFilterFunc mocks the GetFilter method.
+	GetFilterFunc func(filterJobID string) (*observation.Filter, error)
 
 	// PutCSVDataFunc mocks the PutCSVData method.
 	PutCSVDataFunc func(filterJobID string, url string, size int64) error
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// GetFilters holds details about calls to the GetFilters method.
-		GetFilters []struct {
+		// GetFilter holds details about calls to the GetFilter method.
+		GetFilter []struct {
 			// FilterJobID is the filterJobID argument value.
 			FilterJobID string
 		}
@@ -57,34 +57,34 @@ type FilterStoreMock struct {
 	}
 }
 
-// GetFilters calls GetFiltersFunc.
-func (mock *FilterStoreMock) GetFilters(filterJobID string) (*observation.Filter, error) {
-	if mock.GetFiltersFunc == nil {
-		panic("moq: FilterStoreMock.GetFiltersFunc is nil but FilterStore.GetFilters was just called")
+// GetFilter calls GetFilterFunc.
+func (mock *FilterStoreMock) GetFilter(filterJobID string) (*observation.Filter, error) {
+	if mock.GetFilterFunc == nil {
+		panic("moq: FilterStoreMock.GetFilterFunc is nil but FilterStore.GetFilter was just called")
 	}
 	callInfo := struct {
 		FilterJobID string
 	}{
 		FilterJobID: filterJobID,
 	}
-	lockFilterStoreMockGetFilters.Lock()
-	mock.calls.GetFilters = append(mock.calls.GetFilters, callInfo)
-	lockFilterStoreMockGetFilters.Unlock()
-	return mock.GetFiltersFunc(filterJobID)
+	lockFilterStoreMockGetFilter.Lock()
+	mock.calls.GetFilter = append(mock.calls.GetFilter, callInfo)
+	lockFilterStoreMockGetFilter.Unlock()
+	return mock.GetFilterFunc(filterJobID)
 }
 
-// GetFiltersCalls gets all the calls that were made to GetFilters.
+// GetFilterCalls gets all the calls that were made to GetFilter.
 // Check the length with:
-//     len(mockedFilterStore.GetFiltersCalls())
-func (mock *FilterStoreMock) GetFiltersCalls() []struct {
+//     len(mockedFilterStore.GetFilterCalls())
+func (mock *FilterStoreMock) GetFilterCalls() []struct {
 		FilterJobID string
 	} {
 	var calls []struct {
 		FilterJobID string
 	}
-	lockFilterStoreMockGetFilters.RLock()
-	calls = mock.calls.GetFilters
-	lockFilterStoreMockGetFilters.RUnlock()
+	lockFilterStoreMockGetFilter.RLock()
+	calls = mock.calls.GetFilter
+	lockFilterStoreMockGetFilter.RUnlock()
 	return calls
 }
 
