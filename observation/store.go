@@ -57,7 +57,7 @@ func createObservationQuery(filter *Filter) string {
 		optionList := createOptionList(dimension.Values)
 		matchDimensions += fmt.Sprintf("(%s:_%s_%s)", dimension.Name, filter.DataSetFilterID, dimension.Name)
 		where += fmt.Sprintf("%s.value IN [%s]", dimension.Name, optionList)
-		with += fmt.Sprintf("%s", dimension.Name)
+		with += dimension.Name
 		match += fmt.Sprintf("(o:_%s_observation)-[:isValueOf]->(%s)", filter.DataSetFilterID, dimension.Name)
 	}
 

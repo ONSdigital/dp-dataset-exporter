@@ -29,7 +29,14 @@ func NewStore(region string, bucket string) *Store {
 func (store *Store) PutFile(reader io.Reader, filename string) error {
 
 	session, err := session.NewSession(store.config)
+	if err != nil {
+		return err
+	}
+
 	uploader := s3manager.NewUploader(session)
+	if err != nil {
+		return err
+	}
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Body:   reader,

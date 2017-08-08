@@ -30,7 +30,7 @@ func NewExportHandler(filterStore FilterStore, observationStore ObservationStore
 // FilterStore provides existing filter data.
 type FilterStore interface {
 	GetFilter(filterJobID string) (*observation.Filter, error)
-	PutCSVData(filterJobID string, url string, size int64) error
+	PutCSVData(filterJobID string, csvURL string, size int64) error
 }
 
 // ObservationStore provides filtered observation data in CSV rows.
