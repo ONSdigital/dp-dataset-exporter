@@ -25,7 +25,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.FilterJobConsumerGroup, ShouldEqual, "dp-dataset-exporter")
 				So(cfg.DatabaseAddress, ShouldEqual, "bolt://localhost:7687")
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")
-				So(cfg.ResultProducerTopic, ShouldEqual, "csv-filtered")
+				So(cfg.CSVExportedProducerTopic, ShouldEqual, "csv-exported")
 			})
 		})
 	})
