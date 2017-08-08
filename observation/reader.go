@@ -7,9 +7,10 @@ var _ io.Reader = (*Reader)(nil)
 
 // Reader is an io.Reader implementation that wraps a csvRowReader
 type Reader struct {
-	csvRowReader CSVRowReader
-	buffer       []byte // buffer a portion of the current line
-	eof          bool   // are we at the end of the csv rows?
+	csvRowReader   CSVRowReader
+	buffer         []byte // buffer a portion of the current line
+	eof            bool   // are we at the end of the csv rows?
+	totalBytesRead int64  // how many bytes in total have been read?
 }
 
 // NewReader returns a new io.Reader for the given csvRowReader.
@@ -36,6 +37,7 @@ func (reader *Reader) Read(p []byte) (n int, err error) {
 
 	// copy into the given byte array.
 	copied := copy(p, reader.buffer)
+	reader.totalBytesRead += int64(copied)
 
 	// if the line is bigger than the array, slice the line to account for bytes read
 	if len(reader.buffer) > len(p) {
@@ -54,4 +56,9 @@ func (reader *Reader) Read(p []byte) (n int, err error) {
 // Close the reader.
 func (reader *Reader) Close() (err error) {
 	return reader.csvRowReader.Close()
+}
+
+// TotalBytesRead returns the total number of bytes read by this reader.
+func (reader *Reader) TotalBytesRead() int64 {
+	return reader.totalBytesRead
 }

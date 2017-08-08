@@ -34,6 +34,7 @@ func TestReader_Read(t *testing.T) {
 			Convey("The mock row content is returned", func() {
 				So(err, ShouldBeNil)
 				So(bytesRead, ShouldEqual, len(expected))
+				So(reader.TotalBytesRead(), ShouldEqual, len(expected))
 
 				So(reflect.DeepEqual(expected, actual), ShouldBeTrue)
 			})
@@ -83,6 +84,8 @@ func TestReader_Read_MultipleReadsForALine(t *testing.T) {
 				So(err3, ShouldNotBeNil)
 				So(bytesRead3, ShouldEqual, 3)
 				So(reflect.DeepEqual(expected3[:3], read3[:3]), ShouldBeTrue)
+
+				So(reader.TotalBytesRead(), ShouldEqual, len([]byte(dummyRowContent)))
 			})
 		})
 	})
@@ -129,6 +132,8 @@ func TestReader_Read_MultipleLines(t *testing.T) {
 				So(err3, ShouldBeNil)
 				So(bytesRead3, ShouldEqual, expectedLen)
 				So(reflect.DeepEqual(expected, read3[:expectedLen]), ShouldBeTrue)
+
+				So(reader.TotalBytesRead(), ShouldEqual, expectedLen*3) // should have read the row content 3 times
 			})
 		})
 	})
@@ -158,6 +163,7 @@ func TestReader_Read_Error(t *testing.T) {
 				So(err, ShouldNotBeNil)
 				So(bytesRead, ShouldEqual, 0)
 				So(err, ShouldEqual, expectedError)
+				So(reader.TotalBytesRead(), ShouldEqual, 0)
 			})
 		})
 	})
