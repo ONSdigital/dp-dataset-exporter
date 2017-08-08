@@ -8,6 +8,7 @@ import (
 //go:generate moq -out eventtest/filter_store.go -pkg eventtest . FilterStore
 //go:generate moq -out eventtest/observation_store.go -pkg eventtest . ObservationStore
 //go:generate moq -out eventtest/file_store.go -pkg eventtest . FileStore
+//go:generate moq -out eventtest/producer.go -pkg eventtest . Producer
 
 var _ Handler = (*ExportHandler)(nil)
 
@@ -16,14 +17,20 @@ type ExportHandler struct {
 	filterStore      FilterStore
 	observationStore ObservationStore
 	fileStore        FileStore
+	eventProducer    Producer
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
-func NewExportHandler(filterStore FilterStore, observationStore ObservationStore, fileStore FileStore) *ExportHandler {
+func NewExportHandler(filterStore FilterStore,
+	observationStore ObservationStore,
+	fileStore FileStore,
+	eventProducer Producer) *ExportHandler {
+
 	return &ExportHandler{
 		filterStore:      filterStore,
 		observationStore: observationStore,
 		fileStore:        fileStore,
+		eventProducer:    eventProducer,
 	}
 }
 
@@ -43,22 +50,24 @@ type FileStore interface {
 	PutFile(reader io.Reader, filter *observation.Filter) (url string, err error)
 }
 
+// Producer handles producing output events.
+type Producer interface {
+	CSVExported(filterJobID string) error
+}
+
 // Handle the export of a single filter job.
 func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 
-	// get filters from filter store
 	filter, err := handler.filterStore.GetFilter(event.FilterJobID)
 	if err != nil {
 		return err
 	}
 
-	// get observation rows from observation store.
 	csvRowReader, err := handler.observationStore.GetCSVRows(filter)
 	if err != nil {
 		return err
 	}
 
-	// upload to file store
 	reader := observation.NewReader(csvRowReader)
 	fileURL, err := handler.fileStore.PutFile(reader, filter)
 	if err != nil {
@@ -69,9 +78,7 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 	err = handler.filterStore.PutCSVData(filter.JobID, fileURL, reader.TotalBytesRead())
 	if err != nil {
 		return err
-	} // todo: test err
+	}
 
-	// write output message
-
-	return nil
+	return handler.eventProducer.CSVExported(filter.JobID)
 }

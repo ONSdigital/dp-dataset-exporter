@@ -10,11 +10,23 @@ import (
 	"testing"
 )
 
+const filterJobId = "345"
+const fileUrl = "s3://some/url/123.csv"
+
+var filterJobEvent = &event.FilterJobSubmitted{FilterJobID: filterJobId}
+
+var filter = &observation.Filter{
+	DataSetFilterID: "888",
+	JobID:           filterJobId,
+	DimensionFilters: []*observation.DimensionFilter{
+		{Name: "age", Values: []string{"29", "30"}},
+		{Name: "sex", Values: []string{"male", "female"}},
+	},
+}
+
 func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 
 	Convey("Given a handler with a mock filter store that returns an error", t, func() {
-
-		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: "345"}
 
 		mockError := errors.New("get filters failed")
 
@@ -24,7 +36,7 @@ func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, nil, nil)
+		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil)
 
 		Convey("When handle is called", func() {
 
@@ -44,17 +56,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in the database")
 
-		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: "345"}
-
-		filter := &observation.Filter{
-			DataSetFilterID: "888",
-			DimensionFilters: []*observation.DimensionFilter{
-				{Name: "age", Values: []string{"29", "30"}},
-				{Name: "sex", Values: []string{"male", "female"}},
-			},
-		}
-
-		mockFilterStore := &eventtest.FilterStoreMock{
+		var mockFilterStore = &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
@@ -66,7 +68,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil)
 
 		Convey("When handle is called", func() {
 
@@ -86,16 +88,6 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in the database")
 
-		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: "345"}
-
-		filter := &observation.Filter{
-			DataSetFilterID: "888",
-			DimensionFilters: []*observation.DimensionFilter{
-				{Name: "age", Values: []string{"29", "30"}},
-				{Name: "sex", Values: []string{"male", "female"}},
-			},
-		}
-
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
@@ -114,7 +106,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil)
 
 		Convey("When handle is called", func() {
 
@@ -134,22 +126,9 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in put CSV data")
 
-		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: "345"}
-
-		filter := &observation.Filter{
-			DataSetFilterID: "888",
-			DimensionFilters: []*observation.DimensionFilter{
-				{Name: "age", Values: []string{"29", "30"}},
-				{Name: "sex", Values: []string{"male", "female"}},
-			},
-		}
-
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
-			},
-			PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
-				return expectedError
 			},
 		}
 
@@ -161,11 +140,11 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 		mockedFileStore := &eventtest.FileStoreMock{
 			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
-				return "", nil
+				return "", expectedError
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil)
 
 		Convey("When handle is called", func() {
 
@@ -179,22 +158,11 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 	})
 }
 
-func TestExportHandler_Handle(t *testing.T) {
+func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 
-	Convey("Given a handler with a mocked dependencies", t, func() {
+	Convey("Given a handler with a mocked event producer that returns an error", t, func() {
 
-		filterJobId := "345"
-		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: filterJobId}
-		fileUrl := "s3://some/url/123.csv"
-
-		filter := &observation.Filter{
-			DataSetFilterID: "888",
-			JobID:           filterJobId,
-			DimensionFilters: []*observation.DimensionFilter{
-				{Name: "age", Values: []string{"29", "30"}},
-				{Name: "sex", Values: []string{"male", "female"}},
-			},
-		}
+		expectedError := errors.New("something bad happened in event producer")
 
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
@@ -217,7 +185,58 @@ func TestExportHandler_Handle(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore)
+		mockedEventProducer := &eventtest.EventProducerMock{
+			CSVExportedFunc: func(filterJobID string) error {
+				return expectedError
+			},
+		}
+
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer)
+
+		Convey("When handle is called", func() {
+
+			err := handler.Handle(filterJobEvent)
+
+			Convey("The error returned is the error returned from the file store", func() {
+				So(err, ShouldNotBeNil)
+				So(err, ShouldEqual, expectedError)
+			})
+		})
+	})
+}
+
+func TestExportHandler_Handle(t *testing.T) {
+
+	Convey("Given a handler with a mocked dependencies", t, func() {
+
+		mockFilterStore := &eventtest.FilterStoreMock{
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
+				return filter, nil
+			},
+			PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
+				return nil
+			},
+		}
+
+		mockObservationStore := &eventtest.ObservationStoreMock{
+			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+				return nil, nil
+			},
+		}
+
+		mockedFileStore := &eventtest.FileStoreMock{
+			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+				return fileUrl, nil
+			},
+		}
+
+		mockedEventProducer := &eventtest.EventProducerMock{
+			CSVExportedFunc: func(filterJobID string) error {
+				return nil
+			},
+		}
+
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer)
 
 		Convey("When handle is called", func() {
 
@@ -257,6 +276,12 @@ func TestExportHandler_Handle(t *testing.T) {
 
 				So(mockFilterStore.PutCSVDataCalls()[0].FilterJobID, ShouldEqual, filterJobEvent.FilterJobID)
 				So(mockFilterStore.PutCSVDataCalls()[0].CsvURL, ShouldEqual, fileUrl)
+			})
+
+			Convey("The event producer is called with the filter ID.", func() {
+
+				So(len(mockedEventProducer.CSVExportedCalls()), ShouldEqual, 1)
+				So(mockedEventProducer.CSVExportedCalls()[0].FilterJobID, ShouldEqual, filterJobEvent.FilterJobID)
 			})
 		})
 	})
