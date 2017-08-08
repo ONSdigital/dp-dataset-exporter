@@ -29,7 +29,7 @@ func NewExportHandler(filterStore FilterStore, observationStore ObservationStore
 
 // FilterStore provides existing filter data.
 type FilterStore interface {
-	GetFilters(filterJobID string) (*observation.Filter, error)
+	GetFilter(filterJobID string) (*observation.Filter, error)
 	PutCSVData(filterJobID string, url string, size int64) error
 }
 
@@ -47,7 +47,7 @@ type FileStore interface {
 func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 
 	// get filters from filter store
-	filter, err := handler.filterStore.GetFilters(event.FilterJobID)
+	filter, err := handler.filterStore.GetFilter(event.FilterJobID)
 	if err != nil {
 		return err
 	}
