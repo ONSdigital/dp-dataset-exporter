@@ -1,7 +1,7 @@
 package file
 
 import (
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -26,17 +26,19 @@ func NewStore(region string, bucket string) *Store {
 }
 
 // PutFile stores the contents of the given reader to the given filename.
-func (store *Store) PutFile(reader io.Reader, filename string) error {
+func (store *Store) PutFile(reader io.Reader, filter *observation.Filter) (url string, err error) {
 
 	session, err := session.NewSession(store.config)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	uploader := s3manager.NewUploader(session)
 	if err != nil {
-		return err
+		return "", err
 	}
+
+	filename := filter.JobID + ".csv"
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Body:   reader,
@@ -44,12 +46,8 @@ func (store *Store) PutFile(reader io.Reader, filename string) error {
 		Key:    &filename,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	log.Debug("upload successful", log.Data{
-		"upload_location": result.Location,
-	})
-
-	return nil
+	return result.Location, nil
 }
