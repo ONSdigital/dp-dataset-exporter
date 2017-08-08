@@ -185,7 +185,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
-		mockedEventProducer := &eventtest.EventProducerMock{
+		mockedEventProducer := &eventtest.ProducerMock{
 			CSVExportedFunc: func(filterJobID string) error {
 				return expectedError
 			},
@@ -230,7 +230,7 @@ func TestExportHandler_Handle(t *testing.T) {
 			},
 		}
 
-		mockedEventProducer := &eventtest.EventProducerMock{
+		mockedEventProducer := &eventtest.ProducerMock{
 			CSVExportedFunc: func(filterJobID string) error {
 				return nil
 			},

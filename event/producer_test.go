@@ -20,9 +20,11 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 		Convey("When CSVExported is called on the event producer", func() {
 
-			eventProducer.CSVExported(filterJobId)
+			err := eventProducer.CSVExported(filterJobId)
 
 			Convey("The expected event is available on the output channel", func() {
+
+				So(err, ShouldBeNil)
 
 				messageBytes := <-outputChannel
 				close(outputChannel)
