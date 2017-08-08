@@ -26,6 +26,8 @@ func TestSpec(t *testing.T) {
 				So(cfg.DatabaseAddress, ShouldEqual, "bolt://localhost:7687")
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")
 				So(cfg.CSVExportedProducerTopic, ShouldEqual, "csv-exported")
+				So(cfg.AWSRegion, ShouldEqual, "eu-west-1")
+				So(cfg.S3BucketName, ShouldEqual, "csv-exported")
 			})
 		})
 	})
