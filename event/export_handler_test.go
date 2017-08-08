@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestExportHandler_Handle_FilterStoreError(t *testing.T) {
+func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 
 	Convey("Given a handler with a mock filter store that returns an error", t, func() {
 
@@ -128,14 +128,68 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 	})
 }
 
-func TestExportHandler_Handle(t *testing.T) {
+func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
-	Convey("Given a handler with a mocked dependencies", t, func() {
+	Convey("Given a handler with a mocked file store that returns an error", t, func() {
+
+		expectedError := errors.New("something bad happened in put CSV data")
 
 		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: "345"}
 
 		filter := &observation.Filter{
 			DataSetFilterID: "888",
+			DimensionFilters: []*observation.DimensionFilter{
+				{Name: "age", Values: []string{"29", "30"}},
+				{Name: "sex", Values: []string{"male", "female"}},
+			},
+		}
+
+		mockFilterStore := &eventtest.FilterStoreMock{
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
+				return filter, nil
+			},
+			PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
+				return expectedError
+			},
+		}
+
+		mockObservationStore := &eventtest.ObservationStoreMock{
+			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+				return nil, nil
+			},
+		}
+
+		mockedFileStore := &eventtest.FileStoreMock{
+			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+				return "", nil
+			},
+		}
+
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore)
+
+		Convey("When handle is called", func() {
+
+			err := handler.Handle(filterJobEvent)
+
+			Convey("The error returned is the error returned from the file store", func() {
+				So(err, ShouldNotBeNil)
+				So(err, ShouldEqual, expectedError)
+			})
+		})
+	})
+}
+
+func TestExportHandler_Handle(t *testing.T) {
+
+	Convey("Given a handler with a mocked dependencies", t, func() {
+
+		filterJobId := "345"
+		filterJobEvent := &event.FilterJobSubmitted{FilterJobID: filterJobId}
+		fileUrl := "s3://some/url/123.csv"
+
+		filter := &observation.Filter{
+			DataSetFilterID: "888",
+			JobID:           filterJobId,
 			DimensionFilters: []*observation.DimensionFilter{
 				{Name: "age", Values: []string{"29", "30"}},
 				{Name: "sex", Values: []string{"male", "female"}},
@@ -159,7 +213,7 @@ func TestExportHandler_Handle(t *testing.T) {
 
 		mockedFileStore := &eventtest.FileStoreMock{
 			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
-				return "", nil
+				return fileUrl, nil
 			},
 		}
 
@@ -195,6 +249,14 @@ func TestExportHandler_Handle(t *testing.T) {
 
 				actual := mockedFileStore.PutFileCalls()[0].Reader
 				So(actual, ShouldNotBeNil)
+			})
+
+			Convey("The filter store is called with file URL returned from the file store.", func() {
+
+				So(len(mockFilterStore.PutCSVDataCalls()), ShouldEqual, 1)
+
+				So(mockFilterStore.PutCSVDataCalls()[0].FilterJobID, ShouldEqual, filterJobEvent.FilterJobID)
+				So(mockFilterStore.PutCSVDataCalls()[0].CsvURL, ShouldEqual, fileUrl)
 			})
 		})
 	})
