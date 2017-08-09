@@ -72,6 +72,11 @@ func main() {
 		kafkaConsumer.Closer() <- true
 		kafkaProducer.Closer() <- true
 
+		err := dbConnection.Close()
+		if err != nil {
+			log.Error(err, log.Data{"message": "failed to close connection to Neo4j"})
+		}
+
 		log.Debug("graceful shutdown was successful", nil)
 		os.Exit(0)
 	}()
