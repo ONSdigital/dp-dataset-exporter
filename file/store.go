@@ -40,6 +40,7 @@ func (store *Store) PutFile(reader io.Reader, filter *observation.Filter) (url s
 
 	filename := filter.JobID + ".csv"
 
+	// the AWS uploader automatically handles large files breaking them into parts and using the multi part API.
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Body:   reader,
 		Bucket: &store.bucket,

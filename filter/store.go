@@ -24,6 +24,9 @@ var ErrFilterJobNotFound = errors.New("failed to find filter job")
 // ErrFilterAPIError returned when an unrecognised error occurs.
 var ErrFilterAPIError = errors.New("Internal error from the import api")
 
+// ErrUnrecognisedAPIError returned when an unrecognised error occurs.
+var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the import api")
+
 // NewStore returns a new instance of a filter store.
 func NewStore(filterAPIURL string, httpClient HTTPClient) *Store {
 	return &Store{
@@ -82,9 +85,9 @@ func (store *Store) getFilterMetaData(filterJobID string) (*observation.Filter, 
 	}
 
 	var filter *observation.Filter
-	JSONErr := json.Unmarshal(bytes, &filter)
-	if JSONErr != nil {
-		return nil, JSONErr
+	err = json.Unmarshal(bytes, &filter)
+	if err != nil {
+		return nil, err
 	}
 
 	return filter, nil
@@ -139,15 +142,17 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	}
 
 	switch response.StatusCode {
+	case http.StatusOK:
+		bytes, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read http body into bytes")
+		}
+		return bytes, nil
 	case http.StatusNotFound:
 		return nil, ErrFilterJobNotFound
 	case http.StatusInternalServerError:
 		return nil, ErrFilterAPIError
+	default:
+		return nil, ErrUnrecognisedAPIError
 	}
-
-	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read http body into bytes")
-	}
-	return bytes, nil
 }

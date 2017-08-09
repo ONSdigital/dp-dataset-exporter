@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/johnnadratowski/golang-neo4j-bolt-driver/log"
 	"io"
 )
 
@@ -69,6 +70,11 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 	}
 
 	reader := observation.NewReader(csvRowReader)
+	defer func() {
+		err := reader.Close()
+		log.Error(err, nil)
+	}()
+
 	fileURL, err := handler.fileStore.PutFile(reader, filter)
 	if err != nil {
 		return err

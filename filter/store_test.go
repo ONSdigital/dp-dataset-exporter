@@ -160,7 +160,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
 		mockHTTPClient := &filtertest.HTTPClientMock{
 			DoFunc: func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusNotFound}, nil
+				return &http.Response{StatusCode: http.StatusBadGateway}, nil
 			},
 		}
 
@@ -174,7 +174,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 				So(actualFilter, ShouldBeNil)
 				So(err, ShouldNotBeNil)
 
-				So(err, ShouldEqual, filter.ErrFilterJobNotFound)
+				So(err, ShouldEqual, filter.ErrUnrecognisedAPIError)
 			})
 		})
 	})

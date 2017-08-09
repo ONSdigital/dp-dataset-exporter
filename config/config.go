@@ -32,7 +32,5 @@ func Get() (*Config, error) {
 		AWSRegion:                "eu-west-1",
 	}
 
-	err := gofigure.Gofigure(&cfg)
-
-	return &cfg, err
+	return &cfg, gofigure.Gofigure(&cfg)
 }

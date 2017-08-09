@@ -23,7 +23,7 @@ type Handler interface {
 func Consume(messageConsumer MessageConsumer, handler Handler) {
 	for message := range messageConsumer.Incoming() {
 
-		event, err := Unmarshal(message)
+		event, err := unmarshal(message)
 		if err != nil {
 			log.Error(err, log.Data{"message": "failed to unmarshal event"})
 			continue
@@ -43,8 +43,8 @@ func Consume(messageConsumer MessageConsumer, handler Handler) {
 	}
 }
 
-// Unmarshal converts a event instance to []byte.
-func Unmarshal(message kafka.Message) (*FilterJobSubmitted, error) {
+// unmarshal converts a event instance to []byte.
+func unmarshal(message kafka.Message) (*FilterJobSubmitted, error) {
 	var event FilterJobSubmitted
 	err := schema.FilterJobSubmittedEvent.Unmarshal(message.GetData(), &event)
 	return &event, err

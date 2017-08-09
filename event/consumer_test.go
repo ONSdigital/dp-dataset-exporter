@@ -79,25 +79,6 @@ func TestConsume(t *testing.T) {
 	})
 }
 
-func TestToEvent(t *testing.T) {
-
-	Convey("Given a event schema encoded using avro", t, func() {
-
-		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(Marshal(*expectedEvent))
-
-		Convey("When the expectedEvent is unmarshalled", func() {
-
-			event, err := event.Unmarshal(message)
-
-			Convey("The expectedEvent has the expected values", func() {
-				So(err, ShouldBeNil)
-				So(event.FilterJobID, ShouldEqual, expectedEvent.FilterJobID)
-			})
-		})
-	})
-}
-
 // Marshal helper method to marshal a event into a []byte
 func Marshal(event event.FilterJobSubmitted) []byte {
 	bytes, err := schema.FilterJobSubmittedEvent.Marshal(event)

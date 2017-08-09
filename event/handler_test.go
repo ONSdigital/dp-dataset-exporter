@@ -4,6 +4,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-dataset-exporter/observation/observationtest"
 	"github.com/johnnadratowski/golang-neo4j-bolt-driver/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"io"
@@ -88,6 +89,15 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in the database")
 
+		mockRowReader := &observationtest.CSVRowReaderMock{
+			ReadFunc: func() (string, error) {
+				return "wut", nil
+			},
+			CloseFunc: func() error {
+				return nil
+			},
+		}
+
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
@@ -96,7 +106,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
 			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
-				return nil, nil
+				return mockRowReader, nil
 			},
 		}
 
@@ -126,6 +136,15 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in put CSV data")
 
+		mockRowReader := &observationtest.CSVRowReaderMock{
+			ReadFunc: func() (string, error) {
+				return "wut", nil
+			},
+			CloseFunc: func() error {
+				return nil
+			},
+		}
+
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
@@ -134,7 +153,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
 			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
-				return nil, nil
+				return mockRowReader, nil
 			},
 		}
 
@@ -164,6 +183,15 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in event producer")
 
+		mockRowReader := &observationtest.CSVRowReaderMock{
+			ReadFunc: func() (string, error) {
+				return "wut", nil
+			},
+			CloseFunc: func() error {
+				return nil
+			},
+		}
+
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
@@ -175,7 +203,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
 			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
-				return nil, nil
+				return mockRowReader, nil
 			},
 		}
 
@@ -209,6 +237,15 @@ func TestExportHandler_Handle(t *testing.T) {
 
 	Convey("Given a handler with a mocked dependencies", t, func() {
 
+		mockRowReader := &observationtest.CSVRowReaderMock{
+			ReadFunc: func() (string, error) {
+				return "wut", nil
+			},
+			CloseFunc: func() error {
+				return nil
+			},
+		}
+
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
@@ -220,7 +257,7 @@ func TestExportHandler_Handle(t *testing.T) {
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
 			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
-				return nil, nil
+				return mockRowReader, nil
 			},
 		}
 
@@ -283,6 +320,16 @@ func TestExportHandler_Handle(t *testing.T) {
 				So(len(mockedEventProducer.CSVExportedCalls()), ShouldEqual, 1)
 				So(mockedEventProducer.CSVExportedCalls()[0].FilterJobID, ShouldEqual, filterJobEvent.FilterJobID)
 			})
+
+			Convey("The CSV row reader returned from the DB is closed.", func() {
+				So(len(mockRowReader.CloseCalls()), ShouldEqual, 1)
+			})
 		})
 	})
 }
+
+type iOReadCloser struct {
+	io.Reader
+}
+
+func (iOReadCloser) Close() error { return nil }

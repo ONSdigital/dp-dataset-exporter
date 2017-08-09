@@ -3,28 +3,28 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "UvospQG3Po/190Rl2TH/LmnqaeA=",
+			"checksumSHA1": "dzh4fF9o6j+mJEbJn5utm8Q+Pyg=",
 			"path": "github.com/ONSdigital/go-ns/avro",
-			"revision": "2eacf03a56b8af2f433f7311f6da135dafb2c207",
-			"revisionTime": "2017-07-21T14:36:54Z"
+			"revision": "c493b1568574c9720d7805f23ce6271ac445dc57",
+			"revisionTime": "2017-07-28T08:24:17Z"
 		},
 		{
-			"checksumSHA1": "y+/SgY99+YR0/omjsLQ1b4Pmq3g=",
+			"checksumSHA1": "dF3c6fF99+C/Y09aqUqJ9ouiHPE=",
 			"path": "github.com/ONSdigital/go-ns/kafka",
-			"revision": "2eacf03a56b8af2f433f7311f6da135dafb2c207",
-			"revisionTime": "2017-07-21T14:36:54Z"
+			"revision": "c493b1568574c9720d7805f23ce6271ac445dc57",
+			"revisionTime": "2017-07-28T08:24:17Z"
 		},
 		{
 			"checksumSHA1": "XxpAeP/OwIe2MDbHGBuNdwNtR4Q=",
 			"path": "github.com/ONSdigital/go-ns/kafka/kafkatest",
-			"revision": "2eacf03a56b8af2f433f7311f6da135dafb2c207",
-			"revisionTime": "2017-07-21T14:36:54Z"
+			"revision": "c493b1568574c9720d7805f23ce6271ac445dc57",
+			"revisionTime": "2017-07-28T08:24:17Z"
 		},
 		{
 			"checksumSHA1": "AjbjbhFVAOP/1NU5HL+uy+X/yJo=",
 			"path": "github.com/ONSdigital/go-ns/log",
-			"revision": "2eacf03a56b8af2f433f7311f6da135dafb2c207",
-			"revisionTime": "2017-07-21T14:36:54Z"
+			"revision": "c493b1568574c9720d7805f23ce6271ac445dc57",
+			"revisionTime": "2017-07-28T08:24:17Z"
 		},
 		{
 			"checksumSHA1": "+Jp0tVXfQ1TM8T+oun82oJtME5U=",
@@ -228,8 +228,8 @@
 			"checksumSHA1": "I6MnUzkLJt+sh73CodD0NKswFrs=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/go-avro/avro",
 			"path": "github.com/go-avro/avro",
-			"revision": "2eacf03a56b8af2f433f7311f6da135dafb2c207",
-			"revisionTime": "2017-07-21T14:36:54Z"
+			"revision": "c493b1568574c9720d7805f23ce6271ac445dc57",
+			"revisionTime": "2017-07-28T08:24:17Z"
 		},
 		{
 			"checksumSHA1": "VvZKmbuBN1QAG699KduTdmSPwA4=",
@@ -321,8 +321,8 @@
 			"checksumSHA1": "hBgLmZ/4mCxmnH88mqFKBkpJFUY=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/mgutz/ansi",
 			"path": "github.com/mgutz/ansi",
-			"revision": "2eacf03a56b8af2f433f7311f6da135dafb2c207",
-			"revisionTime": "2017-07-21T14:36:54Z"
+			"revision": "c493b1568574c9720d7805f23ce6271ac445dc57",
+			"revisionTime": "2017-07-28T08:24:17Z"
 		},
 		{
 			"checksumSHA1": "FGg99nQ56Fo3radSCuU1AeEUJug=",

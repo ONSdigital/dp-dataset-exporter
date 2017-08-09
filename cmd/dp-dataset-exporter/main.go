@@ -48,7 +48,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	kafkaProducer := kafka.NewProducer(kafkaBrokers, config.CSVExportedProducerTopic, 0)
+	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, config.CSVExportedProducerTopic, 0)
+	if err != nil {
+		log.Error(err, log.Data{"message": "failed to create kafka producer"})
+		os.Exit(1)
+	}
 
 	dbConnection, err := bolt.NewDriver().OpenNeo(config.DatabaseAddress)
 
