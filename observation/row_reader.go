@@ -47,7 +47,7 @@ func (reader *BoltRowReader) Read() (string, error) {
 	}
 
 	if csvRow, ok := data[0].(string); ok {
-		return csvRow, nil
+		return csvRow + "\n", nil
 	}
 
 	return "", ErrUnrecognisedType

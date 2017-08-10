@@ -31,7 +31,7 @@ func TestBoltRowReader_Read(t *testing.T) {
 
 			Convey("The expected csv row is returned", func() {
 				So(err, ShouldBeNil)
-				So(row, ShouldEqual, expectedCSVRow)
+				So(row, ShouldEqual, expectedCSVRow+"\n")
 			})
 		})
 	})
