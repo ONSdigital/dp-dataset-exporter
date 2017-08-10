@@ -6,14 +6,13 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	"github.com/ONSdigital/go-ns/avro"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	"os"
 )
 
 func main() {
-	log.Namespace = "dp-observation-importer"
+	log.Namespace = "dp-dataset-exporter"
 
 	config, err := config.Get()
 	if err != nil {
@@ -32,8 +31,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	avroProducer := avro.NewProducer(kafkaProducer, schema.FilterJobSubmitted)
-
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 
@@ -44,6 +41,12 @@ func main() {
 			FilterJobID: filterJobID,
 		}
 
-		avroProducer.SendMessage(event)
+		bytes, err := schema.FilterJobSubmittedEvent.Marshal(event)
+		if err != nil {
+			log.Error(err, nil)
+			os.Exit(1)
+		}
+
+		kafkaProducer.Output() <- bytes
 	}
 }
