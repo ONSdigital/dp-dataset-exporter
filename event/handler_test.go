@@ -327,9 +327,3 @@ func TestExportHandler_Handle(t *testing.T) {
 		})
 	})
 }
-
-type iOReadCloser struct {
-	io.Reader
-}
-
-func (iOReadCloser) Close() error { return nil }
