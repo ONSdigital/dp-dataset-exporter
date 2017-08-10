@@ -2,7 +2,7 @@ package event
 
 import (
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
-	"github.com/johnnadratowski/golang-neo4j-bolt-driver/log"
+	"github.com/ONSdigital/go-ns/log"
 	"io"
 )
 
@@ -64,6 +64,10 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 		return err
 	}
 
+	log.Debug("filter retrieved for job", log.Data{
+		"dataset_filter_id": filter.DataSetFilterID,
+		"filter_id":         filter.JobID})
+
 	csvRowReader, err := handler.observationStore.GetCSVRows(filter)
 	if err != nil {
 		return err
@@ -72,13 +76,21 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
 		err := reader.Close()
-		log.Error(err, nil)
+		if err != nil {
+			log.Error(err, nil)
+		}
 	}()
 
 	fileURL, err := handler.fileStore.PutFile(reader, filter)
 	if err != nil {
 		return err
 	}
+
+	log.Debug("exported csv file", log.Data{
+		"dataset_filter_id": filter.DataSetFilterID,
+		"filter_id":         filter.JobID,
+		"url":               fileURL,
+		"size":              reader.TotalBytesRead()})
 
 	// write url and file size to filter API
 	err = handler.filterStore.PutCSVData(filter.JobID, fileURL, reader.TotalBytesRead())
