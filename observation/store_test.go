@@ -20,10 +20,13 @@ func TestSpec(t *testing.T) {
 			},
 		}
 
-		expectedQuery := "MATCH (age:_888_age), (sex:_888_sex) " +
-			"WHERE age.value IN ['29', '30'] AND sex.value IN ['male', 'female'] " +
+		expectedQuery := "MATCH (age:`_888_age`), (sex:`_888_sex`) " +
+			"WHERE age.value IN ['29', '30'] " +
+			"AND sex.value IN ['male', 'female'] " +
 			"WITH age, sex " +
-			"MATCH (o:_888_observation)-[:isValueOf]->(age), (o:_888_observation)-[:isValueOf]->(sex)"
+			"MATCH (o:`_888_observation`)-[:isValueOf]->(age), " +
+			"(o:`_888_observation`)-[:isValueOf]->(sex) " +
+			"return o.value"
 
 		expectedCSVRow := "the,csv,row"
 
