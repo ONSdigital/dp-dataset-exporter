@@ -9,6 +9,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -174,6 +175,134 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 				So(actualFilter, ShouldBeNil)
 				So(err, ShouldNotBeNil)
 
+				So(err, ShouldEqual, filter.ErrUnrecognisedAPIError)
+			})
+		})
+	})
+}
+
+func TestStore_PutCSVData(t *testing.T) {
+
+	Convey("Given a store with a mocked HTTP response", t, func() {
+
+		fileURL := ""
+		fileSize := int64(12345)
+
+		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
+		mockHTTPClient := &filtertest.HTTPClientMock{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
+			},
+		}
+
+		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+
+		Convey("When PutCSVData is called", func() {
+
+			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+
+			Convey("The expected body data is sent", func() {
+				So(err, ShouldBeNil)
+
+				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+
+				httpReq := mockHTTPClient.DoCalls()[0].Req
+				buf := bytes.Buffer{}
+				buf.ReadFrom(httpReq.Body)
+
+				actualFilter := &observation.Filter{}
+				err := json.Unmarshal(buf.Bytes(), actualFilter)
+				So(err, ShouldBeNil)
+
+				So(actualFilter.Downloads.CSV.URL, ShouldEqual, fileURL)
+				So(actualFilter.Downloads.CSV.Size, ShouldEqual, strconv.FormatInt(fileSize, 10))
+				So(httpReq.URL.Path, ShouldEndWith, filterJobID)
+			})
+		})
+	})
+}
+
+func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
+
+	Convey("Given a store with a mocked HTTP error response", t, func() {
+
+		fileURL := ""
+		fileSize := int64(12345)
+
+		mockHTTPClient := &filtertest.HTTPClientMock{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusNotFound, Body: nil}, nil
+			},
+		}
+
+		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+
+		Convey("When PutCSVData is called", func() {
+
+			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+
+			Convey("The expected error is returned", func() {
+
+				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldEqual, filter.ErrFilterJobNotFound)
+			})
+		})
+	})
+}
+
+func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
+
+	Convey("Given a store with a mocked HTTP error response", t, func() {
+
+		fileURL := ""
+		fileSize := int64(12345)
+
+		mockHTTPClient := &filtertest.HTTPClientMock{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusInternalServerError, Body: nil}, nil
+			},
+		}
+
+		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+
+		Convey("When PutCSVData is called", func() {
+
+			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+
+			Convey("The expected error is returned", func() {
+
+				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldEqual, filter.ErrFilterAPIError)
+			})
+		})
+	})
+}
+
+func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
+
+	Convey("Given a store with a mocked HTTP error response", t, func() {
+
+		fileURL := ""
+		fileSize := int64(12345)
+
+		mockHTTPClient := &filtertest.HTTPClientMock{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusBadGateway, Body: nil}, nil
+			},
+		}
+
+		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+
+		Convey("When PutCSVData is called", func() {
+
+			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+
+			Convey("The expected error is returned", func() {
+
+				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(err, ShouldNotBeNil)
 				So(err, ShouldEqual, filter.ErrUnrecognisedAPIError)
 			})
 		})

@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 //go:generate moq -out filtertest/http_client.go -pkg filtertest . HTTPClient
@@ -41,11 +43,28 @@ type HTTPClient interface {
 }
 
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
-func (store *Store) PutCSVData(filterJobID string, url string, size int64) error {
+func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) error {
 
-	// todo: make call to the filter API.
+	url := store.filterAPIURL + "/filters/" + filterJobID
 
-	return nil
+	putBody := &observation.Filter{
+		State: "completed",
+		Downloads: &observation.Downloads{
+			CSV: &observation.DownloadItem{
+				Size: strconv.FormatInt(size, 10),
+				URL:  fileURL,
+			},
+		},
+	}
+
+	json, err := json.Marshal(putBody)
+	if err != nil {
+		return err
+	}
+
+	_, err = store.makeRequest("PUT", url, bytes.NewReader(json))
+
+	return err
 }
 
 // GetFilter returns filter data from the filter API for the given ID
@@ -131,7 +150,7 @@ func (store *Store) getFilterDimensionList(filter *observation.Filter) ([]*obser
 // common function for handling a HTTP request and response codes.
 func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, error) {
 
-	request, err := http.NewRequest(method, url, nil)
+	request, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
