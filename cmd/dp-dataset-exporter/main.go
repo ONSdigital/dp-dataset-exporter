@@ -66,26 +66,6 @@ func main() {
 
 	exit := make(chan struct{})
 
-	go func() {
-
-		<-signals
-
-		close(exit)
-
-		// gracefully dispose resources
-		kafkaConsumer.Closer() <- true
-		kafkaProducer.Closer() <- true
-
-		err := dbConnection.Close()
-		if err != nil {
-			log.Error(err, log.Data{"message": "failed to close connection to Neo4j"})
-			os.Exit(0)
-		}
-
-		log.Debug("graceful shutdown was successful", nil)
-		os.Exit(0)
-	}()
-
 	httpClient := http.Client{Timeout: time.Second * 15}
 
 	filterStore := filter.NewStore(config.FilterAPIURL, &httpClient)
@@ -95,5 +75,22 @@ func main() {
 
 	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer)
 
-	event.Consume(kafkaConsumer, eventHandler)
+	go event.Consume(kafkaConsumer, eventHandler)
+
+	<-signals
+
+	close(exit)
+
+	// gracefully dispose resources
+	kafkaConsumer.Closer() <- true
+	kafkaProducer.Closer() <- true
+
+	err = dbConnection.Close()
+	if err != nil {
+		log.Error(err, log.Data{"message": "failed to close connection to Neo4j"})
+		os.Exit(0)
+	}
+
+	log.Debug("graceful shutdown was successful", nil)
+	os.Exit(0)
 }
