@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestSpec(t *testing.T) {
+func TestStore_GetCSVRows(t *testing.T) {
 
 	Convey("Given an store with a mock DB connection", t, func() {
 
@@ -20,13 +20,14 @@ func TestSpec(t *testing.T) {
 			},
 		}
 
-		expectedQuery := "MATCH (age:`_888_age`), (sex:`_888_sex`) " +
+		expectedQuery := "MATCH (:`_888_Instance`) RETURN i.header as row " +
+			"UNION ALL " +
+			"MATCH (age:`_888_age`), (sex:`_888_sex`) " +
 			"WHERE age.value IN ['29', '30'] " +
 			"AND sex.value IN ['male', 'female'] " +
 			"WITH age, sex " +
-			"MATCH (o:`_888_observation`)-[:isValueOf]->(age), " +
-			"(o:`_888_observation`)-[:isValueOf]->(sex) " +
-			"return o.value"
+			"MATCH (o:`_888_observation`)-[:isValueOf]->(age), (o:`_888_observation`)-[:isValueOf]->(sex) " +
+			"return o.value as row"
 
 		expectedCSVRow := "the,csv,row"
 

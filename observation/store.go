@@ -28,9 +28,12 @@ func NewStore(dBConnection DBConnection) *Store {
 // GetCSVRows returns a reader allowing individual CSV rows to be read.
 func (store *Store) GetCSVRows(filter *Filter) (CSVRowReader, error) {
 
-	query := createObservationQuery(filter)
+	headerRowQuery := fmt.Sprintf("MATCH (:`_%s_Instance`) RETURN i.header as row", filter.DataSetFilterID)
+	rowsQuery := createObservationQuery(filter)
 
-	rows, err := store.dBConnection.QueryNeo(query, nil)
+	unionQuery := headerRowQuery + " UNION ALL " + rowsQuery
+
+	rows, err := store.dBConnection.QueryNeo(unionQuery, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +64,7 @@ func createObservationQuery(filter *Filter) string {
 		match += fmt.Sprintf("(o:`_%s_observation`)-[:isValueOf]->(%s)", filter.DataSetFilterID, dimension.Name)
 	}
 
-	return matchDimensions + where + with + match + " return o.value"
+	return matchDimensions + where + with + match + " return o.value as row"
 }
 
 func createOptionList(options []string) string {
