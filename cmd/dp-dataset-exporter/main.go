@@ -68,7 +68,7 @@ func main() {
 
 	httpClient := http.Client{Timeout: time.Second * 15}
 
-	filterStore := filter.NewStore(config.FilterAPIURL, &httpClient)
+	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
 	observationStore := observation.NewStore(dbConnection)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
 	eventProducer := event.NewAvroProducer(kafkaProducer)

@@ -15,6 +15,7 @@ import (
 )
 
 const filterAPIURL string = "http://filter-api:8765"
+const filterAPIAuthToken string = "dgt-dsfgrtyedf-gesrtrt"
 const filterJobID string = "123456784432"
 
 var mockFilterData = &observation.Filter{
@@ -62,7 +63,7 @@ func TestStore_GetFilter(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -105,7 +106,7 @@ func TestStore_GetFilter_DimensionCallError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -139,7 +140,7 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -165,7 +166,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -195,7 +196,7 @@ func TestStore_PutCSVData(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -217,6 +218,8 @@ func TestStore_PutCSVData(t *testing.T) {
 				So(actualFilter.Downloads.CSV.URL, ShouldEqual, fileURL)
 				So(actualFilter.Downloads.CSV.Size, ShouldEqual, strconv.FormatInt(fileSize, 10))
 				So(httpReq.URL.Path, ShouldEndWith, filterJobID)
+				So(httpReq.Header.Get("Internal-token"), ShouldEqual, filterAPIAuthToken)
+
 			})
 		})
 	})
@@ -235,7 +238,7 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -264,7 +267,7 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -293,7 +296,7 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 

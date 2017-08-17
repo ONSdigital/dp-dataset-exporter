@@ -17,8 +17,9 @@ import (
 
 // Store provides access to stored dimension data.
 type Store struct {
-	filterAPIURL string
-	httpClient   HTTPClient
+	filterAPIURL       string
+	filterAPIAuthToken string
+	httpClient         HTTPClient
 }
 
 // ErrFilterJobNotFound returned when the filter job count not be found for the given ID.
@@ -31,10 +32,11 @@ var ErrFilterAPIError = errors.New("Internal error from the import api")
 var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the import api")
 
 // NewStore returns a new instance of a filter store.
-func NewStore(filterAPIURL string, httpClient HTTPClient) *Store {
+func NewStore(filterAPIURL string, filterAPIAuthToken string, httpClient HTTPClient) *Store {
 	return &Store{
-		filterAPIURL: filterAPIURL,
-		httpClient:   httpClient,
+		filterAPIURL:       filterAPIURL,
+		filterAPIAuthToken: filterAPIAuthToken,
+		httpClient:         httpClient,
 	}
 }
 
@@ -154,6 +156,7 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
+	request.Header.Set("Internal-token", store.filterAPIAuthToken)
 
 	response, responseError := store.httpClient.Do(request)
 	if responseError != nil {
