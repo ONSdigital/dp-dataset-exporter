@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/ONSdigital/dp-dataset-exporter/observation"
 )
 
 //go:generate moq -out filtertest/http_client.go -pkg filtertest . HTTPClient
@@ -69,7 +70,6 @@ func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) e
 
 // GetFilter returns filter data from the filter API for the given ID
 func (store *Store) GetFilter(filterJobID string) (*observation.Filter, error) {
-
 	filter, err := store.getFilterMetaData(filterJobID)
 	if err != nil {
 		return nil, err
@@ -114,8 +114,7 @@ func (store *Store) getFilterMetaData(filterJobID string) (*observation.Filter, 
 
 // call the filter API for filter meta data.
 func (store *Store) getFilterDimensionOptions(dimensionURL string) (*observation.DimensionFilter, error) {
-
-	dimensionOptionsURL := dimensionURL + "/options"
+	dimensionOptionsURL := store.filterAPIURL + dimensionURL + "/options"
 
 	bytes, err := store.makeRequest("GET", dimensionOptionsURL, nil)
 	if err != nil {
@@ -132,8 +131,9 @@ func (store *Store) getFilterDimensionOptions(dimensionURL string) (*observation
 }
 
 func (store *Store) getFilterDimensionList(filter *observation.Filter) ([]*observation.DimensionFilter, error) {
+	url := store.filterAPIURL + filter.DimensionListURL
 
-	bytes, err := store.makeRequest("GET", filter.DimensionListURL, nil)
+	bytes, err := store.makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
