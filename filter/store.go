@@ -156,7 +156,7 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Internal-token", store.filterAPIAuthToken)
+	request.Header.Set("internal_token", store.filterAPIAuthToken)
 
 	response, responseError := store.httpClient.Do(request)
 	if responseError != nil {
