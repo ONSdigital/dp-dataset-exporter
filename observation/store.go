@@ -28,7 +28,7 @@ func NewStore(dBConnection DBConnection) *Store {
 // GetCSVRows returns a reader allowing individual CSV rows to be read.
 func (store *Store) GetCSVRows(filter *Filter) (CSVRowReader, error) {
 
-	headerRowQuery := fmt.Sprintf("MATCH (:`_%s_Instance`) RETURN i.header as row", filter.DataSetFilterID)
+	headerRowQuery := fmt.Sprintf("MATCH (i:`_%s_Instance`) RETURN i.header as row", filter.DataSetFilterID)
 	rowsQuery := createObservationQuery(filter)
 
 	unionQuery := headerRowQuery + " UNION ALL " + rowsQuery

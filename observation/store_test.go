@@ -20,7 +20,7 @@ func TestStore_GetCSVRows(t *testing.T) {
 			},
 		}
 
-		expectedQuery := "MATCH (:`_888_Instance`) RETURN i.header as row " +
+		expectedQuery := "MATCH (i:`_888_Instance`) RETURN i.header as row " +
 			"UNION ALL " +
 			"MATCH (age:`_888_age`), (sex:`_888_sex`) " +
 			"WHERE age.value IN ['29', '30'] " +
