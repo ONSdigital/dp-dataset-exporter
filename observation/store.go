@@ -57,7 +57,7 @@ func createObservationQuery(filter *Filter) string {
 			match += ", "
 		}
 
-		optionList := createOptionList(dimension.Values)
+		optionList := createOptionList(dimension.Options)
 		matchDimensions += fmt.Sprintf("(%s:`_%s_%s`)", dimension.Name, filter.DataSetFilterID, dimension.Name)
 		where += fmt.Sprintf("%s.value IN [%s]", dimension.Name, optionList)
 		with += dimension.Name
@@ -67,7 +67,7 @@ func createObservationQuery(filter *Filter) string {
 	return matchDimensions + where + with + match + " return o.value as row"
 }
 
-func createOptionList(options []string) string {
+func createOptionList(options []*DimensionOption) string {
 
 	var buffer bytes.Buffer
 
@@ -77,7 +77,7 @@ func createOptionList(options []string) string {
 			buffer.WriteString(", ")
 		}
 
-		buffer.WriteString(fmt.Sprintf("'%s'", option))
+		buffer.WriteString(fmt.Sprintf("'%s'", option.Option))
 	}
 
 	return buffer.String()

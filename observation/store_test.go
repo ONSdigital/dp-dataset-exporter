@@ -15,8 +15,14 @@ func TestStore_GetCSVRows(t *testing.T) {
 		filter := &observation.Filter{
 			DataSetFilterID: "888",
 			DimensionFilters: []*observation.DimensionFilter{
-				{Name: "age", Values: []string{"29", "30"}},
-				{Name: "sex", Values: []string{"male", "female"}},
+				{Name: "age", Options: []*observation.DimensionOption{
+					{Option: "29"},
+					{Option: "30"}}},
+				{
+					Name: "sex", Options: []*observation.DimensionOption{
+						{Option: "male"},
+						{Option: "female"}},
+				},
 			},
 		}
 

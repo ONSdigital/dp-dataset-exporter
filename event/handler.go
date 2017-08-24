@@ -75,9 +75,9 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
-		err := reader.Close()
-		if err != nil {
-			log.Error(err, nil)
+		closeErr := reader.Close()
+		if closeErr != nil {
+			log.Error(closeErr, nil)
 		}
 	}()
 

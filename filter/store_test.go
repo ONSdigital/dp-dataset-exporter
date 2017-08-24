@@ -29,10 +29,9 @@ var mockDimensionListData = []*observation.DimensionFilter{{
 	Name: "Sex",
 }}
 
-var mockDimensionData = &observation.DimensionFilter{
-	URL:    filterAPIURL + "/filter/" + filterJobID + "/dimensions/234",
-	Name:   "Sex",
-	Values: []string{"Male", "Female"},
+var mockDimensionOptionData = []*observation.DimensionOption{
+	{Option: "29"},
+	{Option: "30"},
 }
 
 func TestStore_GetFilter(t *testing.T) {
@@ -43,7 +42,7 @@ func TestStore_GetFilter(t *testing.T) {
 	mockDimensionListJSON, _ := json.Marshal(mockDimensionListData)
 	mockDimensionListBody := iOReadCloser{bytes.NewReader(mockDimensionListJSON)}
 
-	mockDimensionJSON, _ := json.Marshal(mockDimensionData)
+	mockDimensionJSON, _ := json.Marshal(mockDimensionOptionData)
 	mockDimensionBody := iOReadCloser{bytes.NewReader(mockDimensionJSON)}
 
 	Convey("Given a store with mocked HTTP responses", t, func() {
@@ -73,9 +72,8 @@ func TestStore_GetFilter(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				So(filter.JobID, ShouldEqual, filterJobID)
-				So(filter.DimensionFilters[0].Name, ShouldEqual, mockDimensionData.Name)
-				So(filter.DimensionFilters[0].Values[0], ShouldEqual, mockDimensionData.Values[0])
-				So(filter.DimensionFilters[0].Values[1], ShouldEqual, mockDimensionData.Values[1])
+				So(filter.DimensionFilters[0].Options[0], ShouldResemble, mockDimensionOptionData[0])
+				So(filter.DimensionFilters[0].Options[1], ShouldResemble, mockDimensionOptionData[1])
 			})
 		})
 	})
