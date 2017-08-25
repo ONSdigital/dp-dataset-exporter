@@ -4,7 +4,7 @@ job "dp-dataset-exporter" {
   type        = "service"
 
   group "web" {
-    count = {{WEB_TASK_COUNT}}
+    count = "{{WEB_TASK_COUNT}}"
 
     constraint {
       attribute = "${node.class}"
@@ -15,15 +15,18 @@ job "dp-dataset-exporter" {
       driver = "exec"
 
       artifact {
-        source = "s3::https://s3-eu-west-1.amazonaws.com/ons-dp-deployments/dp-dataset-exporter/latest.tar.gz"
+        source = "s3::https://s3-eu-west-1.amazonaws.com/{{BUILD_BUCKET}}/dp-dataset-exporter/{{REVISION}}.tar.gz"
+      }
+
+      artifact {
+        source = "s3::https://s3-eu-west-1.amazonaws.com/{{DEPLOYMENT_BUCKET}}/dp-dataset-exporter/{{REVISION}}.tar.gz"
       }
 
       config {
         command = "${NOMAD_TASK_DIR}/start-task"
-
-         args = [
-                  "${NOMAD_TASK_DIR}/dp-dataset-exporter",
-                ]
+        args    = [
+          "${NOMAD_TASK_DIR}/dp-dataset-exporter",
+        ]
       }
 
       service {
@@ -53,52 +56,55 @@ job "dp-dataset-exporter" {
   }
 
   group "publishing" {
-    count = {{PUBLISHING_TASK_COUNT}}
+    count = {
+{
+  PUBLISHING_TASK_COUNT
+}}
 
-    constraint {
-      attribute = "${node.class}"
-      value     = "publishing"
-    }
+constraint {
+attribute = "${node.class}"
+value = "publishing"
+}
 
-    task "dp-dataset-exporter" {
-      driver = "exec"
+task "dp-dataset-exporter" {
+driver = "exec"
 
-      artifact {
-        source = "s3::https://s3-eu-west-1.amazonaws.com/ons-dp-deployments/dp-dataset-exporter/latest.tar.gz"
-      }
+artifact {
+source = "s3::https://s3-eu-west-1.amazonaws.com/ons-dp-deployments/dp-dataset-exporter/latest.tar.gz"
+}
 
-      config {
-        command = "${NOMAD_TASK_DIR}/start-task"
+config {
+command = "${NOMAD_TASK_DIR}/start-task"
 
-         args = [
-                  "${NOMAD_TASK_DIR}/dp-dataset-exporter",
-                ]
-      }
+args = [
+"${NOMAD_TASK_DIR}/dp-dataset-exporter",
+]
+}
 
-      service {
-        name = "dp-dataset-exporter"
-        port = "http"
-        tags = ["publishing"]
-      }
+service {
+name = "dp-dataset-exporter"
+port = "http"
+tags = ["publishing"]
+}
 
-      resources {
-        cpu    = "{{PUBLISHING_RESOURCE_CPU}}"
-        memory = "{{PUBLISHING_RESOURCE_MEM}}"
+resources {
+cpu = "{{PUBLISHING_RESOURCE_CPU}}"
+memory = "{{PUBLISHING_RESOURCE_MEM}}"
 
-        network {
-          port "http" {}
-        }
-      }
+network {
+port "http" {}
+}
+}
 
-      template {
-        source      = "${NOMAD_TASK_DIR}/vars-template"
-        destination = "${NOMAD_TASK_DIR}/vars"
-      }
+template {
+source = "${NOMAD_TASK_DIR}/vars-template"
+destination = "${NOMAD_TASK_DIR}/vars"
+}
 
-      vault {
-        policies = ["dp-dataset-exporter"]
-      }
-    }
-  }
+vault {
+policies = ["dp-dataset-exporter"]
+}
+}
+}
 
 }
