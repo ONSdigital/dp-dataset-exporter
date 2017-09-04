@@ -20,7 +20,7 @@ func TestSpec(t *testing.T) {
 
 			Convey("The values should be set to the expected defaults", func() {
 				So(cfg.BindAddr, ShouldEqual, ":22500")
-				So(cfg.KafkaAddr, ShouldEqual, "localhost:9092")
+				So(cfg.KafkaAddr, ShouldResemble, []string{"localhost:9092"})
 				So(cfg.FilterJobConsumerTopic, ShouldEqual, "filter-job-submitted")
 				So(cfg.FilterJobConsumerGroup, ShouldEqual, "dp-dataset-exporter")
 				So(cfg.DatabaseAddress, ShouldEqual, "bolt://localhost:7687")

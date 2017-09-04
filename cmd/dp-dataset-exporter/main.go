@@ -36,7 +36,7 @@ func main() {
 		"s3_bucket_name": config.S3BucketName,
 		"bind_addr":      config.BindAddr})
 
-	kafkaBrokers := []string{config.KafkaAddr}
+	kafkaBrokers := config.KafkaAddr
 	kafkaConsumer, err := kafka.NewConsumerGroup(
 		kafkaBrokers,
 		config.FilterJobConsumerTopic,
