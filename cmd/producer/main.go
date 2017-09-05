@@ -23,7 +23,7 @@ func main() {
 	// Avoid logging the neo4j URL as it may contain a password
 	log.Debug("loaded config", log.Data{"config": config})
 
-	kafkaBrokers := []string{config.KafkaAddr}
+	kafkaBrokers := config.KafkaAddr
 
 	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, config.FilterJobConsumerTopic, 0)
 	if err != nil {
