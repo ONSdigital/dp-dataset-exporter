@@ -14,7 +14,7 @@ var filterJobSubmittedEvent = `{
 }`
 
 // FilterJobSubmittedEvent the Avro schema for FilterJobSubmitted messages.
-var FilterJobSubmittedEvent *avro.Schema = &avro.Schema{
+var FilterJobSubmittedEvent = &avro.Schema{
 	Definition: filterJobSubmittedEvent,
 }
 
@@ -23,11 +23,12 @@ var csvExportedEvent = `{
   "name": "csv-exported",
   "namespace": "",
   "fields": [
-    {"name": "filter_job_id", "type": "string"}
+    {"name": "filter_job_id", "type": "string"},
+    {"name": "file_url", "type": "string"}
   ]
 }`
 
 // CSVExportedEvent the Avro schema for CSV exported messages.
-var CSVExportedEvent *avro.Schema = &avro.Schema{
+var CSVExportedEvent = &avro.Schema{
 	Definition: csvExportedEvent,
 }

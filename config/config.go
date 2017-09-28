@@ -29,7 +29,7 @@ func Get() (*Config, error) {
 		DatabaseAddress:          "bolt://localhost:7687",
 		FilterAPIURL:             "http://localhost:22100",
 		FilterAPIAuthToken:       "FD0108EA-825D-411C-9B1D-41EF7727F465",
-		CSVExportedProducerTopic: "csv-exported",
+		CSVExportedProducerTopic: "common-output-created",
 		S3BucketName:             "csv-exported",
 		AWSRegion:                "eu-west-1",
 	}

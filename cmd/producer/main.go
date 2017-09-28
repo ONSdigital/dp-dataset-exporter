@@ -20,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Avoid logging the neo4j URL as it may contain a password
+	// Avoid logging the neo4j FileURL as it may contain a password
 	log.Debug("loaded config", log.Data{"config": config})
 
 	kafkaBrokers := config.KafkaAddr
@@ -37,7 +37,7 @@ func main() {
 		filterJobID := scanner.Text()
 		fmt.Println("Sending filter job event with ID " + filterJobID)
 
-		event := event.CSVExported{
+		event := event.FilterJobSubmitted{
 			FilterJobID: filterJobID,
 		}
 

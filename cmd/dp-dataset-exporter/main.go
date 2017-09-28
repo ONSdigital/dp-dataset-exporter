@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Avoid logging the neo4j URL as it may contain a password
+	// Avoid logging the neo4j FileURL as it may contain a password
 	log.Debug("loaded config", log.Data{
 		"topics":         []string{config.FilterJobConsumerTopic, config.CSVExportedProducerTopic},
 		"brokers":        config.KafkaAddr,

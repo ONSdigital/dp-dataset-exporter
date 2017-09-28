@@ -53,7 +53,7 @@ type FileStore interface {
 
 // Producer handles producing output events.
 type Producer interface {
-	CSVExported(filterJobID string) error
+	CSVExported(filterJobID, fileURL string) error
 }
 
 // Handle the export of a single filter job.
@@ -98,5 +98,5 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 		return err
 	}
 
-	return handler.eventProducer.CSVExported(filter.JobID)
+	return handler.eventProducer.CSVExported(filter.JobID, fileURL)
 }

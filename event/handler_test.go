@@ -220,7 +220,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		}
 
 		mockedEventProducer := &eventtest.ProducerMock{
-			CSVExportedFunc: func(filterJobID string) error {
+			CSVExportedFunc: func(filterJobID string, url string) error {
 				return expectedError
 			},
 		}
@@ -274,7 +274,7 @@ func TestExportHandler_Handle(t *testing.T) {
 		}
 
 		mockedEventProducer := &eventtest.ProducerMock{
-			CSVExportedFunc: func(filterJobID string) error {
+			CSVExportedFunc: func(filterJobID string, url string) error {
 				return nil
 			},
 		}
@@ -313,7 +313,7 @@ func TestExportHandler_Handle(t *testing.T) {
 				So(actual, ShouldNotBeNil)
 			})
 
-			Convey("The filter store is called with file URL returned from the file store.", func() {
+			Convey("The filter store is called with file FileURL returned from the file store.", func() {
 
 				So(len(mockFilterStore.PutCSVDataCalls()), ShouldEqual, 1)
 

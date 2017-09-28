@@ -207,7 +207,7 @@ func TestStore_PutCSVData(t *testing.T) {
 
 				httpReq := mockHTTPClient.DoCalls()[0].Req
 				buf := bytes.Buffer{}
-				buf.ReadFrom(httpReq.Body)
+				_, _ = buf.ReadFrom(httpReq.Body)
 
 				actualFilter := &observation.Filter{}
 				err := json.Unmarshal(buf.Bytes(), actualFilter)

@@ -20,7 +20,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 		Convey("When CSVExported is called on the event producer", func() {
 
-			err := eventProducer.CSVExported(filterJobId)
+			err := eventProducer.CSVExported(filterJobId, fileUrl)
 
 			Convey("The expected event is available on the output channel", func() {
 
@@ -28,37 +28,16 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 				messageBytes := <-outputChannel
 				close(outputChannel)
-				observationEvent := Unmarshal(messageBytes)
+				observationEvent := unmarshal(messageBytes)
 				So(observationEvent.FilterJobID, ShouldEqual, filterJobId)
-			})
-		})
-	})
-}
-
-func TestMarshal(t *testing.T) {
-
-	Convey("Given an example CSV exported event", t, func() {
-
-		expectedEvent := event.CSVExported{
-			FilterJobID: filterJobId,
-		}
-
-		Convey("When Marshal is called", func() {
-
-			bytes, err := event.Marshal(expectedEvent)
-			So(err, ShouldBeNil)
-
-			Convey("The event can be unmarshalled and has the expected values", func() {
-
-				actualEvent := Unmarshal(bytes)
-				So(actualEvent.FilterJobID, ShouldEqual, expectedEvent.FilterJobID)
+				So(observationEvent.FileURL, ShouldEqual, fileUrl)
 			})
 		})
 	})
 }
 
 // Unmarshal converts observation events to []byte.
-func Unmarshal(bytes []byte) *event.CSVExported {
+func unmarshal(bytes []byte) *event.CSVExported {
 	event := &event.CSVExported{}
 	err := schema.CSVExportedEvent.Unmarshal(bytes, event)
 	So(err, ShouldBeNil)
