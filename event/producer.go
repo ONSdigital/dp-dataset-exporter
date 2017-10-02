@@ -40,7 +40,7 @@ func (producer *AvroProducer) CSVExported(filterJobID, fileURL string) error {
 	return nil
 }
 
-// Marshal converts the given ObservationsInsertedEvent to a []byte.
+// marshal converts the given ObservationsInsertedEvent to a []byte.
 func marshal(event CSVExported) ([]byte, error) {
 	bytes, err := schema.CSVExportedEvent.Marshal(event)
 	return bytes, err

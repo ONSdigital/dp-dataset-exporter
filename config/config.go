@@ -16,6 +16,7 @@ type Config struct {
 	AWSRegion                string   `envconfig:"AWS_REGION"`
 	S3BucketName             string   `envconfig:"S3_BUCKET_NAME"`
 	CSVExportedProducerTopic string   `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
+	ErrorProducerTopic       string   `envconfig:"ERROR_PRODUCER_TOPIC"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -32,6 +33,7 @@ func Get() (*Config, error) {
 		CSVExportedProducerTopic: "common-output-created",
 		S3BucketName:             "csv-exported",
 		AWSRegion:                "eu-west-1",
+		ErrorProducerTopic:       "filter-error",
 	}
 
 	return cfg, envconfig.Process("", cfg)
