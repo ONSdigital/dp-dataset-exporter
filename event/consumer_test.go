@@ -83,7 +83,7 @@ func TestConsume(t *testing.T) {
 
 func TestConsume_HandlerError(t *testing.T) {
 
-	Convey("Given an event consumer with a valid schema", t, func() {
+	Convey("Given an event consumer with a mock event handler that returns an error", t, func() {
 
 		expectedError := errors.New("Something bad happened in the event handler.")
 
@@ -112,17 +112,10 @@ func TestConsume_HandlerError(t *testing.T) {
 
 			event.Consume(mockConsumer, handlerMock, mockErrorHandler)
 
-			Convey("A event is sent to the handlerMock", func() {
-				So(len(handlerMock.HandleCalls()), ShouldEqual, 1)
-
-				event := handlerMock.HandleCalls()[0].FilterJobSubmittedEvent
-				So(event.FilterJobID, ShouldEqual, expectedEvent.FilterJobID)
-			})
-
 			Convey("The error handler is given the error returned from the event handler", func() {
 				So(len(mockErrorHandler.HandleCalls()), ShouldEqual, 1)
 				So(mockErrorHandler.HandleCalls()[0].Err, ShouldEqual, expectedError)
-				So(mockErrorHandler.HandleCalls()[0].InstanceID, ShouldEqual, expectedEvent.FilterJobID)
+				So(mockErrorHandler.HandleCalls()[0].FilterID, ShouldEqual, expectedEvent.FilterJobID)
 			})
 
 			Convey("The message is committed", func() {

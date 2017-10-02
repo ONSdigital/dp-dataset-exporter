@@ -36,13 +36,13 @@ type MessageProducer interface {
 func (handler *KafkaHandler) Handle(filterID string, err error) {
 
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
-
-	log.Info("Received error report", data)
+	log.Info("An error occured while processing a filter job", data)
 
 	error := Event{
-		FilterID:  filterID,
-		EventType: "error",
-		EventMsg:  err.Error(),
+		FilterID:    filterID,
+		EventType:   "error",
+		EventMsg:    err.Error(),
+		ServiceName: "dp-dataset-exporter",
 	}
 
 	errMsg, err := EventSchema.Marshal(error)
