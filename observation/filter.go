@@ -3,7 +3,7 @@ package observation
 // Filter represents a structure for a filter job
 type Filter struct {
 	JobID            string             `json:"filter_job_id,omitempty"`
-	DataSetFilterID  string             `json:"dataset_filter_id"`
+	InstanceID       string             `json:"instance_id"`
 	DimensionListURL string             `json:"dimension_list_url"`
 	State            string             `json:"state,omitempty"`
 	Downloads        *Downloads         `json:"downloads,omitempty"`

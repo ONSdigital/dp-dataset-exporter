@@ -28,7 +28,7 @@ func NewStore(dBConnection DBConnection) *Store {
 // GetCSVRows returns a reader allowing individual CSV rows to be read.
 func (store *Store) GetCSVRows(filter *Filter) (CSVRowReader, error) {
 
-	headerRowQuery := fmt.Sprintf("MATCH (i:`_%s_Instance`) RETURN i.header as row", filter.DataSetFilterID)
+	headerRowQuery := fmt.Sprintf("MATCH (i:`_%s_Instance`) RETURN i.header as row", filter.InstanceID)
 	rowsQuery := createObservationQuery(filter)
 
 	unionQuery := headerRowQuery + " UNION ALL " + rowsQuery
@@ -58,10 +58,10 @@ func createObservationQuery(filter *Filter) string {
 		}
 
 		optionList := createOptionList(dimension.Options)
-		matchDimensions += fmt.Sprintf("(%s:`_%s_%s`)", dimension.Name, filter.DataSetFilterID, dimension.Name)
+		matchDimensions += fmt.Sprintf("(%s:`_%s_%s`)", dimension.Name, filter.InstanceID, dimension.Name)
 		where += fmt.Sprintf("%s.value IN [%s]", dimension.Name, optionList)
 		with += dimension.Name
-		match += fmt.Sprintf("(o:`_%s_observation`)-[:isValueOf]->(%s)", filter.DataSetFilterID, dimension.Name)
+		match += fmt.Sprintf("(o:`_%s_observation`)-[:isValueOf]->(%s)", filter.InstanceID, dimension.Name)
 	}
 
 	return matchDimensions + where + with + match + " return o.value as row"

@@ -13,7 +13,7 @@ func TestStore_GetCSVRows(t *testing.T) {
 	Convey("Given an store with a mock DB connection", t, func() {
 
 		filter := &observation.Filter{
-			DataSetFilterID: "888",
+			InstanceID: "888",
 			DimensionFilters: []*observation.DimensionFilter{
 				{Name: "age", Options: []*observation.DimensionOption{
 					{Option: "29"},
