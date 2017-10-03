@@ -4,6 +4,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+	"time"
 )
 
 func TestSpec(t *testing.T) {
@@ -29,6 +30,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.CSVExportedProducerTopic, ShouldEqual, "common-output-created")
 				So(cfg.AWSRegion, ShouldEqual, "eu-west-1")
 				So(cfg.S3BucketName, ShouldEqual, "csv-exported")
+				So(cfg.GracefulShutdownTimeout, ShouldEqual, time.Second*10)
 			})
 		})
 	})

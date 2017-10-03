@@ -1,15 +1,18 @@
 package event_test
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/errors/errorstest"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/kafka/kafkatest"
+	"github.com/ONSdigital/go-ns/log"
 	"github.com/johnnadratowski/golang-neo4j-bolt-driver/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+	"time"
 )
 
 func TestConsume_UnmarshallError(t *testing.T) {
@@ -28,11 +31,13 @@ func TestConsume_UnmarshallError(t *testing.T) {
 
 		messages <- kafkatest.NewMessage([]byte("invalid schema"))
 		messages <- kafkatest.NewMessage(marshal(*expectedEvent))
-		close(messages)
+
+		consumer := event.NewConsumer()
 
 		Convey("When consume messages is called", func() {
 
-			event.Consume(mockConsumer, mockEventHandler, nil)
+			consumer.Consume(mockConsumer, mockEventHandler, nil)
+			waitForEventsToBeSentToHandler(mockEventHandler)
 
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
@@ -50,27 +55,28 @@ func TestConsume(t *testing.T) {
 
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
-		handlerMock := &eventtest.HandlerMock{
+		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
 				return nil
 			},
 		}
 
 		expectedEvent := getExampleEvent()
-
 		message := kafkatest.NewMessage(marshal(*expectedEvent))
 
 		messages <- message
-		close(messages)
+
+		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
 
-			event.Consume(mockConsumer, handlerMock, nil)
+			consumer.Consume(mockConsumer, mockEventHandler, nil)
+			waitForEventsToBeSentToHandler(mockEventHandler)
 
-			Convey("A event is sent to the handlerMock ", func() {
-				So(len(handlerMock.HandleCalls()), ShouldEqual, 1)
+			Convey("A event is sent to the mockEventHandler ", func() {
+				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
 
-				event := handlerMock.HandleCalls()[0].FilterJobSubmittedEvent
+				event := mockEventHandler.HandleCalls()[0].FilterJobSubmittedEvent
 				So(event.FilterJobID, ShouldEqual, expectedEvent.FilterJobID)
 			})
 
@@ -89,7 +95,7 @@ func TestConsume_HandlerError(t *testing.T) {
 
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
-		handlerMock := &eventtest.HandlerMock{
+		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
 				return expectedError
 			},
@@ -104,13 +110,14 @@ func TestConsume_HandlerError(t *testing.T) {
 		expectedEvent := getExampleEvent()
 
 		message := kafkatest.NewMessage(marshal(*expectedEvent))
-
 		messages <- message
-		close(messages)
+
+		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
 
-			event.Consume(mockConsumer, handlerMock, mockErrorHandler)
+			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler)
+			waitForEventsToBeSentToHandler(mockEventHandler)
 
 			Convey("The error handler is given the error returned from the event handler", func() {
 				So(len(mockErrorHandler.HandleCalls()), ShouldEqual, 1)
@@ -120,6 +127,38 @@ func TestConsume_HandlerError(t *testing.T) {
 
 			Convey("The message is committed", func() {
 				So(message.Committed(), ShouldEqual, true)
+			})
+		})
+	})
+}
+
+func TestClose(t *testing.T) {
+
+	Convey("Given a consumer", t, func() {
+
+		messages := make(chan kafka.Message, 1)
+		mockConsumer := kafkatest.NewMessageConsumer(messages)
+		mockEventHandler := &eventtest.HandlerMock{
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+				return nil
+			},
+		}
+
+		expectedEvent := getExampleEvent()
+		message := kafkatest.NewMessage(marshal(*expectedEvent))
+
+		messages <- message
+
+		consumer := event.NewConsumer()
+
+		consumer.Consume(mockConsumer, mockEventHandler, nil)
+
+		Convey("When close is called", func() {
+
+			err := consumer.Close(context.Background())
+
+			Convey("The no errors are returned", func() {
+				So(err, ShouldBeNil)
 			})
 		})
 	})
@@ -137,4 +176,23 @@ func getExampleEvent() *event.FilterJobSubmitted {
 		FilterJobID: "123321",
 	}
 	return expectedEvent
+}
+
+func waitForEventsToBeSentToHandler(eventHandler *eventtest.HandlerMock) {
+
+	start := time.Now()
+	timeout := start.Add(time.Millisecond * 500)
+	for {
+		if len(eventHandler.HandleCalls()) > 0 {
+			log.Debug("events have been sent to the handler", nil)
+			break
+		}
+
+		if time.Now().After(timeout) {
+			log.Debug("timeout hit", nil)
+			break
+		}
+
+		time.Sleep(time.Millisecond * 10)
+	}
 }

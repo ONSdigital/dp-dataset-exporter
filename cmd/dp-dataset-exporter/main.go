@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/go-ns/handlers/healthcheck"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/go-ns/server"
+	"github.com/gorilla/mux"
 	bolt "github.com/johnnadratowski/golang-neo4j-bolt-driver"
 	"net/http"
 	"os"
@@ -37,44 +41,44 @@ func main() {
 		"s3_bucket_name": config.S3BucketName,
 		"bind_addr":      config.BindAddr})
 
+	// a channel used to signal a graceful exit is required.
+	errorChannel := make(chan error)
+
+	router := mux.NewRouter()
+	router.Path("/healthcheck").HandlerFunc(healthcheck.Handler)
+	httpServer := server.New(config.BindAddr, router)
+
+	// Disable auto handling of os signals by the HTTP server. This is handled
+	// in the service so we can gracefully shutdown resources other than just
+	// the HTTP server.
+	httpServer.HandleOSSignals = false
+
+	go func() {
+		log.Debug("starting http server", log.Data{"bind_addr": config.BindAddr})
+		if err := httpServer.ListenAndServe(); err != nil {
+			errorChannel <- err
+		}
+	}()
+
 	kafkaBrokers := config.KafkaAddr
 	kafkaConsumer, err := kafka.NewConsumerGroup(
 		kafkaBrokers,
 		config.FilterJobConsumerTopic,
 		config.FilterJobConsumerGroup,
 		kafka.OffsetNewest)
-
-	if err != nil {
-		log.Error(err, log.Data{"message": "failed to create kafka consumer"})
-		os.Exit(1)
-	}
+	exitIfError(err)
 
 	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, config.CSVExportedProducerTopic, 0)
-	if err != nil {
-		log.Error(err, log.Data{"message": "failed to create kafka producer"})
-		os.Exit(1)
-	}
+	exitIfError(err)
 
 	kafkaErrorProducer, err := kafka.NewProducer(config.KafkaAddr, config.ErrorProducerTopic, 0)
-	if err != nil {
-		log.Error(err, log.Data{"message": "failed to create kafka error producer"})
-		os.Exit(1)
-	}
+	exitIfError(err)
+
+	dbConnection, err := bolt.NewDriver().OpenNeo(config.DatabaseAddress)
+	exitIfError(err)
 
 	// when errors occur - we send a message on an error topic.
 	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer)
-
-	dbConnection, err := bolt.NewDriver().OpenNeo(config.DatabaseAddress)
-
-	if err != nil {
-		log.Error(err, log.Data{"message": "failed to create connection to Neo4j"})
-		os.Exit(1)
-	}
-
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-
-	exit := make(chan struct{})
 
 	httpClient := http.Client{Timeout: time.Second * 15}
 
@@ -85,22 +89,69 @@ func main() {
 
 	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer)
 
-	go event.Consume(kafkaConsumer, eventHandler, errorHandler)
+	eventConsumer := event.NewConsumer()
+	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
 
-	<-signals
+	shutdownGracefully := func() {
 
-	close(exit)
+		ctx, cancel := context.WithTimeout(context.Background(), config.GracefulShutdownTimeout)
 
-	// gracefully dispose resources
-	kafkaConsumer.Closer() <- true
-	kafkaProducer.Closer() <- true
+		// gracefully dispose resources
+		err = eventConsumer.Close(ctx)
+		logIfError(err)
 
-	err = dbConnection.Close()
-	if err != nil {
-		log.Error(err, log.Data{"message": "failed to close connection to Neo4j"})
+		err = kafkaConsumer.Close(ctx)
+		logIfError(err)
+
+		err = kafkaProducer.Close(ctx)
+		logIfError(err)
+
+		err = kafkaErrorProducer.Close(ctx)
+		logIfError(err)
+
+		err = httpServer.Shutdown(ctx)
+		logIfError(err)
+
+		// cancel the timer in the shutdown context.
+		cancel()
+
+		log.Debug("graceful shutdown was successful", nil)
 		os.Exit(0)
 	}
 
-	log.Debug("graceful shutdown was successful", nil)
-	os.Exit(0)
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+
+	for {
+		select {
+		case err := <-kafkaConsumer.Errors():
+			log.ErrorC("kafka consumer", err, nil)
+			shutdownGracefully()
+		case err := <-kafkaProducer.Errors():
+			log.ErrorC("kafka result producer", err, nil)
+			shutdownGracefully()
+		case err := <-kafkaErrorProducer.Errors():
+			log.ErrorC("kafka error producer", err, nil)
+			shutdownGracefully()
+		case err := <-errorChannel:
+			log.ErrorC("error channel", err, nil)
+			shutdownGracefully()
+		case <-signals:
+			log.Debug("os signal received", nil)
+			shutdownGracefully()
+		}
+	}
+}
+
+func exitIfError(err error) {
+	if err != nil {
+		log.Error(err, nil)
+		os.Exit(1)
+	}
+}
+
+func logIfError(err error) {
+	if err != nil {
+		log.Error(err, nil)
+	}
 }
