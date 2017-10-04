@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
+	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
@@ -26,7 +27,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Avoid logging the neo4j URL as it may contain a password
+	// Avoid logging the neo4j FileURL as it may contain a password
 	log.Debug("loaded config", log.Data{
 		"topics":         []string{config.FilterJobConsumerTopic, config.CSVExportedProducerTopic},
 		"brokers":        config.KafkaAddr,
@@ -54,6 +55,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	kafkaErrorProducer, err := kafka.NewProducer(config.KafkaAddr, config.ErrorProducerTopic, 0)
+	if err != nil {
+		log.Error(err, log.Data{"message": "failed to create kafka error producer"})
+		os.Exit(1)
+	}
+
+	// when errors occur - we send a message on an error topic.
+	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer)
+
 	dbConnection, err := bolt.NewDriver().OpenNeo(config.DatabaseAddress)
 
 	if err != nil {
@@ -75,7 +85,7 @@ func main() {
 
 	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer)
 
-	go event.Consume(kafkaConsumer, eventHandler)
+	go event.Consume(kafkaConsumer, eventHandler, errorHandler)
 
 	<-signals
 

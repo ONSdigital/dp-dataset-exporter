@@ -16,6 +16,7 @@ type Config struct {
 	AWSRegion                string   `envconfig:"AWS_REGION"`
 	S3BucketName             string   `envconfig:"S3_BUCKET_NAME"`
 	CSVExportedProducerTopic string   `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
+	ErrorProducerTopic       string   `envconfig:"ERROR_PRODUCER_TOPIC"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -29,9 +30,10 @@ func Get() (*Config, error) {
 		DatabaseAddress:          "bolt://localhost:7687",
 		FilterAPIURL:             "http://localhost:22100",
 		FilterAPIAuthToken:       "FD0108EA-825D-411C-9B1D-41EF7727F465",
-		CSVExportedProducerTopic: "csv-exported",
+		CSVExportedProducerTopic: "common-output-created",
 		S3BucketName:             "csv-exported",
 		AWSRegion:                "eu-west-1",
+		ErrorProducerTopic:       "filter-error",
 	}
 
 	return cfg, envconfig.Process("", cfg)

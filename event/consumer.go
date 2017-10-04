@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
@@ -20,7 +21,7 @@ type Handler interface {
 }
 
 // Consume converts messages to event instances, and pass the event to the provided handler.
-func Consume(messageConsumer MessageConsumer, handler Handler) {
+func Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler) {
 	for message := range messageConsumer.Incoming() {
 
 		event, err := unmarshal(message)
@@ -33,8 +34,8 @@ func Consume(messageConsumer MessageConsumer, handler Handler) {
 
 		err = handler.Handle(event)
 		if err != nil {
+			errorHandler.Handle(event.FilterJobID, err)
 			log.Error(err, log.Data{"message": "failed to handle event"})
-			continue
 		}
 
 		log.Debug("event processed - committing message", log.Data{"event": event})

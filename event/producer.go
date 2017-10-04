@@ -23,13 +23,14 @@ func NewAvroProducer(messageProducer MessageProducer) *AvroProducer {
 }
 
 // CSVExported produces a new CSV exported event for the given filter job ID.
-func (producer *AvroProducer) CSVExported(filterJobID string) error {
+func (producer *AvroProducer) CSVExported(filterJobID, fileURL string) error {
 
 	csvExported := CSVExported{
 		FilterJobID: filterJobID,
+		FileURL:     fileURL,
 	}
 
-	bytes, err := Marshal(csvExported)
+	bytes, err := marshal(csvExported)
 	if err != nil {
 		return err
 	}
@@ -39,8 +40,8 @@ func (producer *AvroProducer) CSVExported(filterJobID string) error {
 	return nil
 }
 
-// Marshal converts the given ObservationsInsertedEvent to a []byte.
-func Marshal(event CSVExported) ([]byte, error) {
+// marshal converts the given ObservationsInsertedEvent to a []byte.
+func marshal(event CSVExported) ([]byte, error) {
 	bytes, err := schema.CSVExportedEvent.Marshal(event)
 	return bytes, err
 }

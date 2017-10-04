@@ -17,7 +17,7 @@ var (
 //
 //         // make and configure a mocked Producer
 //         mockedProducer := &ProducerMock{
-//             CSVExportedFunc: func(filterJobID string) error {
+//             CSVExportedFunc: func(filterJobID string, fileURL string) error {
 // 	               panic("TODO: mock out the CSVExported method")
 //             },
 //         }
@@ -28,7 +28,7 @@ var (
 //     }
 type ProducerMock struct {
 	// CSVExportedFunc mocks the CSVExported method.
-	CSVExportedFunc func(filterJobID string) error
+	CSVExportedFunc func(filterJobID string, fileURL string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -36,24 +36,28 @@ type ProducerMock struct {
 		CSVExported []struct {
 			// FilterJobID is the filterJobID argument value.
 			FilterJobID string
+			// FileURL is the fileURL argument value.
+			FileURL string
 		}
 	}
 }
 
 // CSVExported calls CSVExportedFunc.
-func (mock *ProducerMock) CSVExported(filterJobID string) error {
+func (mock *ProducerMock) CSVExported(filterJobID string, fileURL string) error {
 	if mock.CSVExportedFunc == nil {
 		panic("moq: ProducerMock.CSVExportedFunc is nil but Producer.CSVExported was just called")
 	}
 	callInfo := struct {
 		FilterJobID string
+		FileURL     string
 	}{
 		FilterJobID: filterJobID,
+		FileURL:     fileURL,
 	}
 	lockProducerMockCSVExported.Lock()
 	mock.calls.CSVExported = append(mock.calls.CSVExported, callInfo)
 	lockProducerMockCSVExported.Unlock()
-	return mock.CSVExportedFunc(filterJobID)
+	return mock.CSVExportedFunc(filterJobID, fileURL)
 }
 
 // CSVExportedCalls gets all the calls that were made to CSVExported.
@@ -61,9 +65,11 @@ func (mock *ProducerMock) CSVExported(filterJobID string) error {
 //     len(mockedProducer.CSVExportedCalls())
 func (mock *ProducerMock) CSVExportedCalls() []struct {
 	FilterJobID string
+	FileURL     string
 } {
 	var calls []struct {
 		FilterJobID string
+		FileURL     string
 	}
 	lockProducerMockCSVExported.RLock()
 	calls = mock.calls.CSVExported
