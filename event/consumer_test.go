@@ -157,7 +157,7 @@ func TestClose(t *testing.T) {
 
 			err := consumer.Close(context.Background())
 
-			Convey("The no errors are returned", func() {
+			Convey("Then no errors are returned", func() {
 				So(err, ShouldBeNil)
 			})
 		})
