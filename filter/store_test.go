@@ -216,7 +216,7 @@ func TestStore_PutCSVData(t *testing.T) {
 				So(actualFilter.Downloads.CSV.URL, ShouldEqual, fileURL)
 				So(actualFilter.Downloads.CSV.Size, ShouldEqual, strconv.FormatInt(fileSize, 10))
 				So(httpReq.URL.Path, ShouldEndWith, filterJobID)
-				So(httpReq.Header.Get("internal_token"), ShouldEqual, filterAPIAuthToken)
+				So(httpReq.Header.Get("Internal-Token"), ShouldEqual, filterAPIAuthToken)
 			})
 		})
 	})
