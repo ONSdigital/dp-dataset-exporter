@@ -20,7 +20,7 @@ const filterJobID string = "123456784432"
 
 var mockFilterData = &observation.Filter{
 	JobID:            filterJobID,
-	DataSetFilterID:  "123",
+	InstanceID:       "123",
 	DimensionListURL: filterAPIURL + "/filter/" + filterJobID + "/dimensions",
 }
 

@@ -17,8 +17,8 @@ const fileUrl = "s3://some/url/123.csv"
 var filterJobEvent = &event.FilterJobSubmitted{FilterJobID: filterJobId}
 
 var filter = &observation.Filter{
-	JobID:           filterJobId,
-	DataSetFilterID: "888",
+	JobID:      filterJobId,
+	InstanceID: "888",
 	DimensionFilters: []*observation.DimensionFilter{
 		{Name: "age", Options: []*observation.DimensionOption{
 			{Option: "29"},

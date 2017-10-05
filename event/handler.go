@@ -65,8 +65,8 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 	}
 
 	log.Debug("filter retrieved for job", log.Data{
-		"dataset_filter_id": filter.DataSetFilterID,
-		"filter_id":         filter.JobID})
+		"instance_id": filter.InstanceID,
+		"filter_id":   filter.JobID})
 
 	csvRowReader, err := handler.observationStore.GetCSVRows(filter)
 	if err != nil {
@@ -87,10 +87,10 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 	}
 
 	log.Debug("exported csv file", log.Data{
-		"dataset_filter_id": filter.DataSetFilterID,
-		"filter_id":         filter.JobID,
-		"url":               fileURL,
-		"size":              reader.TotalBytesRead()})
+		"instance_id": filter.InstanceID,
+		"filter_id":   filter.JobID,
+		"url":         fileURL,
+		"size":        reader.TotalBytesRead()})
 
 	// write url and file size to filter API
 	err = handler.filterStore.PutCSVData(filter.JobID, fileURL, reader.TotalBytesRead())
