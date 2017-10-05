@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/go-ns/log"
 )
 
 //go:generate moq -out filtertest/http_client.go -pkg filtertest . HTTPClient
@@ -26,10 +27,10 @@ type Store struct {
 var ErrFilterJobNotFound = errors.New("failed to find filter job")
 
 // ErrFilterAPIError returned when an unrecognised error occurs.
-var ErrFilterAPIError = errors.New("Internal error from the import api")
+var ErrFilterAPIError = errors.New("Internal error from the filter api")
 
 // ErrUnrecognisedAPIError returned when an unrecognised error occurs.
-var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the import api")
+var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the filter api")
 
 // NewStore returns a new instance of a filter store.
 func NewStore(filterAPIURL string, filterAPIAuthToken string, httpClient HTTPClient) *Store {
@@ -177,6 +178,10 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	case http.StatusInternalServerError:
 		return nil, ErrFilterAPIError
 	default:
+		log.Debug("unrecognised status code returned from the filter API",
+			log.Data{
+				"status_code": response.StatusCode,
+			})
 		return nil, ErrUnrecognisedAPIError
 	}
 }
