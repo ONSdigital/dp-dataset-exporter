@@ -51,8 +51,8 @@ func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) e
 
 	url := store.filterAPIURL + "/filters/" + filterJobID
 
+	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
 	putBody := &observation.Filter{
-		State: "completed",
 		Downloads: &observation.Downloads{
 			CSV: &observation.DownloadItem{
 				Size: strconv.FormatInt(size, 10),
