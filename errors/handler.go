@@ -35,7 +35,7 @@ type MessageProducer interface {
 func (handler *KafkaHandler) Handle(filterID string, err error) {
 
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
-	log.Info("An error occured while processing a filter job", data)
+	log.Info("an error occured while processing a filter job", data)
 
 	error := Event{
 		FilterID:    filterID,
@@ -46,7 +46,7 @@ func (handler *KafkaHandler) Handle(filterID string, err error) {
 
 	errMsg, err := EventSchema.Marshal(error)
 	if err != nil {
-		log.ErrorC("Failed to marshall error to event-reporter", err, data)
+		log.ErrorC("failed to marshall error to event-reporter", err, data)
 		return
 	}
 	handler.messageProducer.Output() <- errMsg

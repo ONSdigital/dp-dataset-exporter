@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
@@ -35,7 +34,8 @@ func main() {
 	for scanner.Scan() {
 
 		filterJobID := scanner.Text()
-		fmt.Println("Sending filter job event with ID " + filterJobID)
+
+		log.Debug("Sending filter job event", log.Data{"filter_job_id": filterJobID})
 
 		event := event.FilterJobSubmitted{
 			FilterJobID: filterJobID,

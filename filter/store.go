@@ -178,7 +178,7 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	case http.StatusInternalServerError:
 		return nil, ErrFilterAPIError
 	default:
-		log.Debug("unrecognised status code returned from the filter API",
+		log.Debug("unrecognised status code returned from the filter api",
 			log.Data{
 				"status_code": response.StatusCode,
 			})

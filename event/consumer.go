@@ -73,7 +73,6 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 		log.Info("shutdown context time exceeded, skipping graceful shutdown of event consumer", nil)
 		return errs.New("Shutdown context timed out")
 	}
-
 }
 
 func processMessage(message kafka.Message, handler Handler, errorHandler errors.Handler) {
