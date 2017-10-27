@@ -5,44 +5,44 @@
 		{
 			"checksumSHA1": "dzh4fF9o6j+mJEbJn5utm8Q+Pyg=",
 			"path": "github.com/ONSdigital/go-ns/avro",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "ei+/RCSa0XO9v9rQxAh0uqyJ/28=",
 			"path": "github.com/ONSdigital/go-ns/handlers/healthcheck",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "J9OiPnhPHFPhQ+R+dq6LFj+dTxE=",
 			"path": "github.com/ONSdigital/go-ns/handlers/requestID",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
-			"checksumSHA1": "FyeCEY30Rz0d477/Za2UhQ/Jnjs=",
+			"checksumSHA1": "d0xkjPw9SKVWK1vDJqvD3HoFbnA=",
 			"path": "github.com/ONSdigital/go-ns/kafka",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
-			"checksumSHA1": "4QqUjd1oHh2AOJwu5S2SC/Wn9Ec=",
+			"checksumSHA1": "DbwOTqcxyy34cDSkPZt27d7zllk=",
 			"path": "github.com/ONSdigital/go-ns/kafka/kafkatest",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "AjbjbhFVAOP/1NU5HL+uy+X/yJo=",
 			"path": "github.com/ONSdigital/go-ns/log",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
-			"checksumSHA1": "Wc0l6IlAATaN3qFb2ECwcjcHH4I=",
+			"checksumSHA1": "GQdzMpAMb42KQQ/GsJFSRU5dj1Y=",
 			"path": "github.com/ONSdigital/go-ns/server",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "+Jp0tVXfQ1TM8T+oun82oJtME5U=",
@@ -246,8 +246,8 @@
 			"checksumSHA1": "I6MnUzkLJt+sh73CodD0NKswFrs=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/go-avro/avro",
 			"path": "github.com/go-avro/avro",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "VvZKmbuBN1QAG699KduTdmSPwA4=",
@@ -265,8 +265,8 @@
 		{
 			"checksumSHA1": "yIkYzW7bzAD81zHyuCNmEj4+oxQ=",
 			"path": "github.com/gopherjs/gopherjs/js",
-			"revision": "b40cd48c38f9a18eb3db20d163bad78de12cf0b7",
-			"revisionTime": "2017-09-06T18:39:36Z"
+			"revision": "415225646bb92c4449bb484646f2c95a98402f6f",
+			"revisionTime": "2017-09-27T19:27:36Z"
 		},
 		{
 			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
@@ -339,8 +339,8 @@
 			"checksumSHA1": "OBvAHqWjdI4NQVAqTkcQAdTuCFY=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/justinas/alice",
 			"path": "github.com/justinas/alice",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "gWlw0l2wMBLhmejJCTr/Zywqyk8=",
@@ -352,8 +352,8 @@
 			"checksumSHA1": "hBgLmZ/4mCxmnH88mqFKBkpJFUY=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/mgutz/ansi",
 			"path": "github.com/mgutz/ansi",
-			"revision": "e605c4209714ac169976bc443fe0cd1e3acf1dbd",
-			"revisionTime": "2017-09-28T12:01:46Z"
+			"revision": "a1bd0a85bf8904441aa027164380a31c6583cec4",
+			"revisionTime": "2017-10-23T12:32:27Z"
 		},
 		{
 			"checksumSHA1": "FGg99nQ56Fo3radSCuU1AeEUJug=",
