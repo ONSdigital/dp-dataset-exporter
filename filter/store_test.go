@@ -29,11 +29,6 @@ var mockDimensionListData = []*observation.DimensionFilter{{
 	Name: "Sex",
 }}
 
-var mockDimensionOptionData = []*observation.DimensionOption{
-	{Option: "29"},
-	{Option: "30"},
-}
-
 func TestStore_GetFilter(t *testing.T) {
 
 	mockFilterJSON, _ := json.Marshal(mockFilterData)
@@ -42,17 +37,10 @@ func TestStore_GetFilter(t *testing.T) {
 	mockDimensionListJSON, _ := json.Marshal(mockDimensionListData)
 	mockDimensionListBody := iOReadCloser{bytes.NewReader(mockDimensionListJSON)}
 
-	mockDimensionJSON, _ := json.Marshal(mockDimensionOptionData)
-	mockDimensionBody := iOReadCloser{bytes.NewReader(mockDimensionJSON)}
-
 	Convey("Given a store with mocked HTTP responses", t, func() {
 
 		mockHTTPClient := &filtertest.HTTPClientMock{
 			DoFunc: func(req *http.Request) (*http.Response, error) {
-
-				if strings.Contains(req.URL.Path, "/options") {
-					return &http.Response{StatusCode: http.StatusOK, Body: mockDimensionBody}, nil
-				}
 
 				if strings.Contains(req.URL.Path, "/dimensions") {
 					return &http.Response{StatusCode: http.StatusOK, Body: mockDimensionListBody}, nil
@@ -72,49 +60,6 @@ func TestStore_GetFilter(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				So(filter.JobID, ShouldEqual, filterJobID)
-				So(filter.DimensionFilters[0].Options[0], ShouldResemble, mockDimensionOptionData[0])
-				So(filter.DimensionFilters[0].Options[1], ShouldResemble, mockDimensionOptionData[1])
-			})
-		})
-	})
-}
-
-func TestStore_GetFilter_DimensionCallError(t *testing.T) {
-
-	mockFilterJSON, _ := json.Marshal(mockFilterData)
-	mockFilterBody := iOReadCloser{bytes.NewReader(mockFilterJSON)}
-
-	mockDimensionListJSON, _ := json.Marshal(mockDimensionListData)
-	mockDimensionListBody := iOReadCloser{bytes.NewReader(mockDimensionListJSON)}
-
-	Convey("Given a mock http client that returns a 404 error when getting dimension options", t, func() {
-
-		mockHTTPClient := &filtertest.HTTPClientMock{
-			DoFunc: func(req *http.Request) (*http.Response, error) {
-
-				if strings.Contains(req.URL.Path, "/options") {
-					return &http.Response{StatusCode: http.StatusNotFound}, nil
-				}
-
-				if strings.Contains(req.URL.Path, "/dimensions") {
-					return &http.Response{StatusCode: http.StatusOK, Body: mockDimensionListBody}, nil
-				}
-
-				return &http.Response{StatusCode: http.StatusOK, Body: mockFilterBody}, nil
-			},
-		}
-
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
-
-		Convey("When GetFilter is called", func() {
-
-			actualFilter, err := filterStore.GetFilter(filterJobID)
-
-			Convey("The expected error is returned", func() {
-				So(actualFilter, ShouldBeNil)
-				So(err, ShouldNotBeNil)
-
-				So(err, ShouldEqual, filter.ErrFilterJobNotFound)
 			})
 		})
 	})

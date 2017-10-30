@@ -67,7 +67,7 @@ func createObservationQuery(filter *Filter) string {
 	return matchDimensions + where + with + match + " return o.value as row"
 }
 
-func createOptionList(options []*DimensionOption) string {
+func createOptionList(options []string) string {
 
 	var buffer bytes.Buffer
 
@@ -77,7 +77,7 @@ func createOptionList(options []*DimensionOption) string {
 			buffer.WriteString(", ")
 		}
 
-		buffer.WriteString(fmt.Sprintf("'%s'", option.Option))
+		buffer.WriteString(fmt.Sprintf("'%s'", option))
 	}
 
 	return buffer.String()

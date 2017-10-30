@@ -84,14 +84,6 @@ func (store *Store) GetFilter(filterJobID string) (*observation.Filter, error) {
 	}
 
 	for _, dimension := range dimensionList {
-
-		options, err := store.getFilterDimensionOptions(dimension.URL)
-		if err != nil {
-			return nil, err
-		}
-
-		dimension.Options = append(dimension.Options, options...)
-
 		filter.DimensionFilters = append(filter.DimensionFilters, dimension)
 	}
 
@@ -117,26 +109,8 @@ func (store *Store) getFilterMetaData(filterJobID string) (*observation.Filter, 
 	return filter, nil
 }
 
-// call the filter API for filter meta data.
-func (store *Store) getFilterDimensionOptions(dimensionURL string) ([]*observation.DimensionOption, error) {
-	dimensionOptionsURL := store.filterAPIURL + dimensionURL + "/options"
-
-	bytes, err := store.makeRequest("GET", dimensionOptionsURL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var dimensionFilter []*observation.DimensionOption
-	err = json.Unmarshal(bytes, &dimensionFilter)
-	if err != nil {
-		return nil, err
-	}
-
-	return dimensionFilter, nil
-}
-
 func (store *Store) getFilterDimensionList(filter *observation.Filter) ([]*observation.DimensionFilter, error) {
-	url := store.filterAPIURL + filter.DimensionListURL
+	url := filter.DimensionListURL
 
 	bytes, err := store.makeRequest("GET", url, nil)
 	if err != nil {

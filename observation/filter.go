@@ -17,15 +17,9 @@ type Downloads struct {
 
 // DimensionFilter represents an object containing a list of dimension values and the dimension name
 type DimensionFilter struct {
-	Name    string             `json:"name,omitempty"`
-	URL     string             `json:"dimension_url,omitempty"`
-	Options []*DimensionOption `json:"options,omitempty"`
-}
-
-// DimensionOption represents a single option of a dimension
-type DimensionOption struct {
-	Option string `json:"option,omitempty"`
-	URL    string `json:"dimension_option_url,omitempty"`
+	Name    string   `json:"name,omitempty"`
+	URL     string   `json:"dimension_url,omitempty"`
+	Options []string `json:"options,omitempty"`
 }
 
 // DownloadItem represents an object containing information for the download item

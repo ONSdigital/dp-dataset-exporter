@@ -20,14 +20,8 @@ var filter = &observation.Filter{
 	JobID:      filterJobId,
 	InstanceID: "888",
 	DimensionFilters: []*observation.DimensionFilter{
-		{Name: "age", Options: []*observation.DimensionOption{
-			{Option: "29"},
-			{Option: "30"}}},
-		{
-			Name: "sex", Options: []*observation.DimensionOption{
-				{Option: "male"},
-				{Option: "female"}},
-		},
+		{Name: "age", Options: []string{"29", "30"}},
+		{Name: "sex", Options: []string{"male", "female"}},
 	},
 }
 
