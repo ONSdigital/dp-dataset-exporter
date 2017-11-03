@@ -18,7 +18,7 @@ var (
 //
 //         // make and configure a mocked Handler
 //         mockedHandler := &HandlerMock{
-//             HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+//             HandleFunc: func(filterSubmittedEvent *event.FilterSubmitted) error {
 // 	               panic("TODO: mock out the Handle method")
 //             },
 //         }
@@ -29,42 +29,42 @@ var (
 //     }
 type HandlerMock struct {
 	// HandleFunc mocks the Handle method.
-	HandleFunc func(filterJobSubmittedEvent *event.FilterJobSubmitted) error
+	HandleFunc func(filterSubmittedEvent *event.FilterSubmitted) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Handle holds details about calls to the Handle method.
 		Handle []struct {
-			// FilterJobSubmittedEvent is the filterJobSubmittedEvent argument value.
-			FilterJobSubmittedEvent *event.FilterJobSubmitted
+			// FilterSubmittedEvent is the filterSubmittedEvent argument value.
+			FilterSubmittedEvent *event.FilterSubmitted
 		}
 	}
 }
 
 // Handle calls HandleFunc.
-func (mock *HandlerMock) Handle(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+func (mock *HandlerMock) Handle(filterSubmittedEvent *event.FilterSubmitted) error {
 	if mock.HandleFunc == nil {
 		panic("moq: HandlerMock.HandleFunc is nil but Handler.Handle was just called")
 	}
 	callInfo := struct {
-		FilterJobSubmittedEvent *event.FilterJobSubmitted
+		FilterSubmittedEvent *event.FilterSubmitted
 	}{
-		FilterJobSubmittedEvent: filterJobSubmittedEvent,
+		FilterSubmittedEvent: filterSubmittedEvent,
 	}
 	lockHandlerMockHandle.Lock()
 	mock.calls.Handle = append(mock.calls.Handle, callInfo)
 	lockHandlerMockHandle.Unlock()
-	return mock.HandleFunc(filterJobSubmittedEvent)
+	return mock.HandleFunc(filterSubmittedEvent)
 }
 
 // HandleCalls gets all the calls that were made to Handle.
 // Check the length with:
 //     len(mockedHandler.HandleCalls())
 func (mock *HandlerMock) HandleCalls() []struct {
-	FilterJobSubmittedEvent *event.FilterJobSubmitted
+	FilterSubmittedEvent *event.FilterSubmitted
 } {
 	var calls []struct {
-		FilterJobSubmittedEvent *event.FilterJobSubmitted
+		FilterSubmittedEvent *event.FilterSubmitted
 	}
 	lockHandlerMockHandle.RLock()
 	calls = mock.calls.Handle

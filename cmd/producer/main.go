@@ -2,12 +2,13 @@ package main
 
 import (
 	"bufio"
+	"os"
+
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
-	"os"
 )
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 
 	kafkaBrokers := config.KafkaAddr
 
-	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, config.FilterJobConsumerTopic, 0)
+	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, config.FilterConsumerTopic, 0)
 	if err != nil {
 		log.Error(err, nil)
 		os.Exit(1)
@@ -33,15 +34,15 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 
-		filterJobID := scanner.Text()
+		filterID := scanner.Text()
 
-		log.Debug("Sending filter job event", log.Data{"filter_job_id": filterJobID})
+		log.Debug("Sending filter output event", log.Data{"filter_ouput_id": filterID})
 
-		event := event.FilterJobSubmitted{
-			FilterJobID: filterJobID,
+		event := event.FilterSubmitted{
+			FilterID: filterID,
 		}
 
-		bytes, err := schema.FilterJobSubmittedEvent.Marshal(event)
+		bytes, err := schema.FilterSubmittedEvent.Marshal(event)
 		if err != nil {
 			log.Error(err, nil)
 			os.Exit(1)

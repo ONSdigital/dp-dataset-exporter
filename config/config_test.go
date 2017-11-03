@@ -1,10 +1,11 @@
 package config_test
 
 import (
-	"github.com/ONSdigital/dp-dataset-exporter/config"
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 	"time"
+
+	"github.com/ONSdigital/dp-dataset-exporter/config"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestSpec(t *testing.T) {
@@ -22,8 +23,8 @@ func TestSpec(t *testing.T) {
 			Convey("The values should be set to the expected defaults", func() {
 				So(cfg.BindAddr, ShouldEqual, ":22500")
 				So(cfg.KafkaAddr, ShouldResemble, []string{"localhost:9092"})
-				So(cfg.FilterJobConsumerTopic, ShouldEqual, "filter-job-submitted")
-				So(cfg.FilterJobConsumerGroup, ShouldEqual, "dp-dataset-exporter")
+				So(cfg.FilterConsumerTopic, ShouldEqual, "filter-job-submitted")
+				So(cfg.FilterConsumerGroup, ShouldEqual, "dp-dataset-exporter")
 				So(cfg.DatabaseAddress, ShouldEqual, "bolt://localhost:7687")
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")
 				So(cfg.FilterAPIAuthToken, ShouldEqual, "FD0108EA-825D-411C-9B1D-41EF7727F465")

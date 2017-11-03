@@ -49,7 +49,7 @@ type HTTPClient interface {
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
 func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) error {
 
-	url := store.filterAPIURL + "/filters/" + filterJobID
+	url := store.filterAPIURL + "/filter-outputs/" + filterJobID
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
 	putBody := &observation.Filter{
@@ -73,27 +73,18 @@ func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) e
 
 // GetFilter returns filter data from the filter API for the given ID
 func (store *Store) GetFilter(filterJobID string) (*observation.Filter, error) {
-	filter, err := store.getFilterMetaData(filterJobID)
+	filter, err := store.getFilterData(filterJobID)
 	if err != nil {
 		return nil, err
-	}
-
-	dimensionList, err := store.getFilterDimensionList(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, dimension := range dimensionList {
-		filter.DimensionFilters = append(filter.DimensionFilters, dimension)
 	}
 
 	return filter, nil
 }
 
-// call the filter API for filter meta data.
-func (store *Store) getFilterMetaData(filterJobID string) (*observation.Filter, error) {
+// call the filter API for filter data.
+func (store *Store) getFilterData(filterOutputID string) (*observation.Filter, error) {
 
-	url := store.filterAPIURL + "/filters/" + filterJobID
+	url := store.filterAPIURL + "/filter-outputs/" + filterOutputID
 
 	bytes, err := store.makeRequest("GET", url, nil)
 	if err != nil {
@@ -107,23 +98,6 @@ func (store *Store) getFilterMetaData(filterJobID string) (*observation.Filter, 
 	}
 
 	return filter, nil
-}
-
-func (store *Store) getFilterDimensionList(filter *observation.Filter) ([]*observation.DimensionFilter, error) {
-	url := filter.DimensionListURL
-
-	bytes, err := store.makeRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var dimensionURLs []*observation.DimensionFilter
-	err = json.Unmarshal(bytes, &dimensionURLs)
-	if err != nil {
-		return nil, err
-	}
-
-	return dimensionURLs, nil
 }
 
 // common function for handling a HTTP request and response codes.

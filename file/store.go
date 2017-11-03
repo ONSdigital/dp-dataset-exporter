@@ -1,11 +1,12 @@
 package file
 
 import (
+	"io"
+
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"io"
 )
 
 // Store provides file storage via S3.
@@ -38,7 +39,7 @@ func (store *Store) PutFile(reader io.Reader, filter *observation.Filter) (url s
 		return "", err
 	}
 
-	filename := filter.JobID + ".csv"
+	filename := filter.FilterID + ".csv"
 
 	// the AWS uploader automatically handles large files breaking them into parts and using the multi part API.
 	result, err := uploader.Upload(&s3manager.UploadInput{

@@ -1,11 +1,13 @@
 package event_test
 
 import (
+	"testing"
+
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/go-ns/kafka/kafkatest"
+	"github.com/ONSdigital/go-ns/log"
 	. "github.com/smartystreets/goconvey/convey"
-	"testing"
 )
 
 func TestAvroProducer_CSVExported(t *testing.T) {
@@ -20,16 +22,16 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 		Convey("When CSVExported is called on the event producer", func() {
 
-			err := eventProducer.CSVExported(filterJobId, fileUrl)
+			err := eventProducer.CSVExported(filterOutputId, fileUrl)
 
 			Convey("The expected event is available on the output channel", func() {
-
+				log.Debug("error is:", log.Data{"error": err})
 				So(err, ShouldBeNil)
 
 				messageBytes := <-outputChannel
 				close(outputChannel)
 				observationEvent := unmarshal(messageBytes)
-				So(observationEvent.FilterJobID, ShouldEqual, filterJobId)
+				So(observationEvent.FilterID, ShouldEqual, filterOutputId)
 				So(observationEvent.FileURL, ShouldEqual, fileUrl)
 			})
 		})

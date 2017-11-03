@@ -1,8 +1,6 @@
 package event
 
-import (
-	"github.com/ONSdigital/dp-dataset-exporter/schema"
-)
+import "github.com/ONSdigital/dp-dataset-exporter/schema"
 
 // AvroProducer of output events.
 type AvroProducer struct {
@@ -21,12 +19,12 @@ func NewAvroProducer(messageProducer MessageProducer) *AvroProducer {
 	}
 }
 
-// CSVExported produces a new CSV exported event for the given filter job ID.
-func (producer *AvroProducer) CSVExported(filterJobID, fileURL string) error {
+// CSVExported produces a new CSV exported event for the given filter output ID.
+func (producer *AvroProducer) CSVExported(filterID, fileURL string) error {
 
 	csvExported := CSVExported{
-		FilterJobID: filterJobID,
-		FileURL:     fileURL,
+		FilterID: filterID,
+		FileURL:  fileURL,
 	}
 
 	bytes, err := marshal(csvExported)

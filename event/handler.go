@@ -1,9 +1,10 @@
 package event
 
 import (
+	"io"
+
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"github.com/ONSdigital/go-ns/log"
-	"io"
 )
 
 //go:generate moq -out eventtest/filter_store.go -pkg eventtest . FilterStore
@@ -37,8 +38,8 @@ func NewExportHandler(filterStore FilterStore,
 
 // FilterStore provides existing filter data.
 type FilterStore interface {
-	GetFilter(filterJobID string) (*observation.Filter, error)
-	PutCSVData(filterJobID string, csvURL string, csvSize int64) error
+	GetFilter(filterID string) (*observation.Filter, error)
+	PutCSVData(filterID string, csvURL string, csvSize int64) error
 }
 
 // ObservationStore provides filtered observation data in CSV rows.
@@ -53,20 +54,20 @@ type FileStore interface {
 
 // Producer handles producing output events.
 type Producer interface {
-	CSVExported(filterJobID, fileURL string) error
+	CSVExported(filterID, fileURL string) error
 }
 
-// Handle the export of a single filter job.
-func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
+// Handle the export of a single filter output.
+func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 
-	filter, err := handler.filterStore.GetFilter(event.FilterJobID)
+	filter, err := handler.filterStore.GetFilter(event.FilterID)
 	if err != nil {
 		return err
 	}
 
-	log.Debug("filter retrieved for job", log.Data{
+	log.Debug("filter retrieved for output", log.Data{
 		"instance_id": filter.InstanceID,
-		"filter_id":   filter.JobID})
+		"filter_id":   filter.FilterID})
 
 	csvRowReader, err := handler.observationStore.GetCSVRows(filter)
 	if err != nil {
@@ -88,15 +89,15 @@ func (handler *ExportHandler) Handle(event *FilterJobSubmitted) error {
 
 	log.Debug("exported csv file", log.Data{
 		"instance_id": filter.InstanceID,
-		"filter_id":   filter.JobID,
+		"filter_id":   filter.FilterID,
 		"url":         fileURL,
 		"size":        reader.TotalBytesRead()})
 
 	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(filter.JobID, fileURL, reader.TotalBytesRead())
+	err = handler.filterStore.PutCSVData(filter.FilterID, fileURL, reader.TotalBytesRead())
 	if err != nil {
 		return err
 	}
 
-	return handler.eventProducer.CSVExported(filter.JobID, fileURL)
+	return handler.eventProducer.CSVExported(filter.FilterID, fileURL)
 }

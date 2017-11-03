@@ -1,23 +1,24 @@
 package event_test
 
 import (
+	"io"
+	"testing"
+
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	"github.com/ONSdigital/dp-dataset-exporter/observation/observationtest"
 	"github.com/johnnadratowski/golang-neo4j-bolt-driver/errors"
 	. "github.com/smartystreets/goconvey/convey"
-	"io"
-	"testing"
 )
 
-const filterJobId = "345"
+const filterOutputId = "345"
 const fileUrl = "s3://some/url/123.csv"
 
-var filterJobEvent = &event.FilterJobSubmitted{FilterJobID: filterJobId}
+var filterOutputEvent = &event.FilterSubmitted{FilterID: filterOutputId}
 
 var filter = &observation.Filter{
-	JobID:      filterJobId,
+	FilterID:   filterOutputId,
 	InstanceID: "888",
 	DimensionFilters: []*observation.DimensionFilter{
 		{Name: "age", Options: []string{"29", "30"}},
@@ -41,7 +42,7 @@ func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(filterJobEvent)
+			err := handler.Handle(filterOutputEvent)
 
 			Convey("The error from the filter store is returned", func() {
 				So(err, ShouldNotBeNil)
@@ -73,7 +74,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(filterJobEvent)
+			err := handler.Handle(filterOutputEvent)
 
 			Convey("The error returned is the error returned from the observation store", func() {
 				So(err, ShouldNotBeNil)
@@ -120,7 +121,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(filterJobEvent)
+			err := handler.Handle(filterOutputEvent)
 
 			Convey("The error returned is the error returned from the file store", func() {
 				So(err, ShouldNotBeNil)
@@ -167,7 +168,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(filterJobEvent)
+			err := handler.Handle(filterOutputEvent)
 
 			Convey("The error returned is the error returned from the file store", func() {
 				So(err, ShouldNotBeNil)
@@ -223,7 +224,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(filterJobEvent)
+			err := handler.Handle(filterOutputEvent)
 
 			Convey("The error returned is the error returned from the file store", func() {
 				So(err, ShouldNotBeNil)
@@ -277,7 +278,7 @@ func TestExportHandler_Handle(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(filterJobEvent)
+			err := handler.Handle(filterOutputEvent)
 
 			Convey("The error returned is nil", func() {
 				So(err, ShouldBeNil)
@@ -287,8 +288,8 @@ func TestExportHandler_Handle(t *testing.T) {
 
 				So(len(mockFilterStore.GetFilterCalls()), ShouldEqual, 1)
 
-				actualFilterID := mockFilterStore.GetFilterCalls()[0].FilterJobID
-				So(actualFilterID, ShouldEqual, filterJobEvent.FilterJobID)
+				actualFilterID := mockFilterStore.GetFilterCalls()[0].FilterID
+				So(actualFilterID, ShouldEqual, filterOutputEvent.FilterID)
 			})
 
 			Convey("The observation store is called with the filter returned from the filter store", func() {
@@ -311,14 +312,14 @@ func TestExportHandler_Handle(t *testing.T) {
 
 				So(len(mockFilterStore.PutCSVDataCalls()), ShouldEqual, 1)
 
-				So(mockFilterStore.PutCSVDataCalls()[0].FilterJobID, ShouldEqual, filterJobEvent.FilterJobID)
+				So(mockFilterStore.PutCSVDataCalls()[0].FilterID, ShouldEqual, filterOutputEvent.FilterID)
 				So(mockFilterStore.PutCSVDataCalls()[0].CsvURL, ShouldEqual, fileUrl)
 			})
 
 			Convey("The event producer is called with the filter ID.", func() {
 
 				So(len(mockedEventProducer.CSVExportedCalls()), ShouldEqual, 1)
-				So(mockedEventProducer.CSVExportedCalls()[0].FilterJobID, ShouldEqual, filterJobEvent.FilterJobID)
+				So(mockedEventProducer.CSVExportedCalls()[0].FilterID, ShouldEqual, filterOutputEvent.FilterID)
 			})
 
 			Convey("The CSV row reader returned from the DB is closed.", func() {

@@ -2,6 +2,9 @@ package event_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/ONSdigital/dp-dataset-exporter/errors/errorstest"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
@@ -11,8 +14,6 @@ import (
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/johnnadratowski/golang-neo4j-bolt-driver/errors"
 	. "github.com/smartystreets/goconvey/convey"
-	"testing"
-	"time"
 )
 
 func TestConsume_UnmarshallError(t *testing.T) {
@@ -22,7 +23,7 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
 			},
 		}
@@ -42,8 +43,8 @@ func TestConsume_UnmarshallError(t *testing.T) {
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
 
-				event := mockEventHandler.HandleCalls()[0].FilterJobSubmittedEvent
-				So(event.FilterJobID, ShouldEqual, expectedEvent.FilterJobID)
+				event := mockEventHandler.HandleCalls()[0].FilterSubmittedEvent
+				So(event.FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 		})
 	})
@@ -56,7 +57,7 @@ func TestConsume(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
 			},
 		}
@@ -76,8 +77,8 @@ func TestConsume(t *testing.T) {
 			Convey("A event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
 
-				event := mockEventHandler.HandleCalls()[0].FilterJobSubmittedEvent
-				So(event.FilterJobID, ShouldEqual, expectedEvent.FilterJobID)
+				event := mockEventHandler.HandleCalls()[0].FilterSubmittedEvent
+				So(event.FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 
 			Convey("The message is committed", func() {
@@ -96,7 +97,7 @@ func TestConsume_HandlerError(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return expectedError
 			},
 		}
@@ -122,7 +123,7 @@ func TestConsume_HandlerError(t *testing.T) {
 			Convey("The error handler is given the error returned from the event handler", func() {
 				So(len(mockErrorHandler.HandleCalls()), ShouldEqual, 1)
 				So(mockErrorHandler.HandleCalls()[0].Err, ShouldEqual, expectedError)
-				So(mockErrorHandler.HandleCalls()[0].FilterID, ShouldEqual, expectedEvent.FilterJobID)
+				So(mockErrorHandler.HandleCalls()[0].FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 
 			Convey("The message is committed", func() {
@@ -139,7 +140,7 @@ func TestClose(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterJobSubmitted) error {
+			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
 			},
 		}
@@ -165,15 +166,15 @@ func TestClose(t *testing.T) {
 }
 
 // marshal helper method to marshal a event into a []byte
-func marshal(event event.FilterJobSubmitted) []byte {
-	bytes, err := schema.FilterJobSubmittedEvent.Marshal(event)
+func marshal(event event.FilterSubmitted) []byte {
+	bytes, err := schema.FilterSubmittedEvent.Marshal(event)
 	So(err, ShouldBeNil)
 	return bytes
 }
 
-func getExampleEvent() *event.FilterJobSubmitted {
-	expectedEvent := &event.FilterJobSubmitted{
-		FilterJobID: "123321",
+func getExampleEvent() *event.FilterSubmitted {
+	expectedEvent := &event.FilterSubmitted{
+		FilterID: "123321",
 	}
 	return expectedEvent
 }

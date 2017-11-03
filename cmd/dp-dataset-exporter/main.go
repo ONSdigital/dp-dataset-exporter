@@ -2,6 +2,12 @@ package main
 
 import (
 	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
@@ -14,11 +20,6 @@ import (
 	"github.com/ONSdigital/go-ns/server"
 	"github.com/gorilla/mux"
 	bolt "github.com/johnnadratowski/golang-neo4j-bolt-driver"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {
@@ -33,9 +34,9 @@ func main() {
 
 	// Avoid logging the neo4j FileURL as it may contain a password
 	log.Debug("loaded config", log.Data{
-		"topics":         []string{config.FilterJobConsumerTopic, config.CSVExportedProducerTopic},
+		"topics":         []string{config.FilterConsumerTopic, config.CSVExportedProducerTopic},
 		"brokers":        config.KafkaAddr,
-		"consumer_group": config.FilterJobConsumerGroup,
+		"consumer_group": config.FilterConsumerGroup,
 		"filter_api_url": config.FilterAPIURL,
 		"aws_region":     config.AWSRegion,
 		"s3_bucket_name": config.S3BucketName,
@@ -63,8 +64,8 @@ func main() {
 	kafkaBrokers := config.KafkaAddr
 	kafkaConsumer, err := kafka.NewConsumerGroup(
 		kafkaBrokers,
-		config.FilterJobConsumerTopic,
-		config.FilterJobConsumerGroup,
+		config.FilterConsumerTopic,
+		config.FilterConsumerGroup,
 		kafka.OffsetNewest)
 	exitIfError(err)
 

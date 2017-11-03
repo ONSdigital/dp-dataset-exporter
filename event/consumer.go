@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	errs "errors"
+
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/go-ns/kafka"
@@ -18,7 +19,7 @@ type MessageConsumer interface {
 
 // Handler represents a handler for processing a single event.
 type Handler interface {
-	Handle(filterJobSubmittedEvent *FilterJobSubmitted) error
+	Handle(filterSubmittedEvent *FilterSubmitted) error
 }
 
 // Consumer consumes event messages.
@@ -87,7 +88,7 @@ func processMessage(message kafka.Message, handler Handler, errorHandler errors.
 
 	err = handler.Handle(event)
 	if err != nil {
-		errorHandler.Handle(event.FilterJobID, err)
+		errorHandler.Handle(event.FilterID, err)
 		log.Error(err, log.Data{"message": "failed to handle event"})
 	}
 
@@ -98,8 +99,8 @@ func processMessage(message kafka.Message, handler Handler, errorHandler errors.
 }
 
 // unmarshal converts a event instance to []byte.
-func unmarshal(message kafka.Message) (*FilterJobSubmitted, error) {
-	var event FilterJobSubmitted
-	err := schema.FilterJobSubmittedEvent.Unmarshal(message.GetData(), &event)
+func unmarshal(message kafka.Message) (*FilterSubmitted, error) {
+	var event FilterSubmitted
+	err := schema.FilterSubmittedEvent.Unmarshal(message.GetData(), &event)
 	return &event, err
 }

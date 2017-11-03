@@ -3,49 +3,41 @@ package filter_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
+	"strconv"
+	"testing"
+
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter/filtertest"
 	"github.com/ONSdigital/dp-dataset-exporter/observation"
 	. "github.com/smartystreets/goconvey/convey"
-	"io"
-	"net/http"
-	"strconv"
-	"strings"
-	"testing"
 )
 
 const filterAPIURL string = "http://filter-api:8765"
 const filterAPIAuthToken string = "dgt-dsfgrtyedf-gesrtrt"
-const filterJobID string = "123456784432"
-
-var mockFilterData = &observation.Filter{
-	JobID:            filterJobID,
-	InstanceID:       "123",
-	DimensionListURL: filterAPIURL + "/filter/" + filterJobID + "/dimensions",
-}
+const filterOutputID string = "123456784432"
 
 var mockDimensionListData = []*observation.DimensionFilter{{
-	URL:  filterAPIURL + "/filter/" + filterJobID + "/dimensions/234",
-	Name: "Sex",
+	Name:    "Sex",
+	Options: []string{"male"},
 }}
+
+var mockFilterData = &observation.Filter{
+	FilterID:         filterOutputID,
+	InstanceID:       "123",
+	DimensionFilters: mockDimensionListData,
+}
 
 func TestStore_GetFilter(t *testing.T) {
 
 	mockFilterJSON, _ := json.Marshal(mockFilterData)
 	mockFilterBody := iOReadCloser{bytes.NewReader(mockFilterJSON)}
 
-	mockDimensionListJSON, _ := json.Marshal(mockDimensionListData)
-	mockDimensionListBody := iOReadCloser{bytes.NewReader(mockDimensionListJSON)}
-
 	Convey("Given a store with mocked HTTP responses", t, func() {
 
 		mockHTTPClient := &filtertest.HTTPClientMock{
 			DoFunc: func(req *http.Request) (*http.Response, error) {
-
-				if strings.Contains(req.URL.Path, "/dimensions") {
-					return &http.Response{StatusCode: http.StatusOK, Body: mockDimensionListBody}, nil
-				}
-
 				return &http.Response{StatusCode: http.StatusOK, Body: mockFilterBody}, nil
 			},
 		}
@@ -54,12 +46,14 @@ func TestStore_GetFilter(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			filter, err := filterStore.GetFilter(filterJobID)
+			filter, err := filterStore.GetFilter(filterOutputID)
 
 			Convey("The expected filter data is returned", func() {
 				So(err, ShouldBeNil)
 
-				So(filter.JobID, ShouldEqual, filterJobID)
+				So(filter.FilterID, ShouldEqual, filterOutputID)
+				So(filter.DimensionFilters[0].Name, ShouldEqual, "Sex")
+				So(filter.DimensionFilters[0].Options, ShouldResemble, []string{"male"})
 			})
 		})
 	})
@@ -67,19 +61,11 @@ func TestStore_GetFilter(t *testing.T) {
 
 func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
-	mockFilterJSON, _ := json.Marshal(mockFilterData)
-	mockFilterBody := iOReadCloser{bytes.NewReader(mockFilterJSON)}
-
-	Convey("Given a mock http client that returns a 500 error when getting the dimension list", t, func() {
+	Convey("Given a mock http client that returns a 500 error when getting filter output", t, func() {
 
 		mockHTTPClient := &filtertest.HTTPClientMock{
 			DoFunc: func(req *http.Request) (*http.Response, error) {
-
-				if strings.Contains(req.URL.Path, "/dimensions") {
-					return &http.Response{StatusCode: http.StatusInternalServerError}, nil
-				}
-
-				return &http.Response{StatusCode: http.StatusOK, Body: mockFilterBody}, nil
+				return &http.Response{StatusCode: http.StatusInternalServerError, Body: nil}, nil
 			},
 		}
 
@@ -87,7 +73,7 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			actualFilter, err := filterStore.GetFilter(filterJobID)
+			actualFilter, err := filterStore.GetFilter(filterOutputID)
 
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
@@ -101,7 +87,7 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
 func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
-	Convey("Given a mock http client that returns a 404 error when getting the dimension list", t, func() {
+	Convey("Given a mock http client that returns a 404 error when getting filter output", t, func() {
 
 		mockHTTPClient := &filtertest.HTTPClientMock{
 			DoFunc: func(req *http.Request) (*http.Response, error) {
@@ -113,7 +99,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			actualFilter, err := filterStore.GetFilter(filterJobID)
+			actualFilter, err := filterStore.GetFilter(filterOutputID)
 
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
@@ -143,7 +129,7 @@ func TestStore_PutCSVData(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+			err := filterStore.PutCSVData(filterOutputID, fileURL, fileSize)
 
 			Convey("The expected body data is sent", func() {
 				So(err, ShouldBeNil)
@@ -160,7 +146,7 @@ func TestStore_PutCSVData(t *testing.T) {
 
 				So(actualFilter.Downloads.CSV.URL, ShouldEqual, fileURL)
 				So(actualFilter.Downloads.CSV.Size, ShouldEqual, strconv.FormatInt(fileSize, 10))
-				So(httpReq.URL.Path, ShouldEndWith, filterJobID)
+				So(httpReq.URL.Path, ShouldEndWith, filterOutputID)
 				So(httpReq.Header.Get("Internal-Token"), ShouldEqual, filterAPIAuthToken)
 			})
 		})
@@ -184,7 +170,7 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+			err := filterStore.PutCSVData(filterOutputID, fileURL, fileSize)
 
 			Convey("The expected error is returned", func() {
 
@@ -213,7 +199,7 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+			err := filterStore.PutCSVData(filterOutputID, fileURL, fileSize)
 
 			Convey("The expected error is returned", func() {
 
@@ -242,7 +228,7 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterJobID, fileURL, fileSize)
+			err := filterStore.PutCSVData(filterOutputID, fileURL, fileSize)
 
 			Convey("The expected error is returned", func() {
 

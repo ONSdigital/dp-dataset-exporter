@@ -4,18 +4,18 @@ import (
 	"github.com/ONSdigital/go-ns/avro"
 )
 
-var filterJobSubmittedEvent = `{
+var filterSubmittedEvent = `{
   "type": "record",
-  "name": "filter-job-submitted",
+  "name": "filter-output-submitted",
   "namespace": "",
   "fields": [
-    {"name": "filter_job_id", "type": "string"}
+    {"name": "filter_output_id", "type": "string"}
   ]
 }`
 
-// FilterJobSubmittedEvent the Avro schema for FilterJobSubmitted messages.
-var FilterJobSubmittedEvent = &avro.Schema{
-	Definition: filterJobSubmittedEvent,
+// FilterSubmittedEvent the Avro schema for FilterOutputSubmitted messages.
+var FilterSubmittedEvent = &avro.Schema{
+	Definition: filterSubmittedEvent,
 }
 
 var csvExportedEvent = `{
@@ -23,7 +23,7 @@ var csvExportedEvent = `{
   "name": "csv-exported",
   "namespace": "",
   "fields": [
-    {"name": "filter_job_id", "type": "string"},
+    {"name": "filter_output_id", "type": "string"},
     {"name": "file_url", "type": "string"}
   ]
 }`

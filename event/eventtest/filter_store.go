@@ -19,10 +19,10 @@ var (
 //
 //         // make and configure a mocked FilterStore
 //         mockedFilterStore := &FilterStoreMock{
-//             GetFilterFunc: func(filterJobID string) (*observation.Filter, error) {
+//             GetFilterFunc: func(filterID string) (*observation.Filter, error) {
 // 	               panic("TODO: mock out the GetFilter method")
 //             },
-//             PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
+//             PutCSVDataFunc: func(filterID string, csvURL string, csvSize int64) error {
 // 	               panic("TODO: mock out the PutCSVData method")
 //             },
 //         }
@@ -33,22 +33,22 @@ var (
 //     }
 type FilterStoreMock struct {
 	// GetFilterFunc mocks the GetFilter method.
-	GetFilterFunc func(filterJobID string) (*observation.Filter, error)
+	GetFilterFunc func(filterID string) (*observation.Filter, error)
 
 	// PutCSVDataFunc mocks the PutCSVData method.
-	PutCSVDataFunc func(filterJobID string, csvURL string, csvSize int64) error
+	PutCSVDataFunc func(filterID string, csvURL string, csvSize int64) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// GetFilter holds details about calls to the GetFilter method.
 		GetFilter []struct {
-			// FilterJobID is the filterJobID argument value.
-			FilterJobID string
+			// FilterID is the filterID argument value.
+			FilterID string
 		}
 		// PutCSVData holds details about calls to the PutCSVData method.
 		PutCSVData []struct {
-			// FilterJobID is the filterJobID argument value.
-			FilterJobID string
+			// FilterID is the filterID argument value.
+			FilterID string
 			// CsvURL is the csvURL argument value.
 			CsvURL string
 			// CsvSize is the csvSize argument value.
@@ -58,29 +58,29 @@ type FilterStoreMock struct {
 }
 
 // GetFilter calls GetFilterFunc.
-func (mock *FilterStoreMock) GetFilter(filterJobID string) (*observation.Filter, error) {
+func (mock *FilterStoreMock) GetFilter(filterID string) (*observation.Filter, error) {
 	if mock.GetFilterFunc == nil {
 		panic("moq: FilterStoreMock.GetFilterFunc is nil but FilterStore.GetFilter was just called")
 	}
 	callInfo := struct {
-		FilterJobID string
+		FilterID string
 	}{
-		FilterJobID: filterJobID,
+		FilterID: filterID,
 	}
 	lockFilterStoreMockGetFilter.Lock()
 	mock.calls.GetFilter = append(mock.calls.GetFilter, callInfo)
 	lockFilterStoreMockGetFilter.Unlock()
-	return mock.GetFilterFunc(filterJobID)
+	return mock.GetFilterFunc(filterID)
 }
 
 // GetFilterCalls gets all the calls that were made to GetFilter.
 // Check the length with:
 //     len(mockedFilterStore.GetFilterCalls())
 func (mock *FilterStoreMock) GetFilterCalls() []struct {
-	FilterJobID string
+	FilterID string
 } {
 	var calls []struct {
-		FilterJobID string
+		FilterID string
 	}
 	lockFilterStoreMockGetFilter.RLock()
 	calls = mock.calls.GetFilter
@@ -89,37 +89,37 @@ func (mock *FilterStoreMock) GetFilterCalls() []struct {
 }
 
 // PutCSVData calls PutCSVDataFunc.
-func (mock *FilterStoreMock) PutCSVData(filterJobID string, csvURL string, csvSize int64) error {
+func (mock *FilterStoreMock) PutCSVData(filterID string, csvURL string, csvSize int64) error {
 	if mock.PutCSVDataFunc == nil {
 		panic("moq: FilterStoreMock.PutCSVDataFunc is nil but FilterStore.PutCSVData was just called")
 	}
 	callInfo := struct {
-		FilterJobID string
-		CsvURL      string
-		CsvSize     int64
+		FilterID string
+		CsvURL   string
+		CsvSize  int64
 	}{
-		FilterJobID: filterJobID,
-		CsvURL:      csvURL,
-		CsvSize:     csvSize,
+		FilterID: filterID,
+		CsvURL:   csvURL,
+		CsvSize:  csvSize,
 	}
 	lockFilterStoreMockPutCSVData.Lock()
 	mock.calls.PutCSVData = append(mock.calls.PutCSVData, callInfo)
 	lockFilterStoreMockPutCSVData.Unlock()
-	return mock.PutCSVDataFunc(filterJobID, csvURL, csvSize)
+	return mock.PutCSVDataFunc(filterID, csvURL, csvSize)
 }
 
 // PutCSVDataCalls gets all the calls that were made to PutCSVData.
 // Check the length with:
 //     len(mockedFilterStore.PutCSVDataCalls())
 func (mock *FilterStoreMock) PutCSVDataCalls() []struct {
-	FilterJobID string
-	CsvURL      string
-	CsvSize     int64
+	FilterID string
+	CsvURL   string
+	CsvSize  int64
 } {
 	var calls []struct {
-		FilterJobID string
-		CsvURL      string
-		CsvSize     int64
+		FilterID string
+		CsvURL   string
+		CsvSize  int64
 	}
 	lockFilterStoreMockPutCSVData.RLock()
 	calls = mock.calls.PutCSVData
