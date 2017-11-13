@@ -3,7 +3,7 @@ package event
 import (
 	"io"
 
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/log"
 )
 
@@ -44,7 +44,7 @@ type FilterStore interface {
 
 // ObservationStore provides filtered observation data in CSV rows.
 type ObservationStore interface {
-	GetCSVRows(filter *observation.Filter) (observation.CSVRowReader, error)
+	GetCSVRows(filter *observation.Filter, limit *int) (observation.CSVRowReader, error)
 }
 
 // FileStore provides storage for filtered output files.
@@ -69,7 +69,7 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 		"instance_id": filter.InstanceID,
 		"filter_id":   filter.FilterID})
 
-	csvRowReader, err := handler.observationStore.GetCSVRows(filter)
+	csvRowReader, err := handler.observationStore.GetCSVRows(filter, nil)
 	if err != nil {
 		return err
 	}

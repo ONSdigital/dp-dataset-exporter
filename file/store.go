@@ -3,7 +3,7 @@ package file
 import (
 	"io"
 
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"

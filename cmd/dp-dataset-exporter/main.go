@@ -13,7 +13,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/handlers/healthcheck"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"

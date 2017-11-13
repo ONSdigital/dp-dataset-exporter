@@ -8,10 +8,10 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/log"
+	"strconv"
 )
 
 //go:generate moq -out filtertest/http_client.go -pkg filtertest . HTTPClient
@@ -21,6 +21,25 @@ type Store struct {
 	filterAPIURL       string
 	filterAPIAuthToken string
 	httpClient         HTTPClient
+}
+
+// Downloads represents a list of file types possible to download
+type FilterOuput struct {
+	FilterID         string                         `json:"filter_id,omitempty"`
+	InstanceID       string                         `json:"instance_id"`
+	State            string                         `json:"state,omitempty"`
+	Downloads        *Downloads                     `json:"downloads,omitempty"`
+}
+
+// DimensionFilter represents an object containing a list of dimension values and the dimension name
+type Downloads struct {
+	CSV *DownloadItem `json:"csv,omitempty"`
+}
+
+// DownloadItem represents an object containing information for the download item
+type DownloadItem struct {
+	Size string `json:"size,omitempty"`
+	URL  string `json:"url,omitempty"`
 }
 
 // ErrFilterJobNotFound returned when the filter job count not be found for the given ID.
@@ -52,13 +71,13 @@ func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) e
 	url := store.filterAPIURL + "/filter-outputs/" + filterJobID
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
-	putBody := &observation.Filter{
-		Downloads: &observation.Downloads{
-			CSV: &observation.DownloadItem{
-				Size: strconv.FormatInt(size, 10),
-				URL:  fileURL,
-			},
+	putBody := &FilterOuput{
+	Downloads: &Downloads{
+		CSV: &DownloadItem{
+			Size: strconv.FormatInt(size, 10),
+			URL:  fileURL,
 		},
+	},
 	}
 
 	json, err := json.Marshal(putBody)

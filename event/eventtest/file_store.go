@@ -4,7 +4,7 @@
 package eventtest
 
 import (
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-filter/observation"
 	"io"
 	"sync"
 )

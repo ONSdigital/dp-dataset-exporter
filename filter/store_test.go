@@ -10,7 +10,7 @@ import (
 
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter/filtertest"
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
+	"github.com/ONSdigital/dp-filter/observation"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -140,7 +140,7 @@ func TestStore_PutCSVData(t *testing.T) {
 				buf := bytes.Buffer{}
 				_, _ = buf.ReadFrom(httpReq.Body)
 
-				actualFilter := &observation.Filter{}
+				actualFilter := &filter.FilterOuput{}
 				err := json.Unmarshal(buf.Bytes(), actualFilter)
 				So(err, ShouldBeNil)
 

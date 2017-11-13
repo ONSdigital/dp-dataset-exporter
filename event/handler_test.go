@@ -1,14 +1,14 @@
 package event_test
 
 import (
+	"errors"
 	"io"
 	"testing"
 
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
-	"github.com/ONSdigital/dp-dataset-exporter/observation"
-	"github.com/ONSdigital/dp-dataset-exporter/observation/observationtest"
-	"github.com/johnnadratowski/golang-neo4j-bolt-driver/errors"
+	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/dp-filter/observation/observationtest"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -65,7 +65,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
 				return nil, expectedError
 			},
 		}
@@ -106,7 +106,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -153,7 +153,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -203,7 +203,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -257,7 +257,7 @@ func TestExportHandler_Handle(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(filter *observation.Filter) (observation.CSVRowReader, error) {
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
 				return mockRowReader, nil
 			},
 		}

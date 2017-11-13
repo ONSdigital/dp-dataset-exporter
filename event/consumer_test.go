@@ -2,6 +2,7 @@ package event_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/kafka/kafkatest"
 	"github.com/ONSdigital/go-ns/log"
-	"github.com/johnnadratowski/golang-neo4j-bolt-driver/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
