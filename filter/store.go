@@ -23,15 +23,15 @@ type Store struct {
 	httpClient         HTTPClient
 }
 
-// Downloads represents a list of file types possible to download
+// FilterOuput represents a structure used to update the filter api
 type FilterOuput struct {
-	FilterID         string                         `json:"filter_id,omitempty"`
-	InstanceID       string                         `json:"instance_id"`
-	State            string                         `json:"state,omitempty"`
-	Downloads        *Downloads                     `json:"downloads,omitempty"`
+	FilterID   string     `json:"filter_id,omitempty"`
+	InstanceID string     `json:"instance_id"`
+	State      string     `json:"state,omitempty"`
+	Downloads  *Downloads `json:"downloads,omitempty"`
 }
 
-// DimensionFilter represents an object containing a list of dimension values and the dimension name
+// Downloads represents the CSV which has been generated
 type Downloads struct {
 	CSV *DownloadItem `json:"csv,omitempty"`
 }
@@ -72,12 +72,12 @@ func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) e
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
 	putBody := &FilterOuput{
-	Downloads: &Downloads{
-		CSV: &DownloadItem{
-			Size: strconv.FormatInt(size, 10),
-			URL:  fileURL,
+		Downloads: &Downloads{
+			CSV: &DownloadItem{
+				Size: strconv.FormatInt(size, 10),
+				URL:  fileURL,
+			},
 		},
-	},
 	}
 
 	json, err := json.Marshal(putBody)
