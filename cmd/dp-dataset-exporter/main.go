@@ -20,6 +20,9 @@ import (
 	"github.com/ONSdigital/go-ns/server"
 	"github.com/gorilla/mux"
 	bolt "github.com/johnnadratowski/golang-neo4j-bolt-driver"
+	"github.com/ONSdigital/go-ns/clients/dataset"
+	"github.com/ONSdigital/dp-dataset-exporter/schema"
+	"github.com/satori/go.uuid"
 )
 
 func main() {
@@ -86,9 +89,16 @@ func main() {
 	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
 	observationStore := observation.NewStore(dbConnection)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
-	eventProducer := event.NewAvroProducer(kafkaProducer)
+	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer)
+	datasetAPICli := dataset.New("http://localhost:22000")                 // TODO GET FROM CONFIG
+	datasetAPICli.SetInternalToken("FD0108EA-825D-411C-9B1D-41EF7727F465") // TODO GET FROM CONFIG
+
+	generateFileID := func() string {
+		return uuid.NewV4().String()
+	}
+
+	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, generateFileID)
 
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)

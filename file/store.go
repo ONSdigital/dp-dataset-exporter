@@ -3,7 +3,6 @@ package file
 import (
 	"io"
 
-	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -26,9 +25,8 @@ func NewStore(region string, bucket string) *Store {
 	}
 }
 
-// PutFile stores the contents of the given reader to the given filename.
-func (store *Store) PutFile(reader io.Reader, filter *observation.Filter) (url string, err error) {
-
+// PutFile stores the contents of the given reader to a csv file of given the supplied name.
+func (store *Store) PutFile(reader io.Reader, fileID string) (url string, err error) {
 	session, err := session.NewSession(store.config)
 	if err != nil {
 		return "", err
@@ -39,7 +37,7 @@ func (store *Store) PutFile(reader io.Reader, filter *observation.Filter) (url s
 		return "", err
 	}
 
-	filename := filter.FilterID + ".csv"
+	filename := fileID + ".csv"
 
 	// the AWS uploader automatically handles large files breaking them into parts and using the multi part API.
 	result, err := uploader.Upload(&s3manager.UploadInput{

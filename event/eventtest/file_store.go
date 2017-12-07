@@ -4,7 +4,6 @@
 package eventtest
 
 import (
-	"github.com/ONSdigital/dp-filter/observation"
 	"io"
 	"sync"
 )
@@ -19,7 +18,7 @@ var (
 //
 //         // make and configure a mocked FileStore
 //         mockedFileStore := &FileStoreMock{
-//             PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+//             PutFileFunc: func(reader io.Reader, fileID string) (string, error) {
 // 	               panic("TODO: mock out the PutFile method")
 //             },
 //         }
@@ -30,7 +29,7 @@ var (
 //     }
 type FileStoreMock struct {
 	// PutFileFunc mocks the PutFile method.
-	PutFileFunc func(reader io.Reader, filter *observation.Filter) (string, error)
+	PutFileFunc func(reader io.Reader, fileID string) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -38,28 +37,28 @@ type FileStoreMock struct {
 		PutFile []struct {
 			// Reader is the reader argument value.
 			Reader io.Reader
-			// Filter is the filter argument value.
-			Filter *observation.Filter
+			// FileID is the fileID argument value.
+			FileID string
 		}
 	}
 }
 
 // PutFile calls PutFileFunc.
-func (mock *FileStoreMock) PutFile(reader io.Reader, filter *observation.Filter) (string, error) {
+func (mock *FileStoreMock) PutFile(reader io.Reader, fileID string) (string, error) {
 	if mock.PutFileFunc == nil {
 		panic("moq: FileStoreMock.PutFileFunc is nil but FileStore.PutFile was just called")
 	}
 	callInfo := struct {
 		Reader io.Reader
-		Filter *observation.Filter
+		FileID string
 	}{
 		Reader: reader,
-		Filter: filter,
+		FileID: fileID,
 	}
 	lockFileStoreMockPutFile.Lock()
 	mock.calls.PutFile = append(mock.calls.PutFile, callInfo)
 	lockFileStoreMockPutFile.Unlock()
-	return mock.PutFileFunc(reader, filter)
+	return mock.PutFileFunc(reader, fileID)
 }
 
 // PutFileCalls gets all the calls that were made to PutFile.
@@ -67,11 +66,11 @@ func (mock *FileStoreMock) PutFile(reader io.Reader, filter *observation.Filter)
 //     len(mockedFileStore.PutFileCalls())
 func (mock *FileStoreMock) PutFileCalls() []struct {
 	Reader io.Reader
-	Filter *observation.Filter
+	FileID string
 } {
 	var calls []struct {
 		Reader io.Reader
-		Filter *observation.Filter
+		FileID string
 	}
 	lockFileStoreMockPutFile.RLock()
 	calls = mock.calls.PutFile

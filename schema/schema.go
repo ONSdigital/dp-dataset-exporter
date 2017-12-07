@@ -9,7 +9,11 @@ var filterSubmittedEvent = `{
   "name": "filter-output-submitted",
   "namespace": "",
   "fields": [
-    {"name": "filter_output_id", "type": "string"}
+    {"name": "filter_output_id", "type": "string"},
+    {"name": "instance_id", "type": "string"},
+    {"name": "dataset_id", "type": "string"},
+    {"name": "edition", "type": "string"},
+    {"name": "version", "type": "string"}
   ]
 }`
 
@@ -24,7 +28,12 @@ var csvExportedEvent = `{
   "namespace": "",
   "fields": [
     {"name": "filter_output_id", "type": "string"},
-    {"name": "file_url", "type": "string"}
+    {"name": "file_url", "type": "string"},
+    {"name": "instance_id", "type": "string"},
+    {"name": "dataset_id", "type": "string"},
+    {"name": "edition", "type": "string"},
+    {"name": "version", "type": "string"},
+    {"name": "filename", "type": "string"}
   ]
 }`
 
