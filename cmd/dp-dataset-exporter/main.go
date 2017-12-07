@@ -91,8 +91,8 @@ func main() {
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
-	datasetAPICli := dataset.New("http://localhost:22000")                 // TODO GET FROM CONFIG
-	datasetAPICli.SetInternalToken("FD0108EA-825D-411C-9B1D-41EF7727F465") // TODO GET FROM CONFIG
+	datasetAPICli := dataset.New(config.DatasetAPIURL)
+	datasetAPICli.SetInternalToken(config.DatasetAPIAuthToken)
 
 	generateFileID := func() string {
 		return uuid.NewV4().String()
