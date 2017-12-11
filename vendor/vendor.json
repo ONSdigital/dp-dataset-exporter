@@ -27,12 +27,6 @@
 			"revisionTime": "2017-12-06T08:36:01Z"
 		},
 		{
-			"checksumSHA1": "xz3nOqVed2yuNJUzeKvqLfoN5jE=",
-			"path": "github.com/ONSdigital/go-ns/clients/dataset",
-			"revision": "4e4422f10d9ea7481d8ce6a47bd11f69396ace4a",
-			"revisionTime": "2017-12-06T08:36:01Z"
-		},
-		{
 			"checksumSHA1": "ei+/RCSa0XO9v9rQxAh0uqyJ/28=",
 			"path": "github.com/ONSdigital/go-ns/handlers/healthcheck",
 			"revision": "346c09ef11b6fd9a6eb4e269d8b47aa4c9530694",

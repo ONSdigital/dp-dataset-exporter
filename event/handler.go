@@ -29,8 +29,7 @@ type ExportHandler struct {
 }
 
 type DatasetAPI interface {
-	GetVersion(id, edition, version string) (m dataset.Version, err error)
-	PutVersionDownloads(datasetID string, edition string, version string, downloadList map[string]dataset.Download) error
+	PutVersion(id, edition, version string, m dataset.Version) error
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -69,7 +68,6 @@ type FileStore interface {
 
 // Producer handles producing output events.
 type Producer interface {
-	//CSVExported(filterID, fileURL string) error
 	CSVExported(e *CSVExported) error
 }
 
@@ -165,9 +163,12 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 		"CSV": {Size: strconv.Itoa(int(reader.TotalBytesRead())), URL: fileURL},
 	}
 
-	if err := handler.datasetAPICli.PutVersionDownloads(event.DatasetID, event.Edition, event.Version, downloads); err != nil {
+	v := dataset.Version{Downloads:downloads}
+
+	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v); err != nil {
 		return nil, errors.Wrap(err, "error while attempting update version downloads")
 	}
+
 	log.Info("pre publish version csv download file generation completed", log.Data{
 		"dataset_id": event.DatasetID,
 		"edition":    event.Edition,
