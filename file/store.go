@@ -6,6 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
+	"github.com/ONSdigital/go-ns/log"
 )
 
 // Store provides file storage via S3.
@@ -39,6 +41,10 @@ func (store *Store) PutFile(reader io.Reader, fileID string) (url string, err er
 
 	filename := fileID + ".csv"
 
+	log.Info("uploading file to S3", log.Data{
+		"bucket": store.bucket,
+		"region": *store.config.Region,
+	})
 	// the AWS uploader automatically handles large files breaking them into parts and using the multi part API.
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Body:   reader,
