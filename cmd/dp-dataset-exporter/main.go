@@ -75,7 +75,7 @@ func main() {
 	kafkaErrorProducer, err := kafka.NewProducer(config.KafkaAddr, config.ErrorProducerTopic, 0)
 	exitIfError(err)
 
-	pool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, 5)
+	pool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, config.Neo4jPoolSize)
 	exitIfError(err)
 
 	// when errors occur - we send a message on an error topic.
