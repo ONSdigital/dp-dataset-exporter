@@ -18,8 +18,8 @@ import (
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/ONSdigital/go-ns/server"
-	"github.com/gorilla/mux"
 	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
+	"github.com/gorilla/mux"
 )
 
 func main() {

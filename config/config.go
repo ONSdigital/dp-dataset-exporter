@@ -13,7 +13,7 @@ type Config struct {
 	FilterConsumerGroup      string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic      string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
 	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS"`
-	Neo4jPoolSize               int        `envconfig:"NEO4J_POOL_SIZE"`
+	Neo4jPoolSize            int           `envconfig:"NEO4J_POOL_SIZE"`
 	FilterAPIURL             string        `envconfig:"FILTER_API_URL"`
 	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN"`
 	AWSRegion                string        `envconfig:"AWS_REGION"`
@@ -32,7 +32,7 @@ func Get() (*Config, error) {
 		FilterConsumerTopic:      "filter-job-submitted",
 		FilterConsumerGroup:      "dp-dataset-exporter",
 		DatabaseAddress:          "bolt://localhost:7687",
-		Neo4jPoolSize:             5,
+		Neo4jPoolSize:            5,
 		FilterAPIURL:             "http://localhost:22100",
 		FilterAPIAuthToken:       "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		CSVExportedProducerTopic: "common-output-created",
