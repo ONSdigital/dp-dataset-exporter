@@ -36,7 +36,7 @@ func Get() (*Config, error) {
 		FilterAPIURL:             "http://localhost:22100",
 		FilterAPIAuthToken:       "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		CSVExportedProducerTopic: "common-output-created",
-		S3BucketName:             "csv-exported-test",
+		S3BucketName:             "csv-exported",
 		AWSRegion:                "eu-west-1",
 		DatasetAPIURL:            "http://localhost:22000",
 		DatasetAPIAuthToken:      "FD0108EA-825D-411C-9B1D-41EF7727F465",
