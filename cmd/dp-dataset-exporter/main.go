@@ -18,8 +18,8 @@ import (
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/ONSdigital/go-ns/server"
+	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
 	"github.com/gorilla/mux"
-	bolt "github.com/johnnadratowski/golang-neo4j-bolt-driver"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/satori/go.uuid"
@@ -78,7 +78,7 @@ func main() {
 	kafkaErrorProducer, err := kafka.NewProducer(config.KafkaAddr, config.ErrorProducerTopic, 0)
 	exitIfError(err)
 
-	dbConnection, err := bolt.NewDriver().OpenNeo(config.DatabaseAddress)
+	pool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, config.Neo4jPoolSize)
 	exitIfError(err)
 
 	// when errors occur - we send a message on an error topic.
@@ -87,7 +87,7 @@ func main() {
 	httpClient := http.Client{Timeout: time.Second * 15}
 
 	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
-	observationStore := observation.NewStore(dbConnection)
+	observationStore := observation.NewStore(pool)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
