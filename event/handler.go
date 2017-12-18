@@ -3,11 +3,12 @@ package event
 import (
 	"io"
 
-	"github.com/ONSdigital/dp-filter/observation"
-	"github.com/ONSdigital/go-ns/log"
-	"github.com/ONSdigital/go-ns/clients/dataset"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/go-ns/clients/dataset"
+	"github.com/ONSdigital/go-ns/log"
+	"github.com/pkg/errors"
 )
 
 //go:generate moq -out eventtest/filter_store.go -pkg eventtest . FilterStore
@@ -25,9 +26,10 @@ type ExportHandler struct {
 	fileStore        FileStore
 	eventProducer    Producer
 	datasetAPICli    DatasetAPI
-	generateFileID   func() string
+	generateFileID   string
 }
 
+// DatasetAPI contains functions to call the dataset API.
 type DatasetAPI interface {
 	PutVersion(id, edition, version string, m dataset.Version) error
 }
@@ -38,7 +40,7 @@ func NewExportHandler(filterStore FilterStore,
 	fileStore FileStore,
 	eventProducer Producer,
 	datasetAPI DatasetAPI,
-	generateFileID func() string) *ExportHandler {
+	generateFileID string) *ExportHandler {
 
 	return &ExportHandler{
 		filterStore:      filterStore,
@@ -69,10 +71,6 @@ type FileStore interface {
 // Producer handles producing output events.
 type Producer interface {
 	CSVExported(e *CSVExported) error
-}
-
-type FileIDGenerator interface {
-	NewID() string
 }
 
 // Handle the export of a single filter output.
@@ -107,6 +105,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 	if err != nil {
 		return nil, err
 	}
+	defer csvRowReader.Close()
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
@@ -127,6 +126,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
 
+	log.Info("CSV export completed", log.Data{"filter_id": filter.FilterID, "file_url": fileURL})
 	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL}, nil
 }
 
@@ -151,7 +151,7 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 		}
 	}()
 
-	fileID := handler.generateFileID()
+	fileID := handler.generateFileID
 	log.Info("storing pre-publish file", log.Data{"fileID": fileID})
 
 	fileURL, err := handler.fileStore.PutFile(reader, fileID)
@@ -163,7 +163,7 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 		"CSV": {Size: strconv.Itoa(int(reader.TotalBytesRead())), URL: fileURL},
 	}
 
-	v := dataset.Version{Downloads:downloads}
+	v := dataset.Version{Downloads: downloads}
 
 	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v); err != nil {
 		return nil, errors.Wrap(err, "error while attempting update version downloads")

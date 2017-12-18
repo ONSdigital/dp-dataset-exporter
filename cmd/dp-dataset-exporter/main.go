@@ -13,15 +13,15 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/go-ns/clients/dataset"
 	"github.com/ONSdigital/go-ns/handlers/healthcheck"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/ONSdigital/go-ns/server"
 	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
 	"github.com/gorilla/mux"
-	"github.com/ONSdigital/go-ns/clients/dataset"
-	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/satori/go.uuid"
 )
 
@@ -94,9 +94,7 @@ func main() {
 	datasetAPICli := dataset.New(config.DatasetAPIURL)
 	datasetAPICli.SetInternalToken(config.DatasetAPIAuthToken)
 
-	generateFileID := func() string {
-		return uuid.NewV4().String()
-	}
+	generateFileID := uuid.NewV4().String()
 
 	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, generateFileID)
 

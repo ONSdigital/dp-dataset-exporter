@@ -17,6 +17,7 @@ type MessageProducer interface {
 	Output() chan []byte
 }
 
+// Marshaller marshals events into messages.
 type Marshaller interface {
 	Marshal(s interface{}) ([]byte, error)
 }
@@ -29,6 +30,7 @@ func NewAvroProducer(messageProducer MessageProducer, marshaller Marshaller) *Av
 	}
 }
 
+// CSVExported produces a new CSV exported event for the given filter output ID.
 func (producer *AvroProducer) CSVExported(event *CSVExported) error {
 	if event == nil {
 		return errors.New("event required but was nil")

@@ -8,9 +8,9 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/dp-filter/observation/observationtest"
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/pkg/errors"
 	"github.com/ONSdigital/go-ns/clients/dataset"
+	"github.com/pkg/errors"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 const filterOutputId = "345"
@@ -27,7 +27,7 @@ var filter = &observation.Filter{
 	},
 }
 
-var fileIDGenerator = func() string { return "666" }
+var fileIDGenerator = "666"
 
 func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 	Convey("Given a handler with a mock filter store that returns an error", t, func() {
@@ -323,11 +323,11 @@ func TestExportHandler_Handle(t *testing.T) {
 			Convey("The event producer is called with the filter ID.", func() {
 
 				So(len(mockedEventProducer.CSVExportedCalls()), ShouldEqual, 1)
-				//So(mockedEventProducer.CSVExportedCalls()[0].E., ShouldEqual, filterOutputEvent.FilterID)
+				So(mockedEventProducer.CSVExportedCalls()[0].E.FilterID, ShouldEqual, filterOutputEvent.FilterID)
 			})
 
 			Convey("The CSV row reader returned from the DB is closed.", func() {
-				So(len(mockRowReader.CloseCalls()), ShouldEqual, 1)
+				So(len(mockRowReader.CloseCalls()), ShouldEqual, 2)
 			})
 		})
 	})
