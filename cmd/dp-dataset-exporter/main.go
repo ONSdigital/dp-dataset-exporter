@@ -16,7 +16,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-filter/observation"
-	filterAPIClient "github.com/ONSdigital/go-ns/clients/filter"
+	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
@@ -77,12 +77,14 @@ func main() {
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
 
-	neoHealthCheck := neo4j.NewHealthCheckClient(neo4jConnPool)
-	filterAPIHealthChecker := filterAPIClient.New(config.FilterAPIURL)
-
-	healthChecker := healthcheck.NewServer(config.BindAddr, time.Second * 30, errorChannel,
+	neoHealthChecker := neo4j.NewHealthCheckClient(neo4jConnPool)
+	filterAPIHealthChecker := filterHealthCheck.New(config.FilterAPIURL)
+	healthChecker := healthcheck.NewServer(
+		config.BindAddr,
+		config.HealthCheckInterval,
+		errorChannel,
 		filterAPIHealthChecker,
-		neoHealthCheck)
+		neoHealthChecker)
 
 	shutdownGracefully := func() {
 

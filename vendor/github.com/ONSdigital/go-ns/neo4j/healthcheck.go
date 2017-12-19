@@ -11,11 +11,13 @@ var _ healthcheck.Client = (*HealthCheckClient)(nil)
 
 const pingStmt = "MATCH (i) RETURN i LIMIT 1"
 
+// HealthCheckClient provides a healthcheck.Client implementation for health checking neo4j.
 type HealthCheckClient struct {
 	dbPool      bolt.ClosableDriverPool
 	serviceName string
 }
 
+// NewHealthCheckClient returns a new neo4j health check client using the given connection pool.
 func NewHealthCheckClient(dbPool bolt.ClosableDriverPool) *HealthCheckClient {
 
 	return &HealthCheckClient{
@@ -24,6 +26,7 @@ func NewHealthCheckClient(dbPool bolt.ClosableDriverPool) *HealthCheckClient {
 	}
 }
 
+// Healthcheck calls neo4j to check its health status.
 func (neo4j *HealthCheckClient) Healthcheck() (string, error) {
 
 	logData := log.Data{"statement": pingStmt}
@@ -40,12 +43,6 @@ func (neo4j *HealthCheckClient) Healthcheck() (string, error) {
 		return neo4j.serviceName, err
 	}
 	defer rows.Close()
-
-	_, _, err = rows.All()
-	if err != nil {
-		log.ErrorC("neo4j healthcheck rows.All", err, logData)
-		return neo4j.serviceName, err
-	}
 
 	return neo4j.serviceName, nil
 }

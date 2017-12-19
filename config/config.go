@@ -21,6 +21,7 @@ type Config struct {
 	CSVExportedProducerTopic string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
 	ErrorProducerTopic       string        `envconfig:"ERROR_PRODUCER_TOPIC"`
 	GracefulShutdownTimeout  time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
+	HealthCheckInterval      time.Duration `envconfig:"HEALTH_CHECK_INTERVAL"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -40,6 +41,7 @@ func Get() (*Config, error) {
 		AWSRegion:                "eu-west-1",
 		ErrorProducerTopic:       "filter-error",
 		GracefulShutdownTimeout:  time.Second * 10,
+		HealthCheckInterval:      time.Minute,
 	}
 
 	return cfg, envconfig.Process("", cfg)

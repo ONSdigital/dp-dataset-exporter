@@ -5,12 +5,15 @@ Health checks
 
 Create a health check server to check neo4j and the filter API every 30 seconds:
 ```
-neoHealthCheck := healthcheck.NewNeo4jClient(neo4jConnPool)
-filterAPIHealthCheck := filterAPIClient.New(config.FilterAPIURL)
+neoHealthChecker := neo4j.NewHealthCheckClient(neo4jConnPool)
+filterAPIHealthChecker := filterHealthCheck.New(config.FilterAPIURL)
 
-healthChecker := healthcheck.NewServer(config.BindAddr, time.Second * 30, errorChannel,
-    filterAPIHealthCheck,
-    neoHealthCheck)
+healthChecker := healthcheck.NewServer(
+    config.BindAddr,
+    config.HealthCheckInterval,
+    errorChannel,
+    filterAPIHealthChecker,
+    neoHealthChecker)
 ```
 
 Make sure you call close on shutdown:
@@ -21,7 +24,7 @@ err = healthChecker.Close(ctx)
 
 #### Add a health check to a service with an existing HTTP server
 
-Register the heath check handler as a route:
+Register the health check handler as a route:
 ```
 router.Path("/healthcheck").HandlerFunc(healthcheck.Do)
 ```

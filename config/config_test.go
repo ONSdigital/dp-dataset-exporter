@@ -32,6 +32,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.AWSRegion, ShouldEqual, "eu-west-1")
 				So(cfg.S3BucketName, ShouldEqual, "csv-exported")
 				So(cfg.GracefulShutdownTimeout, ShouldEqual, time.Second*10)
+				So(cfg.HealthCheckInterval, ShouldEqual, time.Minute)
 			})
 		})
 	})
