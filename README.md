@@ -17,11 +17,15 @@ environment variables, or with a link to a configuration guide.
 | FILTER_JOB_CONSUMER_TOPIC   | filter-job-submitted                 | The name of the topic to consume messages from
 | FILTER_JOB_CONSUMER_GROUP   | dp-dataset-exporter                  | The consumer group this application to consume filter job messages
 | DATABASE_ADDRESS            | bolt://localhost:7687                | The address of the database to retrieve dataset data from
+| NEO4J_POOL_SIZE             | 5                                    | The number of neo4j connections to pool
 | FILTER_API_URL              | http://localhost:22100               | The URL of the filter API
 | FILTER_API_AUTH_TOKEN       | FD0108EA-825D-411C-9B1D-41EF7727F465 | The auth token for the filter API
 | AWS_REGION                  | eu-west-1                            | The AWS region to use
 | S3_BUCKET_NAME              | http://localhost:22100               | The name of the S3 bucket to store exported files
 | CSV_EXPORTED_PRODUCER_TOPIC | csv-exported                         | The topic to add messages to when a job is complete
+| ERROR_PRODUCER_TOPIC        | filter-error                         | The topic to add messages to when an error occurs
+| HEALTH_CHECK_INTERVAL       | time.Minute                          | How often to run a health check
+| GRACEFUL_SHUTDOWN_TIMEOUT   | time.Second * 10                     | How long to wait for the service to shutdown gracefully
 
 ### Contributing
 
