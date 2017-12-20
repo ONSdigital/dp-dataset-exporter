@@ -5,6 +5,8 @@ Takes a filter job and produces a filtered dataset.
 
 ### Getting started
 
+`make debug`
+
 ### Configuration
 
 An overview of the configuration options available, either as a table of
@@ -26,6 +28,14 @@ environment variables, or with a link to a configuration guide.
 | ERROR_PRODUCER_TOPIC        | filter-error                         | The topic to add messages to when an error occurs
 | HEALTH_CHECK_INTERVAL       | time.Minute                          | How often to run a health check
 | GRACEFUL_SHUTDOWN_TIMEOUT   | time.Second * 10                     | How long to wait for the service to shutdown gracefully
+
+### Healthcheck
+
+ The `/healthcheck` endpoint returns the current status of the service. Dependent services are health checked on an interval defined by the `HEALTH_CHECK_INTERVAL` environment variable.
+
+ On a development machine a request to the health check endpoint can be made by:
+
+ `curl localhost:22500/healthcheck`
 
 ### Contributing
 
