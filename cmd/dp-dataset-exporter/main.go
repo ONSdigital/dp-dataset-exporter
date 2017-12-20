@@ -32,15 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Avoid logging the neo4j FileURL as it may contain a password
-	log.Debug("loaded config", log.Data{
-		"topics":         []string{config.FilterConsumerTopic, config.CSVExportedProducerTopic},
-		"brokers":        config.KafkaAddr,
-		"consumer_group": config.FilterConsumerGroup,
-		"filter_api_url": config.FilterAPIURL,
-		"aws_region":     config.AWSRegion,
-		"s3_bucket_name": config.S3BucketName,
-		"bind_addr":      config.BindAddr})
+	log.Debug("loaded config", log.Data{"config": config})
 
 	// a channel used to signal a graceful exit is required.
 	errorChannel := make(chan error)

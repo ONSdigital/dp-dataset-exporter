@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -12,10 +13,10 @@ type Config struct {
 	KafkaAddr                []string      `envconfig:"KAFKA_ADDR"`
 	FilterConsumerGroup      string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic      string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
-	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS"`
+	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS" json:"-"`
 	Neo4jPoolSize            int           `envconfig:"NEO4J_POOL_SIZE"`
 	FilterAPIURL             string        `envconfig:"FILTER_API_URL"`
-	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN"`
+	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN" json:"-"`
 	AWSRegion                string        `envconfig:"AWS_REGION"`
 	S3BucketName             string        `envconfig:"S3_BUCKET_NAME"`
 	CSVExportedProducerTopic string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
@@ -45,4 +46,11 @@ func Get() (*Config, error) {
 	}
 
 	return cfg, envconfig.Process("", cfg)
+}
+
+// String is implemented to prevent sensitive fields being logged.
+// The config is returned as JSON with sensitive fields omitted.
+func (config Config) String() string {
+	json, _ := json.Marshal(config)
+	return string(json)
 }
