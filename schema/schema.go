@@ -7,13 +7,12 @@ import (
 var filterSubmittedEvent = `{
   "type": "record",
   "name": "filter-output-submitted",
-  "namespace": "",
   "fields": [
-    {"name": "filter_output_id", "type": "string"},
-    {"name": "instance_id", "type": "string"},
-    {"name": "dataset_id", "type": "string"},
-    {"name": "edition", "type": "string"},
-    {"name": "version", "type": "string"}
+    {"name": "filter_output_id", "type": "string", "default": ""},
+    {"name": "instance_id", "type": "string", "default": ""},
+    {"name": "dataset_id", "type": "string", "default": ""},
+    {"name": "edition", "type": "string", "default": ""},
+    {"name": "version", "type": "string", "default": ""}
   ]
 }`
 
@@ -25,15 +24,14 @@ var FilterSubmittedEvent = &avro.Schema{
 var csvExportedEvent = `{
   "type": "record",
   "name": "csv-exported",
-  "namespace": "",
   "fields": [
-    {"name": "filter_output_id", "type": "string"},
-    {"name": "file_url", "type": "string"},
-    {"name": "instance_id", "type": "string"},
-    {"name": "dataset_id", "type": "string"},
-    {"name": "edition", "type": "string"},
-    {"name": "version", "type": "string"},
-    {"name": "filename", "type": "string"}
+    {"name": "filter_output_id", "type": "string", "default": ""},
+    {"name": "file_url", "type": "string", "default": ""},
+    {"name": "instance_id", "type": "string", "default": ""},
+    {"name": "dataset_id", "type": "string", "default": ""},
+    {"name": "edition", "type": "string", "default": ""},
+    {"name": "version", "type": "string", "default": ""},
+    {"name": "filename", "type": "string", "default": ""}
   ]
 }`
 
