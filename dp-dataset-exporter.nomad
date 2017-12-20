@@ -34,6 +34,12 @@ job "dp-dataset-exporter" {
         name = "dp-dataset-exporter"
         port = "http"
         tags = ["publishing"]
+        check {
+          type     = "http"
+          path     = "/healthcheck"
+          interval = "10s"
+          timeout  = "2s"
+        }
       }
 
       resources {
