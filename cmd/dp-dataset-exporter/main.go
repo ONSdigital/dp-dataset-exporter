@@ -32,6 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// sensitive fields are omitted from config.String().
 	log.Debug("loaded config", log.Data{"config": config})
 
 	// a channel used to signal a graceful exit is required.
@@ -69,14 +70,12 @@ func main() {
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
 
-	neoHealthChecker := neo4j.NewHealthCheckClient(neo4jConnPool)
-	filterAPIHealthChecker := filterHealthCheck.New(config.FilterAPIURL)
 	healthChecker := healthcheck.NewServer(
 		config.BindAddr,
 		config.HealthCheckInterval,
 		errorChannel,
-		filterAPIHealthChecker,
-		neoHealthChecker)
+		filterHealthCheck.New(config.FilterAPIURL),
+		neo4j.NewHealthCheckClient(neo4jConnPool))
 
 	shutdownGracefully := func() {
 

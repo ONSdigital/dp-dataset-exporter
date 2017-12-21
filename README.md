@@ -26,12 +26,12 @@ environment variables, or with a link to a configuration guide.
 | S3_BUCKET_NAME              | http://localhost:22100               | The name of the S3 bucket to store exported files
 | CSV_EXPORTED_PRODUCER_TOPIC | csv-exported                         | The topic to add messages to when a job is complete
 | ERROR_PRODUCER_TOPIC        | filter-error                         | The topic to add messages to when an error occurs
-| HEALTH_CHECK_INTERVAL       | time.Minute                          | How often to run a health check
+| HEALTHCHECK_INTERVAL        | time.Minute                          | How often to run a health check
 | GRACEFUL_SHUTDOWN_TIMEOUT   | time.Second * 10                     | How long to wait for the service to shutdown gracefully
 
 ### Healthcheck
 
- The `/healthcheck` endpoint returns the current status of the service. Dependent services are health checked on an interval defined by the `HEALTH_CHECK_INTERVAL` environment variable.
+ The `/healthcheck` endpoint returns the current status of the service. Dependent services are health checked on an interval defined by the `HEALTHCHECK_INTERVAL` environment variable.
 
  On a development machine a request to the health check endpoint can be made by:
 
