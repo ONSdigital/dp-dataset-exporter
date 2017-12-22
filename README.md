@@ -5,6 +5,8 @@ Takes a filter job and produces a filtered dataset.
 
 ### Getting started
 
+`make debug`
+
 ### Configuration
 
 An overview of the configuration options available, either as a table of
@@ -19,11 +21,23 @@ environment variables, or with a link to a configuration guide.
 | DATABASE_ADDRESS            | bolt://localhost:7687                | The address of the database to retrieve dataset data from
 | DATASET_API_URL             | http://localhost:22000               | The URL of the dataset API
 | DATASET_API_AUTH_TOKEN      | FD0108EA-825D-411C-9B1D-41EF7727F465 | The auth token for the dataset API
+| NEO4J_POOL_SIZE             | 5                                    | The number of neo4j connections to pool
 | FILTER_API_URL              | http://localhost:22100               | The URL of the filter API
 | FILTER_API_AUTH_TOKEN       | FD0108EA-825D-411C-9B1D-41EF7727F465 | The auth token for the filter API
 | AWS_REGION                  | eu-west-1                            | The AWS region to use
 | S3_BUCKET_NAME              | http://localhost:22100               | The name of the S3 bucket to store exported files
 | CSV_EXPORTED_PRODUCER_TOPIC | csv-exported                         | The topic to add messages to when a job is complete
+| ERROR_PRODUCER_TOPIC        | filter-error                         | The topic to add messages to when an error occurs
+| HEALTHCHECK_INTERVAL        | time.Minute                          | How often to run a health check
+| GRACEFUL_SHUTDOWN_TIMEOUT   | time.Second * 10                     | How long to wait for the service to shutdown gracefully
+
+### Healthcheck
+
+ The `/healthcheck` endpoint returns the current status of the service. Dependent services are health checked on an interval defined by the `HEALTHCHECK_INTERVAL` environment variable.
+
+ On a development machine a request to the health check endpoint can be made by:
+
+ `curl localhost:22500/healthcheck`
 
 ### Contributing
 

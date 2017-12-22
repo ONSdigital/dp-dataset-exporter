@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -12,10 +13,10 @@ type Config struct {
 	KafkaAddr                []string      `envconfig:"KAFKA_ADDR"`
 	FilterConsumerGroup      string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic      string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
-	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS"`
+	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS" json:"-"`
 	Neo4jPoolSize            int           `envconfig:"NEO4J_POOL_SIZE"`
 	FilterAPIURL             string        `envconfig:"FILTER_API_URL"`
-	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN"`
+	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN" json:"-"`
 	AWSRegion                string        `envconfig:"AWS_REGION"`
 	S3BucketName             string        `envconfig:"S3_BUCKET_NAME"`
 	CSVExportedProducerTopic string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
@@ -23,6 +24,7 @@ type Config struct {
 	DatasetAPIAuthToken      string        `envconfig:"DATASET_API_AUTH_TOKEN"`
 	ErrorProducerTopic       string        `envconfig:"ERROR_PRODUCER_TOPIC"`
 	GracefulShutdownTimeout  time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
+	HealthCheckInterval      time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -44,7 +46,15 @@ func Get() (*Config, error) {
 		DatasetAPIAuthToken:      "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		ErrorProducerTopic:       "filter-error",
 		GracefulShutdownTimeout:  time.Second * 10,
+		HealthCheckInterval:      time.Minute,
 	}
 
 	return cfg, envconfig.Process("", cfg)
+}
+
+// String is implemented to prevent sensitive fields being logged.
+// The config is returned as JSON with sensitive fields omitted.
+func (config Config) String() string {
+	json, _ := json.Marshal(config)
+	return string(json)
 }

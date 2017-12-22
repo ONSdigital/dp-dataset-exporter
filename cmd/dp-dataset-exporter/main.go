@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/ONSdigital/go-ns/healthcheck"
+	"github.com/ONSdigital/go-ns/neo4j"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,12 +18,10 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/clients/dataset"
-	"github.com/ONSdigital/go-ns/handlers/healthcheck"
+	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
-	"github.com/ONSdigital/go-ns/server"
 	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
-	"github.com/gorilla/mux"
 	"github.com/satori/go.uuid"
 )
 
@@ -35,34 +35,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Avoid logging the neo4j FileURL as it may contain a password
-	log.Debug("loaded config", log.Data{
-		"topics":         []string{config.FilterConsumerTopic, config.CSVExportedProducerTopic},
-		"brokers":        config.KafkaAddr,
-		"consumer_group": config.FilterConsumerGroup,
-		"filter_api_url": config.FilterAPIURL,
-		"aws_region":     config.AWSRegion,
-		"s3_bucket_name": config.S3BucketName,
-		"bind_addr":      config.BindAddr})
+	// sensitive fields are omitted from config.String().
+	log.Debug("loaded config", log.Data{"config": config})
 
 	// a channel used to signal a graceful exit is required.
 	errorChannel := make(chan error)
-
-	router := mux.NewRouter()
-	router.Path("/healthcheck").HandlerFunc(healthcheck.Handler)
-	httpServer := server.New(config.BindAddr, router)
-
-	// Disable auto handling of os signals by the HTTP server. This is handled
-	// in the service so we can gracefully shutdown resources other than just
-	// the HTTP server.
-	httpServer.HandleOSSignals = false
-
-	go func() {
-		log.Debug("starting http server", log.Data{"bind_addr": config.BindAddr})
-		if err := httpServer.ListenAndServe(); err != nil {
-			errorChannel <- err
-		}
-	}()
 
 	kafkaBrokers := config.KafkaAddr
 	kafkaConsumer, err := kafka.NewConsumerGroup(
@@ -78,7 +55,7 @@ func main() {
 	kafkaErrorProducer, err := kafka.NewProducer(config.KafkaAddr, config.ErrorProducerTopic, 0)
 	exitIfError(err)
 
-	pool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, config.Neo4jPoolSize)
+	neo4jConnPool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, config.Neo4jPoolSize)
 	exitIfError(err)
 
 	// when errors occur - we send a message on an error topic.
@@ -87,7 +64,7 @@ func main() {
 	httpClient := http.Client{Timeout: time.Second * 15}
 
 	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
-	observationStore := observation.NewStore(pool)
+	observationStore := observation.NewStore(neo4jConnPool)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
@@ -100,6 +77,13 @@ func main() {
 
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
+
+	healthChecker := healthcheck.NewServer(
+		config.BindAddr,
+		config.HealthCheckInterval,
+		errorChannel,
+		filterHealthCheck.New(config.FilterAPIURL),
+		neo4j.NewHealthCheckClient(neo4jConnPool))
 
 	shutdownGracefully := func() {
 
@@ -118,7 +102,7 @@ func main() {
 		err = kafkaErrorProducer.Close(ctx)
 		logIfError(err)
 
-		err = httpServer.Shutdown(ctx)
+		err = healthChecker.Close(ctx)
 		logIfError(err)
 
 		// cancel the timer in the shutdown context.
