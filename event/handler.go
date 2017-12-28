@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/satori/go.uuid"
 	"io"
 
 	"strconv"
@@ -26,7 +27,6 @@ type ExportHandler struct {
 	fileStore        FileStore
 	eventProducer    Producer
 	datasetAPICli    DatasetAPI
-	generateFileID   string
 }
 
 // DatasetAPI contains functions to call the dataset API.
@@ -39,8 +39,7 @@ func NewExportHandler(filterStore FilterStore,
 	observationStore ObservationStore,
 	fileStore FileStore,
 	eventProducer Producer,
-	datasetAPI DatasetAPI,
-	generateFileID string) *ExportHandler {
+	datasetAPI DatasetAPI) *ExportHandler {
 
 	return &ExportHandler{
 		filterStore:      filterStore,
@@ -48,7 +47,6 @@ func NewExportHandler(filterStore FilterStore,
 		fileStore:        fileStore,
 		eventProducer:    eventProducer,
 		datasetAPICli:    datasetAPI,
-		generateFileID:   generateFileID,
 	}
 }
 
@@ -151,7 +149,7 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 		}
 	}()
 
-	fileID := handler.generateFileID
+	fileID := uuid.NewV4().String()
 	log.Info("storing pre-publish file", log.Data{"fileID": fileID})
 
 	fileURL, err := handler.fileStore.PutFile(reader, fileID)

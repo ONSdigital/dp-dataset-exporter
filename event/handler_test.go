@@ -27,8 +27,6 @@ var filter = &observation.Filter{
 	},
 }
 
-var fileIDGenerator = "666"
-
 func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 	Convey("Given a handler with a mock filter store that returns an error", t, func() {
 
@@ -42,7 +40,7 @@ func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil, datasetAPIMock, fileIDGenerator)
+		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil, datasetAPIMock)
 
 		Convey("When handle is called", func() {
 
@@ -74,7 +72,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, nil, fileIDGenerator)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, nil)
 
 		Convey("When handle is called", func() {
 
@@ -121,7 +119,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil, fileIDGenerator)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
 
 		Convey("When handle is called", func() {
 
@@ -168,7 +166,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil, fileIDGenerator)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
 
 		Convey("When handle is called", func() {
 
@@ -224,7 +222,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil, fileIDGenerator)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil)
 
 		Convey("When handle is called", func() {
 
@@ -278,7 +276,7 @@ func TestExportHandler_Handle(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil, fileIDGenerator)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil)
 
 		Convey("When handle is called", func() {
 
@@ -362,7 +360,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil, mockErr
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, fileIDGenerator)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -396,7 +394,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return "", mockErr
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, fileIDGenerator)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -411,7 +409,6 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 1)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
-				So(fileStockMock.PutFileCalls()[0].FileID, ShouldEqual, "666")
 
 				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 0)
 			})
@@ -443,7 +440,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, fileIDGenerator)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -458,7 +455,6 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 1)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
-				So(fileStockMock.PutFileCalls()[0].FileID, ShouldEqual, "666")
 
 				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 1)
 				So(datasetApiMock.PutVersionCalls()[0].M.Downloads, ShouldResemble, map[string]dataset.Download{
@@ -493,7 +489,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, fileIDGenerator)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -508,7 +504,6 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 1)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
-				So(fileStockMock.PutFileCalls()[0].FileID, ShouldEqual, "666")
 
 				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 1)
 				So(datasetApiMock.PutVersionCalls()[0].M.Downloads, ShouldResemble, map[string]dataset.Download{

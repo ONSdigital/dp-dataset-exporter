@@ -22,7 +22,6 @@ import (
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
-	"github.com/satori/go.uuid"
 )
 
 func main() {
@@ -71,9 +70,7 @@ func main() {
 	datasetAPICli := dataset.New(config.DatasetAPIURL)
 	datasetAPICli.SetInternalToken(config.DatasetAPIAuthToken)
 
-	generateFileID := uuid.NewV4().String()
-
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, generateFileID)
+	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli)
 
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
