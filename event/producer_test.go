@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/ONSdigital/dp-dataset-exporter/event"
+	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/go-ns/kafka/kafkatest"
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/go-ns/log"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestAvroProducer_CSVExported(t *testing.T) {
