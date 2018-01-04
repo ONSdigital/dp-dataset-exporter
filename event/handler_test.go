@@ -325,7 +325,7 @@ func TestExportHandler_Handle(t *testing.T) {
 			})
 
 			Convey("The CSV row reader returned from the DB is closed.", func() {
-				So(len(mockRowReader.CloseCalls()), ShouldEqual, 2)
+				So(len(mockRowReader.CloseCalls()), ShouldEqual, 1)
 			})
 		})
 	})

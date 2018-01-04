@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/satori/go.uuid"
 	"io"
+
+	"github.com/satori/go.uuid"
 
 	"strconv"
 
@@ -103,7 +104,6 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 	if err != nil {
 		return nil, err
 	}
-	defer csvRowReader.Close()
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
