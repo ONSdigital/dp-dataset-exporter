@@ -2,6 +2,7 @@ package event
 
 import (
 	"io"
+	"strings"
 
 	"github.com/satori/go.uuid"
 
@@ -55,6 +56,8 @@ func NewExportHandler(filterStore FilterStore,
 type FilterStore interface {
 	GetFilter(filterID string) (*observation.Filter, error)
 	PutCSVData(filterID string, csvURL string, csvSize int64) error
+	PutStateAsEmpty(filterJobID string) error
+	PutStateAsError(filterJobID string) error
 }
 
 // ObservationStore provides filtered observation data in CSV rows.
@@ -115,6 +118,16 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 
 	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID)
 	if err != nil {
+		return nil, err
+		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
+			log.Debug("empty results from filter job", log.Data{"instance_id": filter.InstanceID,
+				"filter": filter})
+			return nil, handler.filterStore.PutStateAsEmpty(filter.FilterID)
+		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
+			log.Error(err, log.Data{"instance_id": filter.InstanceID,
+				"filter": filter})
+			return nil, handler.filterStore.PutStateAsError(filter.FilterID)
+		}
 		return nil, err
 	}
 

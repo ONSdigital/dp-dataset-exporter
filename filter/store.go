@@ -8,10 +8,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
+
+	"strconv"
 
 	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/log"
-	"strconv"
 )
 
 //go:generate moq -out filtertest/http_client.go -pkg filtertest . HTTPClient
@@ -29,6 +31,20 @@ type FilterOuput struct {
 	InstanceID string     `json:"instance_id"`
 	State      string     `json:"state,omitempty"`
 	Downloads  *Downloads `json:"downloads,omitempty"`
+	Events     Events     `json:"events,omitempty"`
+}
+
+// Events represents a list of array objects containing event information against the filter job
+type Events struct {
+	Error []EventItem `json:"error,omitempty"`
+	Info  []EventItem `json:"info,omitempty"`
+}
+
+// EventItem represents an event object containing event information
+type EventItem struct {
+	Message string    `json:"message,omitempty"`
+	Time    time.Time `json:"time,omitempty"`
+	Type    string    `json:"type,omitempty"`
 }
 
 // Downloads represents the CSV which has been generated
@@ -68,10 +84,8 @@ type HTTPClient interface {
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
 func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) error {
 
-	url := store.filterAPIURL + "/filter-outputs/" + filterJobID
-
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
-	putBody := &FilterOuput{
+	putBody := FilterOuput{
 		Downloads: &Downloads{
 			CSV: &DownloadItem{
 				Size: strconv.FormatInt(size, 10),
@@ -80,13 +94,44 @@ func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) e
 		},
 	}
 
-	json, err := json.Marshal(putBody)
+	return store.updateFilterOutput(filterJobID, &putBody)
+}
+
+// PutStateAsEmpty sets the filter output as empty
+func (store *Store) PutStateAsEmpty(filterJobID string) error {
+	putBody := FilterOuput{
+		State: "completed",
+		Events: Events{
+			Info: []EventItem{EventItem{Message: "No results where found when using the provided filter options",
+				Time: time.Now().UTC()}},
+		},
+	}
+
+	return store.updateFilterOutput(filterJobID, &putBody)
+}
+
+// PutStateAsError set the filter output as an error, we shouldn't state the type of error as
+// this will be displayed to the public
+func (store *Store) PutStateAsError(filterJobID string) error {
+	putBody := FilterOuput{
+		State: "failed",
+		Events: Events{
+			Error: []EventItem{EventItem{Message: "Failed to find any data with the requested information",
+				Time: time.Now().UTC()}},
+		},
+	}
+
+	return store.updateFilterOutput(filterJobID, &putBody)
+}
+
+func (store *Store) updateFilterOutput(filterJobID string, filter *FilterOuput) error {
+	url := store.filterAPIURL + "/filter-outputs/" + filterJobID
+	json, err := json.Marshal(filter)
 	if err != nil {
 		return err
 	}
-
+	log.Debug("json", log.Data{"data": string(json)})
 	_, err = store.makeRequest("PUT", url, bytes.NewReader(json))
-
 	return err
 }
 

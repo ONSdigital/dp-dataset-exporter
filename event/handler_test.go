@@ -133,6 +133,102 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 	})
 }
 
+func TestExportHandler_Handle_Empty_Results(t *testing.T) {
+
+	Convey("Given a handler with a filter query job returns no results", t, func() {
+
+		mockRowReader := &observationtest.CSVRowReaderMock{
+			ReadFunc: func() (string, error) {
+				return "", nil
+			},
+			CloseFunc: func() error {
+				return nil
+			},
+		}
+
+		mockFilterStore := &eventtest.FilterStoreMock{
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
+				return filter, nil
+			},
+			PutStateAsEmptyFunc: func(filterJobID string) error {
+				return nil
+			},
+		}
+
+		mockObservationStore := &eventtest.ObservationStoreMock{
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+				return mockRowReader, nil
+			},
+		}
+
+		mockedFileStore := &eventtest.FileStoreMock{
+			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+				return "", observation.ErrNoResultsFound
+			},
+		}
+
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil)
+
+		Convey("When handle is called", func() {
+
+			err := handler.Handle(filterOutputEvent)
+
+			Convey("The filter state is updated to empty", func() {
+				So(err, ShouldBeNil)
+				So(1, ShouldEqual, len(mockFilterStore.PutStateAsEmptyCalls()))
+			})
+		})
+	})
+}
+
+func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
+
+	Convey("Given a handler with a filter query job returns no results", t, func() {
+
+		mockRowReader := &observationtest.CSVRowReaderMock{
+			ReadFunc: func() (string, error) {
+				return "", nil
+			},
+			CloseFunc: func() error {
+				return nil
+			},
+		}
+
+		mockFilterStore := &eventtest.FilterStoreMock{
+			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
+				return filter, nil
+			},
+			PutStateAsErrorFunc: func(filterJobID string) error {
+				return nil
+			},
+		}
+
+		mockObservationStore := &eventtest.ObservationStoreMock{
+			GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+				return mockRowReader, nil
+			},
+		}
+
+		mockedFileStore := &eventtest.FileStoreMock{
+			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+				return "", observation.ErrNoInstanceFound
+			},
+		}
+
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil)
+
+		Convey("When handle is called", func() {
+
+			err := handler.Handle(filterOutputEvent)
+
+			Convey("The filter state is updated to empty", func() {
+				So(err, ShouldBeNil)
+				So(1, ShouldEqual, len(mockFilterStore.PutStateAsErrorCalls()))
+			})
+		})
+	})
+}
+
 func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 	Convey("Given a handler with a mocked file store that returns an error", t, func() {

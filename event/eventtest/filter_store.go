@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	lockFilterStoreMockGetFilter  sync.RWMutex
-	lockFilterStoreMockPutCSVData sync.RWMutex
+	lockFilterStoreMockGetFilter       sync.RWMutex
+	lockFilterStoreMockPutCSVData      sync.RWMutex
+	lockFilterStoreMockPutStateAsEmpty sync.RWMutex
+	lockFilterStoreMockPutStateAsError sync.RWMutex
 )
 
 // FilterStoreMock is a mock implementation of FilterStore.
@@ -25,6 +27,12 @@ var (
 //             PutCSVDataFunc: func(filterID string, csvURL string, csvSize int64) error {
 // 	               panic("TODO: mock out the PutCSVData method")
 //             },
+//             PutStateAsEmptyFunc: func(filterJobID string) error {
+// 	               panic("TODO: mock out the PutStateAsEmpty method")
+//             },
+//             PutStateAsErrorFunc: func(filterJobID string) error {
+// 	               panic("TODO: mock out the PutStateAsError method")
+//             },
 //         }
 //
 //         // TODO: use mockedFilterStore in code that requires FilterStore
@@ -37,6 +45,12 @@ type FilterStoreMock struct {
 
 	// PutCSVDataFunc mocks the PutCSVData method.
 	PutCSVDataFunc func(filterID string, csvURL string, csvSize int64) error
+
+	// PutStateAsEmptyFunc mocks the PutStateAsEmpty method.
+	PutStateAsEmptyFunc func(filterJobID string) error
+
+	// PutStateAsErrorFunc mocks the PutStateAsError method.
+	PutStateAsErrorFunc func(filterJobID string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -53,6 +67,16 @@ type FilterStoreMock struct {
 			CsvURL string
 			// CsvSize is the csvSize argument value.
 			CsvSize int64
+		}
+		// PutStateAsEmpty holds details about calls to the PutStateAsEmpty method.
+		PutStateAsEmpty []struct {
+			// FilterJobID is the filterJobID argument value.
+			FilterJobID string
+		}
+		// PutStateAsError holds details about calls to the PutStateAsError method.
+		PutStateAsError []struct {
+			// FilterJobID is the filterJobID argument value.
+			FilterJobID string
 		}
 	}
 }
@@ -124,5 +148,67 @@ func (mock *FilterStoreMock) PutCSVDataCalls() []struct {
 	lockFilterStoreMockPutCSVData.RLock()
 	calls = mock.calls.PutCSVData
 	lockFilterStoreMockPutCSVData.RUnlock()
+	return calls
+}
+
+// PutStateAsEmpty calls PutStateAsEmptyFunc.
+func (mock *FilterStoreMock) PutStateAsEmpty(filterJobID string) error {
+	if mock.PutStateAsEmptyFunc == nil {
+		panic("moq: FilterStoreMock.PutStateAsEmptyFunc is nil but FilterStore.PutStateAsEmpty was just called")
+	}
+	callInfo := struct {
+		FilterJobID string
+	}{
+		FilterJobID: filterJobID,
+	}
+	lockFilterStoreMockPutStateAsEmpty.Lock()
+	mock.calls.PutStateAsEmpty = append(mock.calls.PutStateAsEmpty, callInfo)
+	lockFilterStoreMockPutStateAsEmpty.Unlock()
+	return mock.PutStateAsEmptyFunc(filterJobID)
+}
+
+// PutStateAsEmptyCalls gets all the calls that were made to PutStateAsEmpty.
+// Check the length with:
+//     len(mockedFilterStore.PutStateAsEmptyCalls())
+func (mock *FilterStoreMock) PutStateAsEmptyCalls() []struct {
+	FilterJobID string
+} {
+	var calls []struct {
+		FilterJobID string
+	}
+	lockFilterStoreMockPutStateAsEmpty.RLock()
+	calls = mock.calls.PutStateAsEmpty
+	lockFilterStoreMockPutStateAsEmpty.RUnlock()
+	return calls
+}
+
+// PutStateAsError calls PutStateAsErrorFunc.
+func (mock *FilterStoreMock) PutStateAsError(filterJobID string) error {
+	if mock.PutStateAsErrorFunc == nil {
+		panic("moq: FilterStoreMock.PutStateAsErrorFunc is nil but FilterStore.PutStateAsError was just called")
+	}
+	callInfo := struct {
+		FilterJobID string
+	}{
+		FilterJobID: filterJobID,
+	}
+	lockFilterStoreMockPutStateAsError.Lock()
+	mock.calls.PutStateAsError = append(mock.calls.PutStateAsError, callInfo)
+	lockFilterStoreMockPutStateAsError.Unlock()
+	return mock.PutStateAsErrorFunc(filterJobID)
+}
+
+// PutStateAsErrorCalls gets all the calls that were made to PutStateAsError.
+// Check the length with:
+//     len(mockedFilterStore.PutStateAsErrorCalls())
+func (mock *FilterStoreMock) PutStateAsErrorCalls() []struct {
+	FilterJobID string
+} {
+	var calls []struct {
+		FilterJobID string
+	}
+	lockFilterStoreMockPutStateAsError.RLock()
+	calls = mock.calls.PutStateAsError
+	lockFilterStoreMockPutStateAsError.RUnlock()
 	return calls
 }

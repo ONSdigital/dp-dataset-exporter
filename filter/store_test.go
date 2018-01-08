@@ -240,6 +240,58 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 	})
 }
 
+func TestStore_PutStateAsEmpty(t *testing.T) {
+	Convey("Given a store with a mocked HTTP error response", t, func() {
+
+		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
+
+		mockHTTPClient := &filtertest.HTTPClientMock{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
+			},
+		}
+
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+
+		Convey("When PutStateAsEmpty is called", func() {
+
+			err := filterStore.PutStateAsEmpty(filterOutputID)
+
+			Convey("Then no error is returned", func() {
+
+				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(err, ShouldBeNil)
+			})
+		})
+	})
+}
+
+func TestStore_PutStateAsError(t *testing.T) {
+	Convey("Given a store with a mocked HTTP error response", t, func() {
+
+		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
+
+		mockHTTPClient := &filtertest.HTTPClientMock{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
+			},
+		}
+
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+
+		Convey("When PutStateAsError is called", func() {
+
+			err := filterStore.PutStateAsError(filterOutputID)
+
+			Convey("Then no error is returned", func() {
+
+				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(err, ShouldBeNil)
+			})
+		})
+	})
+}
+
 type iOReadCloser struct {
 	io.Reader
 }
