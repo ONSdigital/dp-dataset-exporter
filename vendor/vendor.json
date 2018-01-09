@@ -3,16 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "tbA040Jmx8XWVr7fR2ldy1Ffk3I=",
+			"checksumSHA1": "zi71EEnkYFDI1o31AZ7Yvhs/2Qo=",
 			"path": "github.com/ONSdigital/dp-filter/observation",
-			"revision": "d5c00c65df6d3896b80910010773068aa81972e0",
-			"revisionTime": "2018-01-04T09:56:02Z"
-		},
-		{
-			"checksumSHA1": "7S1sU5E949ABaVMbKBbzPkqmXbM=",
-			"path": "github.com/ONSdigital/dp-filter/observation/observationtest",
-			"revision": "d5c00c65df6d3896b80910010773068aa81972e0",
-			"revisionTime": "2018-01-04T09:56:02Z"
+			"revision": "7bebb654cb92b77a370812cd593cc045d03be22f",
+			"revisionTime": "2018-01-12T09:09:21Z"
 		},
 		{
 			"checksumSHA1": "WI5P8MbnHHGqzuQje+qFoQSUHgk=",
