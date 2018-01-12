@@ -130,7 +130,6 @@ func (store *Store) updateFilterOutput(filterJobID string, filter *FilterOuput) 
 	if err != nil {
 		return err
 	}
-	log.Debug("json", log.Data{"data": string(json)})
 	_, err = store.makeRequest("PUT", url, bytes.NewReader(json))
 	return err
 }
