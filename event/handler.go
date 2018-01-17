@@ -116,17 +116,26 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 		}
 	}()
 
+	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
+	// into the S3 library. We can only tell if data is present by reading the stream.
 	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID)
 	if err != nil {
-		return nil, err
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Debug("empty results from filter job", log.Data{"instance_id": filter.InstanceID,
 				"filter": filter})
-			return nil, handler.filterStore.PutStateAsEmpty(filter.FilterID)
+			updateErr := handler.filterStore.PutStateAsEmpty(filter.FilterID)
+			if updateErr != nil {
+				return nil, updateErr
+			}
+			return nil, err
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
 			log.Error(err, log.Data{"instance_id": filter.InstanceID,
 				"filter": filter})
-			return nil, handler.filterStore.PutStateAsError(filter.FilterID)
+			updateErr := handler.filterStore.PutStateAsError(filter.FilterID)
+			if updateErr != nil {
+				return nil, updateErr
+			}
+			return nil, err
 		}
 		return nil, err
 	}

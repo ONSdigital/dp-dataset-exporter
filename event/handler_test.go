@@ -162,19 +162,19 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+			PutFileFunc: func(reader io.Reader, filter string) (string, error) {
 				return "", observation.ErrNoResultsFound
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
 
 		Convey("When handle is called", func() {
 
 			err := handler.Handle(filterOutputEvent)
 
 			Convey("The filter state is updated to empty", func() {
-				So(err, ShouldBeNil)
+				So(err, ShouldNotBeNil)
 				So(1, ShouldEqual, len(mockFilterStore.PutStateAsEmptyCalls()))
 			})
 		})
@@ -210,19 +210,19 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filter *observation.Filter) (string, error) {
+			PutFileFunc: func(reader io.Reader, filter string) (string, error) {
 				return "", observation.ErrNoInstanceFound
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
 
 		Convey("When handle is called", func() {
 
 			err := handler.Handle(filterOutputEvent)
 
 			Convey("The filter state is updated to empty", func() {
-				So(err, ShouldBeNil)
+				So(err, ShouldNotBeNil)
 				So(1, ShouldEqual, len(mockFilterStore.PutStateAsErrorCalls()))
 			})
 		})
