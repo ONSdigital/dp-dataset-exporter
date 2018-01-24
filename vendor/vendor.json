@@ -45,10 +45,10 @@
 			"revisionTime": "2017-12-21T09:34:27Z"
 		},
 		{
-			"checksumSHA1": "d0xkjPw9SKVWK1vDJqvD3HoFbnA=",
+			"checksumSHA1": "qqaN4hllMTNueffB5bcz8xQnwX0=",
 			"path": "github.com/ONSdigital/go-ns/kafka",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "b7a9d79bc028131d34399e7ef420b73007786202",
+			"revisionTime": "2018-01-23T16:28:19Z"
 		},
 		{
 			"checksumSHA1": "9ISFg1xnb4/WsxOIzhgAFe22LmU=",
@@ -128,12 +128,6 @@
 			"path": "github.com/Shopify/sarama",
 			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
 			"revisionTime": "2017-12-21T09:34:27Z"
-		},
-		{
-			"checksumSHA1": "8hSo1rnEwKizmyHTDkF2FBF64Cs=",
-			"path": "github.com/aws/aws-sdk-go",
-			"revision": "d0cb8551ac28d362e77ea475e5b7b2ebaec06b6b",
-			"revisionTime": "2017-12-21T23:52:18Z"
 		},
 		{
 			"checksumSHA1": "zrW2b0liD5UpOFil/Nj7wa7Sp9A=",
