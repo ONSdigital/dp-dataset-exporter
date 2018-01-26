@@ -15,7 +15,9 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/go-ns/clients/dataset"
 	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
@@ -63,9 +65,12 @@ func main() {
 	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
-	eventProducer := event.NewAvroProducer(kafkaProducer)
+	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer)
+	datasetAPICli := dataset.New(config.DatasetAPIURL)
+	datasetAPICli.SetInternalToken(config.DatasetAPIAuthToken)
+
+	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli)
 
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)

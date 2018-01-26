@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"sync"
 )
 
@@ -17,7 +18,7 @@ var (
 //
 //         // make and configure a mocked Producer
 //         mockedProducer := &ProducerMock{
-//             CSVExportedFunc: func(filterID string, fileURL string) error {
+//             CSVExportedFunc: func(e *event.CSVExported) error {
 // 	               panic("TODO: mock out the CSVExported method")
 //             },
 //         }
@@ -28,48 +29,42 @@ var (
 //     }
 type ProducerMock struct {
 	// CSVExportedFunc mocks the CSVExported method.
-	CSVExportedFunc func(filterID string, fileURL string) error
+	CSVExportedFunc func(e *event.CSVExported) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// CSVExported holds details about calls to the CSVExported method.
 		CSVExported []struct {
-			// FilterID is the filterID argument value.
-			FilterID string
-			// FileURL is the fileURL argument value.
-			FileURL string
+			// E is the e argument value.
+			E *event.CSVExported
 		}
 	}
 }
 
 // CSVExported calls CSVExportedFunc.
-func (mock *ProducerMock) CSVExported(filterID string, fileURL string) error {
+func (mock *ProducerMock) CSVExported(e *event.CSVExported) error {
 	if mock.CSVExportedFunc == nil {
 		panic("moq: ProducerMock.CSVExportedFunc is nil but Producer.CSVExported was just called")
 	}
 	callInfo := struct {
-		FilterID string
-		FileURL  string
+		E *event.CSVExported
 	}{
-		FilterID: filterID,
-		FileURL:  fileURL,
+		E: e,
 	}
 	lockProducerMockCSVExported.Lock()
 	mock.calls.CSVExported = append(mock.calls.CSVExported, callInfo)
 	lockProducerMockCSVExported.Unlock()
-	return mock.CSVExportedFunc(filterID, fileURL)
+	return mock.CSVExportedFunc(e)
 }
 
 // CSVExportedCalls gets all the calls that were made to CSVExported.
 // Check the length with:
 //     len(mockedProducer.CSVExportedCalls())
 func (mock *ProducerMock) CSVExportedCalls() []struct {
-	FilterID string
-	FileURL  string
+	E *event.CSVExported
 } {
 	var calls []struct {
-		FilterID string
-		FileURL  string
+		E *event.CSVExported
 	}
 	lockProducerMockCSVExported.RLock()
 	calls = mock.calls.CSVExported
