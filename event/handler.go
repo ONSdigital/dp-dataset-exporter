@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -26,11 +27,12 @@ const publishedState = "published"
 
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
-	filterStore      FilterStore
-	observationStore ObservationStore
-	fileStore        FileStore
-	eventProducer    Producer
-	datasetAPICli    DatasetAPI
+	filterStore        FilterStore
+	observationStore   ObservationStore
+	fileStore          FileStore
+	eventProducer      Producer
+	datasetAPICli      DatasetAPI
+	downloadServiceURL string
 }
 
 // DatasetAPI contains functions to call the dataset API.
@@ -45,14 +47,16 @@ func NewExportHandler(filterStore FilterStore,
 	observationStore ObservationStore,
 	fileStore FileStore,
 	eventProducer Producer,
-	datasetAPI DatasetAPI) *ExportHandler {
+	datasetAPI DatasetAPI,
+	downloadServiceURL string) *ExportHandler {
 
 	return &ExportHandler{
-		filterStore:      filterStore,
-		observationStore: observationStore,
-		fileStore:        fileStore,
-		eventProducer:    eventProducer,
-		datasetAPICli:    datasetAPI,
+		filterStore:        filterStore,
+		observationStore:   observationStore,
+		fileStore:          fileStore,
+		eventProducer:      eventProducer,
+		datasetAPICli:      datasetAPI,
+		downloadServiceURL: downloadServiceURL,
 	}
 }
 
@@ -204,8 +208,18 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 		return nil, err
 	}
 
-	downloads := map[string]dataset.Download{
-		"CSV": {Size: strconv.Itoa(int(reader.TotalBytesRead())), URL: fileURL},
+	downloads := make(map[string]dataset.Download)
+	downloadURL := fmt.Sprintf("%s/downloads/datasets/%s/editions/%s/versions/%s.csv",
+		handler.downloadServiceURL,
+		event.DatasetID,
+		event.Edition,
+		event.Version,
+	)
+
+	if isPublished {
+		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, URL: downloadURL}
+	} else {
+		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, URL: downloadURL}
 	}
 
 	v := dataset.Version{Downloads: downloads}

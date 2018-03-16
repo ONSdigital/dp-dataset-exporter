@@ -29,6 +29,7 @@ type Config struct {
 	VaultToken               string        `envconfig:"VAULT_TOKEN"                json:"-"`
 	VaultAddress             string        `envconfig:"VAULT_ADDR"`
 	VaultPath                string        `envconfig:"VAULT_PATH"`
+	DownloadServiceURL       string        `envconfig:"DOWNLOAD_SERVICE_URL"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -55,6 +56,7 @@ func Get() (*Config, error) {
 		VaultPath:                "secret/shared/psk",
 		VaultAddress:             "http://localhost:8200",
 		VaultToken:               "",
+		DownloadServiceURL:       "http://localhost:23600",
 	}
 
 	return cfg, envconfig.Process("", cfg)

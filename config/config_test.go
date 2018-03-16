@@ -39,6 +39,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.VaultAddress, ShouldEqual, "http://localhost:8200")
 				So(cfg.VaultPath, ShouldEqual, "secret/shared/psk")
 				So(cfg.VaultToken, ShouldEqual, "")
+				So(cfg.DownloadServiceURL, ShouldEqual, "http://localhost:23600")
 			})
 		})
 	})

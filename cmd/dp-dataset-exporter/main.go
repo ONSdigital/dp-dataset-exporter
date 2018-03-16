@@ -75,7 +75,7 @@ func main() {
 	datasetAPICli := dataset.New(config.DatasetAPIURL)
 	datasetAPICli.SetInternalToken(config.DatasetAPIAuthToken)
 
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli)
+	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, config.DownloadServiceURL)
 
 	eventConsumer := event.NewConsumer()
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
