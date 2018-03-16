@@ -123,6 +123,12 @@
 			"revisionTime": "2017-12-08T13:48:35Z"
 		},
 		{
+			"checksumSHA1": "kp/pQVUk5O36tg/7pxAlUPGgwAA=",
+			"path": "github.com/ONSdigital/s3crypto",
+			"revision": "f566045122cf53e8ebaf1055bffd50ab213181a7",
+			"revisionTime": "2018-03-16T09:39:29Z"
+		},
+		{
 			"checksumSHA1": "+Jp0tVXfQ1TM8T+oun82oJtME5U=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/Shopify/sarama",
 			"path": "github.com/Shopify/sarama",

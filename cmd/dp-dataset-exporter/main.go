@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/ONSdigital/go-ns/healthcheck"
-	"github.com/ONSdigital/go-ns/neo4j"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/ONSdigital/go-ns/healthcheck"
+	"github.com/ONSdigital/go-ns/neo4j"
+	"github.com/ONSdigital/go-ns/vault"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
@@ -57,6 +59,9 @@ func main() {
 	neo4jConnPool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, config.Neo4jPoolSize)
 	exitIfError(err)
 
+	vaultClient, err := vault.CreateVaultClient(config.VaultToken, config.VaultAddress, 3)
+	exitIfError(err)
+
 	// when errors occur - we send a message on an error topic.
 	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer)
 
@@ -64,7 +69,7 @@ func main() {
 
 	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
-	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
+	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName, config.S3PrivateBucketName, config.VaultPath, vaultClient)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
 	datasetAPICli := dataset.New(config.DatasetAPIURL)
@@ -80,7 +85,8 @@ func main() {
 		config.HealthCheckInterval,
 		errorChannel,
 		filterHealthCheck.New(config.FilterAPIURL),
-		neo4j.NewHealthCheckClient(neo4jConnPool))
+		neo4j.NewHealthCheckClient(neo4jConnPool),
+		vaultClient)
 
 	shutdownGracefully := func() {
 
