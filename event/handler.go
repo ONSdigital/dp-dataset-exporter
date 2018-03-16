@@ -22,6 +22,8 @@ import (
 
 var _ Handler = (*ExportHandler)(nil)
 
+const publishedState = "published"
+
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
 	filterStore      FilterStore
@@ -33,7 +35,9 @@ type ExportHandler struct {
 
 // DatasetAPI contains functions to call the dataset API.
 type DatasetAPI interface {
-	PutVersion(id, edition, version string, m dataset.Version) error
+	PutVersion(id, edition, version string, m dataset.Version, cfg ...dataset.Config) error
+	GetVersion(id, edition, version string, cfg ...dataset.Config) (m dataset.Version, err error)
+	GetInstance(instanceID string, cfg ...dataset.Config) (m dataset.Instance, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -67,7 +71,7 @@ type ObservationStore interface {
 
 // FileStore provides storage for filtered output files.
 type FileStore interface {
-	PutFile(reader io.Reader, fileID string) (url string, err error)
+	PutFile(reader io.Reader, fileID string, isPublished bool) (url string, err error)
 }
 
 // Producer handles producing output events.
@@ -78,12 +82,15 @@ type Producer interface {
 // Handle the export of a single filter output.
 func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	var csvExported *CSVExported
-	var err error
+	state, err := handler.getVersionState(event)
+	if err != nil {
+		return err
+	}
 
 	if event.FilterID != "" {
-		csvExported, err = handler.filterJob(event)
+		csvExported, err = handler.filterJob(event, state == publishedState)
 	} else {
-		csvExported, err = handler.prePublishJob(event)
+		csvExported, err = handler.fullDownload(event, state == publishedState)
 	}
 
 	if err != nil {
@@ -96,7 +103,25 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	return nil
 }
 
-func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, error) {
+func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (string, error) {
+	if len(event.InstanceID) == 0 {
+		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version)
+		if err != nil {
+			return "", err
+		}
+
+		return version.State, nil
+	}
+
+	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID)
+	if err != nil {
+		return "", err
+	}
+
+	return instance.State, nil
+}
+
+func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 	log.Info("handling filter job", log.Data{"filter_id": event.FilterID})
 	filter, err := handler.filterStore.GetFilter(event.FilterID)
 	if err != nil {
@@ -118,7 +143,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID)
+	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Debug("empty results from filter job", log.Data{"instance_id": filter.InstanceID,
@@ -150,7 +175,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL}, nil
 }
 
-func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExported, error) {
+func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 	log.Info("handling pre canned job", log.Data{
 		"instance_id": event.InstanceID,
 		"dataset_id":  event.DatasetID,
@@ -174,7 +199,7 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 	fileID := uuid.NewV4().String()
 	log.Info("storing pre-publish file", log.Data{"fileID": fileID})
 
-	fileURL, err := handler.fileStore.PutFile(reader, fileID)
+	fileURL, err := handler.fileStore.PutFile(reader, fileID, isPublished)
 	if err != nil {
 		return nil, err
 	}

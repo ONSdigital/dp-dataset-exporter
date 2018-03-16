@@ -9,7 +9,9 @@ import (
 )
 
 var (
-	lockDatasetAPIMockPutVersion sync.RWMutex
+	lockDatasetAPIMockGetInstance sync.RWMutex
+	lockDatasetAPIMockGetVersion  sync.RWMutex
+	lockDatasetAPIMockPutVersion  sync.RWMutex
 )
 
 // DatasetAPIMock is a mock implementation of DatasetAPI.
@@ -18,7 +20,13 @@ var (
 //
 //         // make and configure a mocked DatasetAPI
 //         mockedDatasetAPI := &DatasetAPIMock{
-//             PutVersionFunc: func(id string, edition string, version string, m dataset.Version) error {
+//             GetInstanceFunc: func(instanceID string, cfg ...dataset.Config) (dataset.Instance, error) {
+// 	               panic("TODO: mock out the GetInstance method")
+//             },
+//             GetVersionFunc: func(id string, edition string, version string, cfg ...dataset.Config) (dataset.Version, error) {
+// 	               panic("TODO: mock out the GetVersion method")
+//             },
+//             PutVersionFunc: func(id string, edition string, version string, m dataset.Version, cfg ...dataset.Config) error {
 // 	               panic("TODO: mock out the PutVersion method")
 //             },
 //         }
@@ -28,61 +36,169 @@ var (
 //
 //     }
 type DatasetAPIMock struct {
+	// GetInstanceFunc mocks the GetInstance method.
+	GetInstanceFunc func(instanceID string, cfg ...dataset.Config) (dataset.Instance, error)
+
+	// GetVersionFunc mocks the GetVersion method.
+	GetVersionFunc func(id string, edition string, version string, cfg ...dataset.Config) (dataset.Version, error)
+
 	// PutVersionFunc mocks the PutVersion method.
-	PutVersionFunc func(id string, edition string, version string, m dataset.Version) error
+	PutVersionFunc func(id string, edition string, version string, m dataset.Version, cfg ...dataset.Config) error
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// GetInstance holds details about calls to the GetInstance method.
+		GetInstance []struct {
+			// InstanceID is the instanceID argument value.
+			InstanceID string
+			// Cfg is the cfg argument value.
+			Cfg []dataset.Config
+		}
+		// GetVersion holds details about calls to the GetVersion method.
+		GetVersion []struct {
+			// ID is the id argument value.
+			ID string
+			// Edition is the edition argument value.
+			Edition string
+			// Version is the version argument value.
+			Version string
+			// Cfg is the cfg argument value.
+			Cfg []dataset.Config
+		}
 		// PutVersion holds details about calls to the PutVersion method.
 		PutVersion []struct {
-			// Id is the id argument value.
-			Id string
+			// ID is the id argument value.
+			ID string
 			// Edition is the edition argument value.
 			Edition string
 			// Version is the version argument value.
 			Version string
 			// M is the m argument value.
 			M dataset.Version
+			// Cfg is the cfg argument value.
+			Cfg []dataset.Config
 		}
 	}
 }
 
+// GetInstance calls GetInstanceFunc.
+func (mock *DatasetAPIMock) GetInstance(instanceID string, cfg ...dataset.Config) (dataset.Instance, error) {
+	if mock.GetInstanceFunc == nil {
+		panic("moq: DatasetAPIMock.GetInstanceFunc is nil but DatasetAPI.GetInstance was just called")
+	}
+	callInfo := struct {
+		InstanceID string
+		Cfg        []dataset.Config
+	}{
+		InstanceID: instanceID,
+		Cfg:        cfg,
+	}
+	lockDatasetAPIMockGetInstance.Lock()
+	mock.calls.GetInstance = append(mock.calls.GetInstance, callInfo)
+	lockDatasetAPIMockGetInstance.Unlock()
+	return mock.GetInstanceFunc(instanceID, cfg...)
+}
+
+// GetInstanceCalls gets all the calls that were made to GetInstance.
+// Check the length with:
+//     len(mockedDatasetAPI.GetInstanceCalls())
+func (mock *DatasetAPIMock) GetInstanceCalls() []struct {
+	InstanceID string
+	Cfg        []dataset.Config
+} {
+	var calls []struct {
+		InstanceID string
+		Cfg        []dataset.Config
+	}
+	lockDatasetAPIMockGetInstance.RLock()
+	calls = mock.calls.GetInstance
+	lockDatasetAPIMockGetInstance.RUnlock()
+	return calls
+}
+
+// GetVersion calls GetVersionFunc.
+func (mock *DatasetAPIMock) GetVersion(id string, edition string, version string, cfg ...dataset.Config) (dataset.Version, error) {
+	if mock.GetVersionFunc == nil {
+		panic("moq: DatasetAPIMock.GetVersionFunc is nil but DatasetAPI.GetVersion was just called")
+	}
+	callInfo := struct {
+		ID      string
+		Edition string
+		Version string
+		Cfg     []dataset.Config
+	}{
+		ID:      id,
+		Edition: edition,
+		Version: version,
+		Cfg:     cfg,
+	}
+	lockDatasetAPIMockGetVersion.Lock()
+	mock.calls.GetVersion = append(mock.calls.GetVersion, callInfo)
+	lockDatasetAPIMockGetVersion.Unlock()
+	return mock.GetVersionFunc(id, edition, version, cfg...)
+}
+
+// GetVersionCalls gets all the calls that were made to GetVersion.
+// Check the length with:
+//     len(mockedDatasetAPI.GetVersionCalls())
+func (mock *DatasetAPIMock) GetVersionCalls() []struct {
+	ID      string
+	Edition string
+	Version string
+	Cfg     []dataset.Config
+} {
+	var calls []struct {
+		ID      string
+		Edition string
+		Version string
+		Cfg     []dataset.Config
+	}
+	lockDatasetAPIMockGetVersion.RLock()
+	calls = mock.calls.GetVersion
+	lockDatasetAPIMockGetVersion.RUnlock()
+	return calls
+}
+
 // PutVersion calls PutVersionFunc.
-func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string, m dataset.Version) error {
+func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string, m dataset.Version, cfg ...dataset.Config) error {
 	if mock.PutVersionFunc == nil {
 		panic("moq: DatasetAPIMock.PutVersionFunc is nil but DatasetAPI.PutVersion was just called")
 	}
 	callInfo := struct {
-		Id      string
+		ID      string
 		Edition string
 		Version string
 		M       dataset.Version
+		Cfg     []dataset.Config
 	}{
-		Id:      id,
+		ID:      id,
 		Edition: edition,
 		Version: version,
 		M:       m,
+		Cfg:     cfg,
 	}
 	lockDatasetAPIMockPutVersion.Lock()
 	mock.calls.PutVersion = append(mock.calls.PutVersion, callInfo)
 	lockDatasetAPIMockPutVersion.Unlock()
-	return mock.PutVersionFunc(id, edition, version, m)
+	return mock.PutVersionFunc(id, edition, version, m, cfg...)
 }
 
 // PutVersionCalls gets all the calls that were made to PutVersion.
 // Check the length with:
 //     len(mockedDatasetAPI.PutVersionCalls())
 func (mock *DatasetAPIMock) PutVersionCalls() []struct {
-	Id      string
+	ID      string
 	Edition string
 	Version string
 	M       dataset.Version
+	Cfg     []dataset.Config
 } {
 	var calls []struct {
-		Id      string
+		ID      string
 		Edition string
 		Version string
 		M       dataset.Version
+		Cfg     []dataset.Config
 	}
 	lockDatasetAPIMockPutVersion.RLock()
 	calls = mock.calls.PutVersion

@@ -18,7 +18,7 @@ var (
 //
 //         // make and configure a mocked FileStore
 //         mockedFileStore := &FileStoreMock{
-//             PutFileFunc: func(reader io.Reader, fileID string) (string, error) {
+//             PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
 // 	               panic("TODO: mock out the PutFile method")
 //             },
 //         }
@@ -29,7 +29,7 @@ var (
 //     }
 type FileStoreMock struct {
 	// PutFileFunc mocks the PutFile method.
-	PutFileFunc func(reader io.Reader, fileID string) (string, error)
+	PutFileFunc func(reader io.Reader, fileID string, isPublished bool) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -39,38 +39,44 @@ type FileStoreMock struct {
 			Reader io.Reader
 			// FileID is the fileID argument value.
 			FileID string
+			// IsPublished is the isPublished argument value.
+			IsPublished bool
 		}
 	}
 }
 
 // PutFile calls PutFileFunc.
-func (mock *FileStoreMock) PutFile(reader io.Reader, fileID string) (string, error) {
+func (mock *FileStoreMock) PutFile(reader io.Reader, fileID string, isPublished bool) (string, error) {
 	if mock.PutFileFunc == nil {
 		panic("moq: FileStoreMock.PutFileFunc is nil but FileStore.PutFile was just called")
 	}
 	callInfo := struct {
-		Reader io.Reader
-		FileID string
+		Reader      io.Reader
+		FileID      string
+		IsPublished bool
 	}{
-		Reader: reader,
-		FileID: fileID,
+		Reader:      reader,
+		FileID:      fileID,
+		IsPublished: isPublished,
 	}
 	lockFileStoreMockPutFile.Lock()
 	mock.calls.PutFile = append(mock.calls.PutFile, callInfo)
 	lockFileStoreMockPutFile.Unlock()
-	return mock.PutFileFunc(reader, fileID)
+	return mock.PutFileFunc(reader, fileID, isPublished)
 }
 
 // PutFileCalls gets all the calls that were made to PutFile.
 // Check the length with:
 //     len(mockedFileStore.PutFileCalls())
 func (mock *FileStoreMock) PutFileCalls() []struct {
-	Reader io.Reader
-	FileID string
+	Reader      io.Reader
+	FileID      string
+	IsPublished bool
 } {
 	var calls []struct {
-		Reader io.Reader
-		FileID string
+		Reader      io.Reader
+		FileID      string
+		IsPublished bool
 	}
 	lockFileStoreMockPutFile.RLock()
 	calls = mock.calls.PutFile
