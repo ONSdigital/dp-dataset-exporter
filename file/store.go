@@ -28,7 +28,7 @@ func NewStore(region string, bucket string) *Store {
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
-func (store *Store) PutFile(reader io.Reader, fileID string) (url string, err error) {
+func (store *Store) PutFile(reader io.Reader, fileID string, isPublished bool) (url string, err error) {
 	session, err := session.NewSession(store.config)
 	if err != nil {
 		return "", err
