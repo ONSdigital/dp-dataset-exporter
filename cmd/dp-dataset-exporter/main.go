@@ -69,7 +69,8 @@ func main() {
 
 	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
-	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName, config.S3PrivateBucketName, config.VaultPath, vaultClient)
+	fileStore, err := file.NewStore(config.AWSRegion, config.S3BucketName, config.S3PrivateBucketName, config.VaultPath, vaultClient)
+	exitIfError(err)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
 	datasetAPICli := dataset.New(config.DatasetAPIURL)

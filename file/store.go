@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"io"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -44,14 +43,13 @@ type Store struct {
 }
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
-func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaultClient VaultClient) *Store {
+func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaultClient VaultClient) (*Store, error) {
 
 	config := aws.NewConfig().WithRegion(region)
 
 	session, err := session.NewSession(config)
 	if err != nil {
-		log.Error(err, nil)
-		os.Exit(1)
+		return nil, err
 	}
 
 	return &Store{
@@ -61,7 +59,7 @@ func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaul
 		privateBucket:  privateBucket,
 		vaultPath:      vaultPath,
 		vaultClient:    vaultClient,
-	}
+	}, nil
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.

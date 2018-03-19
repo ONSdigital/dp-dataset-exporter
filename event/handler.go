@@ -222,6 +222,12 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, URL: downloadURL}
 	}
 
+	log.Info("updating dataset api with download link", log.Data{
+		"isPublished":        isPublished,
+		"downloadServiceURL": downloadURL,
+		"s3URL":              fileURL,
+	})
+
 	v := dataset.Version{Downloads: downloads}
 
 	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v); err != nil {
