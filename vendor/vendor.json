@@ -69,6 +69,12 @@
 			"revisionTime": "2017-12-21T09:34:27Z"
 		},
 		{
+			"checksumSHA1": "eqT3lUe+1W+njYJOealHQ+LsXv0=",
+			"path": "github.com/ONSdigital/go-ns/rchttp",
+			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
+			"revisionTime": "2018-03-16T08:19:17Z"
+		},
+		{
 			"checksumSHA1": "Ohl8JaJRUL+/Y+NTL8y97PZlFfs=",
 			"path": "github.com/ONSdigital/go-ns/rhttp",
 			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
@@ -388,10 +394,10 @@
 			"revisionTime": "2017-12-21T09:34:27Z"
 		},
 		{
-			"checksumSHA1": "gWlw0l2wMBLhmejJCTr/Zywqyk8=",
+			"checksumSHA1": "Jrjxy16tD9mUgr/jbhXwbHVeSa0=",
 			"path": "github.com/kelseyhightower/envconfig",
-			"revision": "70f0258d44cbaa3b6a2581d82f58da01a38e4de4",
-			"revisionTime": "2017-05-23T19:07:22Z"
+			"revision": "462fda1f11d8cad3660e52737b8beefd27acfb3f",
+			"revisionTime": "2017-09-18T16:15:10Z"
 		},
 		{
 			"checksumSHA1": "hBgLmZ/4mCxmnH88mqFKBkpJFUY=",
@@ -462,6 +468,20 @@
 			"path": "github.com/smartystreets/goconvey/convey/reporting",
 			"revision": "9e8dc3f972df6c8fcc0375ef492c24d0bb204857",
 			"revisionTime": "2017-06-02T16:46:21Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"origin": "github.com/ONSdigital/go-ns/vendor/golang.org/x/net/context",
+			"path": "golang.org/x/net/context",
+			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
+			"revisionTime": "2018-03-16T08:19:17Z"
+		},
+		{
+			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
+			"origin": "github.com/ONSdigital/go-ns/vendor/golang.org/x/net/context/ctxhttp",
+			"path": "golang.org/x/net/context/ctxhttp",
+			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
+			"revisionTime": "2018-03-16T08:19:17Z"
 		}
 	],
 	"rootPath": "github.com/ONSdigital/dp-dataset-exporter"
