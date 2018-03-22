@@ -5,6 +5,11 @@ Takes a filter job and produces a filtered dataset.
 
 ### Getting started
 
+Ensure you have vault running.
+
+`brew install vault`
+`vault server -dev`
+
 `make debug`
 
 ### Configuration
@@ -32,6 +37,9 @@ environment variables, or with a link to a configuration guide.
 | HEALTHCHECK_INTERVAL        | time.Minute                          | How often to run a health check
 | GRACEFUL_SHUTDOWN_TIMEOUT   | time.Second * 10                     | How long to wait for the service to shutdown gracefully
 | DOWNLOAD_SERVICE_URL        | http://localhost:23600               | The URL of the download service
+| VAULT_ADDR                  | http://localhost:8200                | The address of vault
+| VAULT_TOKEN                 | -                                    | Use `make debug` to set a vault token
+| VAULT_PATH                  | secret/shared/psk                    | The vault path to store psks
 
 ### Healthcheck
 
