@@ -108,6 +108,12 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 }
 
 func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (string, error) {
+	// We currently only get a filter id for a filter job so return published
+	// TODO: ensure an instance id is given for filter jobs
+	if len(event.FilterID) > 0 {
+		return "published", nil
+	}
+
 	if len(event.InstanceID) == 0 {
 		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version)
 		if err != nil {
