@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"github.com/ONSdigital/go-ns/identity"
 	"github.com/ONSdigital/go-ns/log"
 	"net/http"
 	"net/url"
@@ -25,7 +26,8 @@ func CheckServiceIdentity(ctx context.Context, zebedeeURL, serviceAuthToken stri
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", serviceAuthToken)
+
+	identity.AddServiceTokenHeader(req, serviceAuthToken)
 
 	res, err := client.Do(ctx, req)
 	if err != nil {
