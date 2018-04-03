@@ -64,7 +64,7 @@ func main() {
 
 	httpClient := http.Client{Timeout: time.Second * 15}
 
-	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
+	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, config.ServiceAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
