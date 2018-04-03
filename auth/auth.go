@@ -3,11 +3,11 @@ package auth
 import (
 	"context"
 	"fmt"
+	"github.com/ONSdigital/go-ns/log"
 	"net/http"
 	"net/url"
 
 	"github.com/ONSdigital/go-ns/rchttp"
-	"github.com/ian-kent/go-log/log"
 )
 
 func CheckServiceIdentity(ctx context.Context, zebedeeURL, serviceAuthToken string) error {
