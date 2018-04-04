@@ -5,12 +5,18 @@ Takes a filter job and produces a filtered dataset.
 
 ### Getting started
 
+<<<<<<< HEAD
 Ensure you have vault running.
 
 `brew install vault`
 `vault server -dev`
 
 `make debug`
+=======
+* Run the auth-stub-api
+
+* Run `make debug`
+>>>>>>> cmd-develop
 
 ### Configuration
 
@@ -40,6 +46,8 @@ environment variables, or with a link to a configuration guide.
 | VAULT_ADDR                  | http://localhost:8200                | The address of vault
 | VAULT_TOKEN                 | -                                    | Use `make debug` to set a vault token
 | VAULT_PATH                  | secret/shared/psk                    | The vault path to store psks
+| SERVICE_AUTH_TOKEN          | 0f49d57b-c551-4d33-af1e-a442801dd851 | The service token for this app
+| ZEBEDEE_URL                 | http://localhost:8082                | The URL to zebedee
 
 ### Healthcheck
 

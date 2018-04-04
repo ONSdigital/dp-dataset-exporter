@@ -22,7 +22,7 @@ type Config struct {
 	S3PrivateBucketName      string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
 	CSVExportedProducerTopic string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
 	DatasetAPIURL            string        `envconfig:"DATASET_API_URL"`
-	DatasetAPIAuthToken      string        `envconfig:"DATASET_API_AUTH_TOKEN"`
+	DatasetAPIAuthToken      string        `envconfig:"DATASET_API_AUTH_TOKEN" json:"-"`
 	ErrorProducerTopic       string        `envconfig:"ERROR_PRODUCER_TOPIC"`
 	GracefulShutdownTimeout  time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
 	HealthCheckInterval      time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
@@ -30,6 +30,8 @@ type Config struct {
 	VaultAddress             string        `envconfig:"VAULT_ADDR"`
 	VaultPath                string        `envconfig:"VAULT_PATH"`
 	DownloadServiceURL       string        `envconfig:"DOWNLOAD_SERVICE_URL"`
+	ServiceAuthToken         string        `envconfig:"SERVICE_AUTH_TOKEN" json:"-"`
+	ZebedeeURL               string        `envconfig:"ZEBEDEE_URL"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -57,9 +59,18 @@ func Get() (*Config, error) {
 		VaultAddress:             "http://localhost:8200",
 		VaultToken:               "",
 		DownloadServiceURL:       "http://localhost:23600",
+		ServiceAuthToken:         "0f49d57b-c551-4d33-af1e-a442801dd851",
+		ZebedeeURL:               "http://localhost:8082",
 	}
 
-	return cfg, envconfig.Process("", cfg)
+	err := envconfig.Process("", cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.ServiceAuthToken = "Bearer " + cfg.ServiceAuthToken
+
+	return cfg, nil
 }
 
 // String is implemented to prevent sensitive fields being logged.

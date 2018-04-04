@@ -45,6 +45,12 @@
 			"revisionTime": "2017-12-21T09:34:27Z"
 		},
 		{
+			"checksumSHA1": "BIF0W+bUAeNWG9eYVgpXvgWj1Hs=",
+			"path": "github.com/ONSdigital/go-ns/identity",
+			"revision": "291aa23799e2c5bcae4680ef34dec90a38833c69",
+			"revisionTime": "2018-04-03T10:47:08Z"
+		},
+		{
 			"checksumSHA1": "qqaN4hllMTNueffB5bcz8xQnwX0=",
 			"path": "github.com/ONSdigital/go-ns/kafka",
 			"revision": "b7a9d79bc028131d34399e7ef420b73007786202",
@@ -71,8 +77,8 @@
 		{
 			"checksumSHA1": "eqT3lUe+1W+njYJOealHQ+LsXv0=",
 			"path": "github.com/ONSdigital/go-ns/rchttp",
-			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
-			"revisionTime": "2018-03-16T08:19:17Z"
+			"revision": "f0dafcaf053f2a91da7443b2a2796ecd2c61fb60",
+			"revisionTime": "2018-03-28T11:08:33Z"
 		},
 		{
 			"checksumSHA1": "Ohl8JaJRUL+/Y+NTL8y97PZlFfs=",
@@ -646,15 +652,15 @@
 			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/golang.org/x/net/context",
 			"path": "golang.org/x/net/context",
-			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
-			"revisionTime": "2018-03-16T08:19:17Z"
+			"revision": "f0dafcaf053f2a91da7443b2a2796ecd2c61fb60",
+			"revisionTime": "2018-03-28T11:08:33Z"
 		},
 		{
 			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/golang.org/x/net/context/ctxhttp",
 			"path": "golang.org/x/net/context/ctxhttp",
-			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
-			"revisionTime": "2018-03-16T08:19:17Z"
+			"revision": "f0dafcaf053f2a91da7443b2a2796ecd2c61fb60",
+			"revisionTime": "2018-03-28T11:08:33Z"
 		}
 	],
 	"rootPath": "github.com/ONSdigital/dp-dataset-exporter"
