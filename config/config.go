@@ -49,9 +49,11 @@ func Get() (*Config, error) {
 		ErrorProducerTopic:       "filter-error",
 		GracefulShutdownTimeout:  time.Second * 10,
 		HealthCheckInterval:      time.Minute,
-		ServiceAuthToken:         "939616dc-7599-4ded-9a86-a9c66fbf98e0",
+		ServiceAuthToken:         "0f49d57b-c551-4d33-af1e-a442801dd851",
 		ZebedeeURL:               "http://localhost:8082",
 	}
+
+	cfg.ServiceAuthToken = "Bearer " + cfg.ServiceAuthToken
 
 	return cfg, envconfig.Process("", cfg)
 }
