@@ -53,9 +53,14 @@ func Get() (*Config, error) {
 		ZebedeeURL:               "http://localhost:8082",
 	}
 
+	err := envconfig.Process("", cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg.ServiceAuthToken = "Bearer " + cfg.ServiceAuthToken
 
-	return cfg, envconfig.Process("", cfg)
+	return cfg, nil
 }
 
 // String is implemented to prevent sensitive fields being logged.

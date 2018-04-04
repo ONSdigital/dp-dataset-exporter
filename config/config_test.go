@@ -35,6 +35,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.S3BucketName, ShouldEqual, "csv-exported")
 				So(cfg.GracefulShutdownTimeout, ShouldEqual, time.Second*10)
 				So(cfg.HealthCheckInterval, ShouldEqual, time.Minute)
+				So(cfg.ServiceAuthToken, ShouldEqual, "Bearer 0f49d57b-c551-4d33-af1e-a442801dd851")
 			})
 		})
 	})
