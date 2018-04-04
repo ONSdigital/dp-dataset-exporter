@@ -37,20 +37,24 @@ func NewConsumer() *Consumer {
 }
 
 // Consume converts messages to event instances, and pass the event to the provided handler.
-func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler) {
+func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler, isReady chan bool) {
 
 	go func() {
 		defer close(consumer.closed)
 
-		for {
-			select {
-			case message := <-messageConsumer.Incoming():
+		log.Info("waiting for authentication before consuming messages", nil)
+		if <-isReady {
+			log.Info("starting to consume messages", nil)
+			for {
+				select {
+				case message := <-messageConsumer.Incoming():
 
-				processMessage(message, handler, errorHandler)
+					processMessage(message, handler, errorHandler)
 
-			case <-consumer.closing:
-				log.Info("closing event consumer loop", nil)
-				return
+				case <-consumer.closing:
+					log.Info("closing event consumer loop", nil)
+					return
+				}
 			}
 		}
 	}()

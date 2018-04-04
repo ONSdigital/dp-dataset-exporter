@@ -21,7 +21,8 @@ import (
 // Store provides access to stored dimension data.
 type Store struct {
 	filterAPIURL       string
-	filterAPIAuthToken string
+	filterAPIAuthToken string // Deprecated variable
+	serviceToken       string
 	httpClient         HTTPClient
 }
 
@@ -68,10 +69,11 @@ var ErrFilterAPIError = errors.New("Internal error from the filter api")
 var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the filter api")
 
 // NewStore returns a new instance of a filter store.
-func NewStore(filterAPIURL string, filterAPIAuthToken string, httpClient HTTPClient) *Store {
+func NewStore(filterAPIURL, filterAPIAuthToken, serviceToken string, httpClient HTTPClient) *Store {
 	return &Store{
 		filterAPIURL:       filterAPIURL,
 		filterAPIAuthToken: filterAPIAuthToken,
+		serviceToken:       serviceToken,
 		httpClient:         httpClient,
 	}
 }
@@ -171,6 +173,7 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 		return nil, err
 	}
 	request.Header.Set("Internal-Token", store.filterAPIAuthToken)
+	request.Header.Set("Authorization", store.serviceToken)
 
 	response, responseError := store.httpClient.Do(request)
 	if responseError != nil {
