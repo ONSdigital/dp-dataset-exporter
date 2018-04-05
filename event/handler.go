@@ -32,6 +32,7 @@ type ExportHandler struct {
 	fileStore          FileStore
 	eventProducer      Producer
 	datasetAPICli      DatasetAPI
+	serviceToken       string
 	downloadServiceURL string
 }
 
@@ -48,7 +49,7 @@ func NewExportHandler(filterStore FilterStore,
 	fileStore FileStore,
 	eventProducer Producer,
 	datasetAPI DatasetAPI,
-	downloadServiceURL string) *ExportHandler {
+	serviceToken, downloadServiceURL string) *ExportHandler {
 
 	return &ExportHandler{
 		filterStore:        filterStore,
@@ -56,6 +57,7 @@ func NewExportHandler(filterStore FilterStore,
 		fileStore:          fileStore,
 		eventProducer:      eventProducer,
 		datasetAPICli:      datasetAPI,
+		serviceToken:       serviceToken,
 		downloadServiceURL: downloadServiceURL,
 	}
 }
@@ -236,7 +238,11 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 
 	v := dataset.Version{Downloads: downloads}
 
-	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v); err != nil {
+	var config dataset.Config
+
+	config.AuthToken = handler.serviceToken
+
+	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
 		return nil, errors.Wrap(err, "error while attempting update version downloads")
 	}
 

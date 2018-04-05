@@ -31,36 +31,35 @@ func main() {
 	log.Namespace = "dp-dataset-exporter"
 	log.Info("Starting dataset exporter", nil)
 
-	config, err := config.Get()
+	cfg, err := config.Get()
 	if err != nil {
 		log.Error(err, nil)
 		os.Exit(1)
 	}
 
-	// sensitive fields are omitted from config.String().
-	log.Info("loaded config", log.Data{"config": config})
+	log.Info("loaded config", log.Data{"config": cfg})
 
 	// a channel used to signal a graceful exit is required.
 	errorChannel := make(chan error)
 
-	kafkaBrokers := config.KafkaAddr
+	kafkaBrokers := cfg.KafkaAddr
 	kafkaConsumer, err := kafka.NewConsumerGroup(
 		kafkaBrokers,
-		config.FilterConsumerTopic,
-		config.FilterConsumerGroup,
+		cfg.FilterConsumerTopic,
+		cfg.FilterConsumerGroup,
 		kafka.OffsetNewest)
 	exitIfError(err)
 
-	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, config.CSVExportedProducerTopic, 0)
+	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, cfg.CSVExportedProducerTopic, 0)
 	exitIfError(err)
 
-	kafkaErrorProducer, err := kafka.NewProducer(config.KafkaAddr, config.ErrorProducerTopic, 0)
+	kafkaErrorProducer, err := kafka.NewProducer(cfg.KafkaAddr, cfg.ErrorProducerTopic, 0)
 	exitIfError(err)
 
-	neo4jConnPool, err := bolt.NewClosableDriverPool(config.DatabaseAddress, config.Neo4jPoolSize)
+	neo4jConnPool, err := bolt.NewClosableDriverPool(cfg.DatabaseAddress, cfg.Neo4jPoolSize)
 	exitIfError(err)
 
-	vaultClient, err := vault.CreateVaultClient(config.VaultToken, config.VaultAddress, 3)
+	vaultClient, err := vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, 3)
 	exitIfError(err)
 
 	// when errors occur - we send a message on an error topic.
@@ -68,16 +67,16 @@ func main() {
 
 	httpClient := http.Client{Timeout: time.Second * 15}
 
-	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, config.ServiceAuthToken, &httpClient)
+	filterStore := filter.NewStore(cfg.FilterAPIURL, cfg.FilterAPIAuthToken, cfg.ServiceAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
-	fileStore, err := file.NewStore(config.AWSRegion, config.S3BucketName, config.S3PrivateBucketName, config.VaultPath, vaultClient)
+	fileStore, err := file.NewStore(cfg.AWSRegion, cfg.S3BucketName, cfg.S3PrivateBucketName, cfg.VaultPath, vaultClient)
 	exitIfError(err)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
-	datasetAPICli := dataset.New(config.DatasetAPIURL)
-	datasetAPICli.SetInternalToken(config.DatasetAPIAuthToken)
+	datasetAPICli := dataset.New(cfg.DatasetAPIURL)
+	datasetAPICli.SetInternalToken(cfg.DatasetAPIAuthToken)
 
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, config.DownloadServiceURL)
+	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, cfg.ServiceAuthToken, cfg.DownloadServiceURL)
 
 	isReady := make(chan bool)
 
@@ -85,16 +84,16 @@ func main() {
 	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler, isReady)
 
 	healthChecker := healthcheck.NewServer(
-		config.BindAddr,
-		config.HealthCheckInterval,
+		cfg.BindAddr,
+		cfg.HealthCheckInterval,
 		errorChannel,
-		filterHealthCheck.New(config.FilterAPIURL),
+		filterHealthCheck.New(cfg.FilterAPIURL),
 		neo4j.NewHealthCheckClient(neo4jConnPool),
 		vaultClient)
 
 	shutdownGracefully := func() {
 
-		ctx, cancel := context.WithTimeout(context.Background(), config.GracefulShutdownTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.GracefulShutdownTimeout)
 
 		// gracefully dispose resources
 		err = eventConsumer.Close(ctx)
@@ -125,7 +124,7 @@ func main() {
 	// Check that a valid service token was provided on startup
 	go func() {
 		log.Info("Checking service token", nil)
-		err = auth.CheckServiceIdentity(context.Background(), config.ZebedeeURL, config.ServiceAuthToken)
+		err = auth.CheckServiceIdentity(context.Background(), cfg.ZebedeeURL, cfg.ServiceAuthToken)
 		if err != nil {
 			errorChannel <- err
 			isReady <- false
