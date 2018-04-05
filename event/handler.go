@@ -117,7 +117,7 @@ func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (string, e
 	}
 
 	if len(event.InstanceID) == 0 {
-		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version)
+		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version, dataset.Config{AuthToken: handler.serviceToken})
 		if err != nil {
 			return "", err
 		}
@@ -125,7 +125,7 @@ func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (string, e
 		return version.State, nil
 	}
 
-	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID)
+	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID, dataset.Config{AuthToken: handler.serviceToken})
 	if err != nil {
 		return "", err
 	}
