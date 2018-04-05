@@ -18,7 +18,7 @@ var (
 //
 //         // make and configure a mocked DatasetAPI
 //         mockedDatasetAPI := &DatasetAPIMock{
-//             PutVersionFunc: func(id string, edition string, version string, m dataset.Version) error {
+//             PutVersionFunc: func(id string, edition string, version string, m dataset.Version, config ...dataset.Config) error {
 // 	               panic("TODO: mock out the PutVersion method")
 //             },
 //         }
@@ -29,7 +29,7 @@ var (
 //     }
 type DatasetAPIMock struct {
 	// PutVersionFunc mocks the PutVersion method.
-	PutVersionFunc func(id string, edition string, version string, m dataset.Version) error
+	PutVersionFunc func(id string, edition string, version string, m dataset.Version, config ...dataset.Config) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -43,12 +43,14 @@ type DatasetAPIMock struct {
 			Version string
 			// M is the m argument value.
 			M dataset.Version
+			// Config is the config argument value.
+			Config []dataset.Config
 		}
 	}
 }
 
 // PutVersion calls PutVersionFunc.
-func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string, m dataset.Version) error {
+func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string, m dataset.Version, config ...dataset.Config) error {
 	if mock.PutVersionFunc == nil {
 		panic("moq: DatasetAPIMock.PutVersionFunc is nil but DatasetAPI.PutVersion was just called")
 	}
@@ -57,16 +59,18 @@ func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string
 		Edition string
 		Version string
 		M       dataset.Version
+		Config  []dataset.Config
 	}{
 		Id:      id,
 		Edition: edition,
 		Version: version,
 		M:       m,
+		Config:  config,
 	}
 	lockDatasetAPIMockPutVersion.Lock()
 	mock.calls.PutVersion = append(mock.calls.PutVersion, callInfo)
 	lockDatasetAPIMockPutVersion.Unlock()
-	return mock.PutVersionFunc(id, edition, version, m)
+	return mock.PutVersionFunc(id, edition, version, m, config...)
 }
 
 // PutVersionCalls gets all the calls that were made to PutVersion.
@@ -77,12 +81,14 @@ func (mock *DatasetAPIMock) PutVersionCalls() []struct {
 	Edition string
 	Version string
 	M       dataset.Version
+	Config  []dataset.Config
 } {
 	var calls []struct {
 		Id      string
 		Edition string
 		Version string
 		M       dataset.Version
+		Config  []dataset.Config
 	}
 	lockDatasetAPIMockPutVersion.RLock()
 	calls = mock.calls.PutVersion

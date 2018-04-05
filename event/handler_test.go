@@ -13,8 +13,11 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-const filterOutputId = "345"
-const fileUrl = "s3://some/url/123.csv"
+const (
+	filterOutputId = "345"
+	fileUrl        = "s3://some/url/123.csv"
+	ServiceToken   = "gravy"
+)
 
 var filterOutputEvent = &event.FilterSubmitted{FilterID: filterOutputId}
 
@@ -25,6 +28,10 @@ var filter = &observation.Filter{
 		{Name: "age", Options: []string{"29", "30"}},
 		{Name: "sex", Options: []string{"male", "female"}},
 	},
+}
+
+var cfg = dataset.Config{
+	AuthToken: ServiceToken,
 }
 
 func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
@@ -40,7 +47,7 @@ func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil, datasetAPIMock)
+		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil, datasetAPIMock, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -72,7 +79,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -119,7 +126,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -167,7 +174,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -215,7 +222,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -262,7 +269,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -318,7 +325,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -372,7 +379,7 @@ func TestExportHandler_Handle(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, nil, cfg.AuthToken)
 
 		Convey("When handle is called", func() {
 
@@ -456,7 +463,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil, mockErr
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg.AuthToken)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -490,7 +497,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return "", mockErr
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg.AuthToken)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -528,7 +535,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return "/url", nil
 		}
 
-		datasetApiMock.PutVersionFunc = func(id string, edition string, version string, m dataset.Version) error {
+		datasetApiMock.PutVersionFunc = func(id string, edition string, version string, m dataset.Version, cfg ...dataset.Config) error {
 			return nil
 		}
 
@@ -536,7 +543,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg.AuthToken)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)
@@ -577,7 +584,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return "/url", nil
 		}
 
-		datasetApiMock.PutVersionFunc = func(id string, edition string, version string, m dataset.Version) error {
+		datasetApiMock.PutVersionFunc = func(id string, edition string, version string, m dataset.Version, cfg ...dataset.Config) error {
 			return mockErr
 		}
 
@@ -585,7 +592,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg.AuthToken)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(e)

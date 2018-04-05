@@ -29,11 +29,12 @@ type ExportHandler struct {
 	fileStore        FileStore
 	eventProducer    Producer
 	datasetAPICli    DatasetAPI
+	serviceToken     string
 }
 
 // DatasetAPI contains functions to call the dataset API.
 type DatasetAPI interface {
-	PutVersion(id, edition, version string, m dataset.Version) error
+	PutVersion(id, edition, version string, m dataset.Version, config ...dataset.Config) error
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -41,7 +42,8 @@ func NewExportHandler(filterStore FilterStore,
 	observationStore ObservationStore,
 	fileStore FileStore,
 	eventProducer Producer,
-	datasetAPI DatasetAPI) *ExportHandler {
+	datasetAPI DatasetAPI,
+	serviceToken string) *ExportHandler {
 
 	return &ExportHandler{
 		filterStore:      filterStore,
@@ -49,6 +51,7 @@ func NewExportHandler(filterStore FilterStore,
 		fileStore:        fileStore,
 		eventProducer:    eventProducer,
 		datasetAPICli:    datasetAPI,
+		serviceToken:     serviceToken,
 	}
 }
 
@@ -185,7 +188,11 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 
 	v := dataset.Version{Downloads: downloads}
 
-	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v); err != nil {
+	var config dataset.Config
+
+	config.AuthToken = handler.serviceToken
+
+	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
 		return nil, errors.Wrap(err, "error while attempting update version downloads")
 	}
 
