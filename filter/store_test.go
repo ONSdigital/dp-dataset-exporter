@@ -14,9 +14,10 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-const filterAPIURL string = "http://filter-api:8765"
-const filterAPIAuthToken string = "dgt-dsfgrtyedf-gesrtrt"
-const filterOutputID string = "123456784432"
+const filterAPIURL = "http://filter-api:8765"
+const filterAPIAuthToken = "dgt-dsfgrtyedf-gesrtrt"
+const serviceToken = "sdasfawer-awerawer-gessdfgrtrtrt"
+const filterOutputID = "123456784432"
 
 var mockDimensionListData = []*observation.DimensionFilter{{
 	Name:    "Sex",
@@ -42,7 +43,7 @@ func TestStore_GetFilter(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -69,7 +70,7 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -95,7 +96,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When GetFilter is called", func() {
 
@@ -125,7 +126,7 @@ func TestStore_PutCSVData(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -148,6 +149,7 @@ func TestStore_PutCSVData(t *testing.T) {
 				So(actualFilter.Downloads.CSV.Size, ShouldEqual, strconv.FormatInt(fileSize, 10))
 				So(httpReq.URL.Path, ShouldEndWith, filterOutputID)
 				So(httpReq.Header.Get("Internal-Token"), ShouldEqual, filterAPIAuthToken)
+				So(httpReq.Header.Get("Authorization"), ShouldEqual, serviceToken)
 			})
 		})
 	})
@@ -166,7 +168,7 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -195,7 +197,7 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -224,7 +226,7 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When PutCSVData is called", func() {
 
@@ -251,7 +253,7 @@ func TestStore_PutStateAsEmpty(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When PutStateAsEmpty is called", func() {
 
@@ -277,7 +279,7 @@ func TestStore_PutStateAsError(t *testing.T) {
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, mockHTTPClient)
+		filterStore := filter.NewStore(filterAPIURL, filterAPIAuthToken, serviceToken, mockHTTPClient)
 
 		Convey("When PutStateAsError is called", func() {
 

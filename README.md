@@ -5,7 +5,9 @@ Takes a filter job and produces a filtered dataset.
 
 ### Getting started
 
-`make debug`
+* Run the auth-stub-api
+
+* Run `make debug`
 
 ### Configuration
 
@@ -30,6 +32,8 @@ environment variables, or with a link to a configuration guide.
 | ERROR_PRODUCER_TOPIC        | filter-error                         | The topic to add messages to when an error occurs
 | HEALTHCHECK_INTERVAL        | time.Minute                          | How often to run a health check
 | GRACEFUL_SHUTDOWN_TIMEOUT   | time.Second * 10                     | How long to wait for the service to shutdown gracefully
+| SERVICE_AUTH_TOKEN          | 0f49d57b-c551-4d33-af1e-a442801dd851 | The service token for this app
+| ZEBEDEE_URL                 | http://localhost:8082                | The URL to zebedee
 
 ### Healthcheck
 

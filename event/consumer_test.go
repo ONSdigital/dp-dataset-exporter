@@ -36,8 +36,9 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		consumer := event.NewConsumer()
 
 		Convey("When consume messages is called", func() {
-
-			consumer.Consume(mockConsumer, mockEventHandler, nil)
+			isReady := make(chan bool)
+			consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
+			isReady <- true
 			waitForEventsToBeSentToHandler(mockEventHandler)
 
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
@@ -70,8 +71,9 @@ func TestConsume(t *testing.T) {
 		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
-
-			consumer.Consume(mockConsumer, mockEventHandler, nil)
+			isReady := make(chan bool)
+			consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
+			isReady <- true
 			waitForEventsToBeSentToHandler(mockEventHandler)
 
 			Convey("A event is sent to the mockEventHandler ", func() {
@@ -116,8 +118,9 @@ func TestConsume_HandlerError(t *testing.T) {
 		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
-
-			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler)
+			isReady := make(chan bool)
+			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler, isReady)
+			isReady <- true
 			waitForEventsToBeSentToHandler(mockEventHandler)
 
 			Convey("The error handler is given the error returned from the event handler", func() {
@@ -151,9 +154,9 @@ func TestClose(t *testing.T) {
 		messages <- message
 
 		consumer := event.NewConsumer()
-
-		consumer.Consume(mockConsumer, mockEventHandler, nil)
-
+		isReady := make(chan bool)
+		consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
+		isReady <- true
 		Convey("When close is called", func() {
 
 			err := consumer.Close(context.Background())

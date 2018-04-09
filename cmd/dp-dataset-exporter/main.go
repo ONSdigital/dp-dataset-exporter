@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
-	"github.com/ONSdigital/go-ns/healthcheck"
-	"github.com/ONSdigital/go-ns/neo4j"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/ONSdigital/go-ns/healthcheck"
+	"github.com/ONSdigital/go-ns/neo4j"
+
+	"github.com/ONSdigital/dp-dataset-exporter/auth"
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
@@ -26,7 +28,7 @@ import (
 
 func main() {
 	log.Namespace = "dp-dataset-exporter"
-	log.Debug("Starting dataset exporter", nil)
+	log.Info("Starting dataset exporter", nil)
 
 	config, err := config.Get()
 	if err != nil {
@@ -35,7 +37,7 @@ func main() {
 	}
 
 	// sensitive fields are omitted from config.String().
-	log.Debug("loaded config", log.Data{"config": config})
+	log.Info("loaded config", log.Data{"config": config})
 
 	// a channel used to signal a graceful exit is required.
 	errorChannel := make(chan error)
@@ -62,7 +64,7 @@ func main() {
 
 	httpClient := http.Client{Timeout: time.Second * 15}
 
-	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, &httpClient)
+	filterStore := filter.NewStore(config.FilterAPIURL, config.FilterAPIAuthToken, config.ServiceAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
 	fileStore := file.NewStore(config.AWSRegion, config.S3BucketName)
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
@@ -72,8 +74,10 @@ func main() {
 
 	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli)
 
+	isReady := make(chan bool)
+
 	eventConsumer := event.NewConsumer()
-	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
+	eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler, isReady)
 
 	healthChecker := healthcheck.NewServer(
 		config.BindAddr,
@@ -105,12 +109,24 @@ func main() {
 		// cancel the timer in the shutdown context.
 		cancel()
 
-		log.Debug("graceful shutdown was successful", nil)
+		log.Info("graceful shutdown was successful", nil)
 		os.Exit(0)
 	}
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+
+	// Check that a valid service token was provided on startup
+	go func() {
+		log.Info("Checking service token", nil)
+		err = auth.CheckServiceIdentity(context.Background(), config.ZebedeeURL, config.ServiceAuthToken)
+		if err != nil {
+			errorChannel <- err
+			isReady <- false
+		} else {
+			isReady <- true
+		}
+	}()
 
 	for {
 		select {
