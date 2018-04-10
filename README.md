@@ -5,18 +5,14 @@ Takes a filter job and produces a filtered dataset.
 
 ### Getting started
 
-<<<<<<< HEAD
 Ensure you have vault running.
 
 `brew install vault`
 `vault server -dev`
 
-`make debug`
-=======
+* Run `make debug`
 * Run the auth-stub-api
 
-* Run `make debug`
->>>>>>> cmd-develop
 
 ### Configuration
 
