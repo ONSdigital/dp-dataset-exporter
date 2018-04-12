@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -22,18 +23,24 @@ import (
 
 var _ Handler = (*ExportHandler)(nil)
 
+const publishedState = "published"
+
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
-	filterStore      FilterStore
-	observationStore ObservationStore
-	fileStore        FileStore
-	eventProducer    Producer
-	datasetAPICli    DatasetAPI
+	filterStore        FilterStore
+	observationStore   ObservationStore
+	fileStore          FileStore
+	eventProducer      Producer
+	datasetAPICli      DatasetAPI
+	serviceToken       string
+	downloadServiceURL string
 }
 
 // DatasetAPI contains functions to call the dataset API.
 type DatasetAPI interface {
-	PutVersion(id, edition, version string, m dataset.Version) error
+	PutVersion(id, edition, version string, m dataset.Version, cfg ...dataset.Config) error
+	GetVersion(id, edition, version string, cfg ...dataset.Config) (m dataset.Version, err error)
+	GetInstance(instanceID string, cfg ...dataset.Config) (m dataset.Instance, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -41,14 +48,17 @@ func NewExportHandler(filterStore FilterStore,
 	observationStore ObservationStore,
 	fileStore FileStore,
 	eventProducer Producer,
-	datasetAPI DatasetAPI) *ExportHandler {
+	datasetAPI DatasetAPI,
+	serviceToken, downloadServiceURL string) *ExportHandler {
 
 	return &ExportHandler{
-		filterStore:      filterStore,
-		observationStore: observationStore,
-		fileStore:        fileStore,
-		eventProducer:    eventProducer,
-		datasetAPICli:    datasetAPI,
+		filterStore:        filterStore,
+		observationStore:   observationStore,
+		fileStore:          fileStore,
+		eventProducer:      eventProducer,
+		datasetAPICli:      datasetAPI,
+		serviceToken:       serviceToken,
+		downloadServiceURL: downloadServiceURL,
 	}
 }
 
@@ -67,7 +77,7 @@ type ObservationStore interface {
 
 // FileStore provides storage for filtered output files.
 type FileStore interface {
-	PutFile(reader io.Reader, fileID string) (url string, err error)
+	PutFile(reader io.Reader, fileID string, isPublished bool) (url string, err error)
 }
 
 // Producer handles producing output events.
@@ -78,12 +88,15 @@ type Producer interface {
 // Handle the export of a single filter output.
 func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	var csvExported *CSVExported
-	var err error
+	state, err := handler.getVersionState(event)
+	if err != nil {
+		return err
+	}
 
 	if event.FilterID != "" {
-		csvExported, err = handler.filterJob(event)
+		csvExported, err = handler.filterJob(event, state == publishedState)
 	} else {
-		csvExported, err = handler.prePublishJob(event)
+		csvExported, err = handler.fullDownload(event, state == publishedState)
 	}
 
 	if err != nil {
@@ -96,7 +109,31 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	return nil
 }
 
-func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, error) {
+func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (string, error) {
+	// We currently only get a filter id for a filter job so return published
+	// TODO: ensure an instance id is given for filter jobs
+	if len(event.FilterID) > 0 {
+		return "published", nil
+	}
+
+	if len(event.InstanceID) == 0 {
+		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version, dataset.Config{AuthToken: handler.serviceToken})
+		if err != nil {
+			return "", err
+		}
+
+		return version.State, nil
+	}
+
+	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID, dataset.Config{AuthToken: handler.serviceToken})
+	if err != nil {
+		return "", err
+	}
+
+	return instance.State, nil
+}
+
+func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 	log.Info("handling filter job", log.Data{"filter_id": event.FilterID})
 	filter, err := handler.filterStore.GetFilter(event.FilterID)
 	if err != nil {
@@ -118,7 +155,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID)
+	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Debug("empty results from filter job", log.Data{"instance_id": filter.InstanceID,
@@ -150,7 +187,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted) (*CSVExported, e
 	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL}, nil
 }
 
-func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExported, error) {
+func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 	log.Info("handling pre canned job", log.Data{
 		"instance_id": event.InstanceID,
 		"dataset_id":  event.DatasetID,
@@ -174,18 +211,38 @@ func (handler *ExportHandler) prePublishJob(event *FilterSubmitted) (*CSVExporte
 	fileID := uuid.NewV4().String()
 	log.Info("storing pre-publish file", log.Data{"fileID": fileID})
 
-	fileURL, err := handler.fileStore.PutFile(reader, fileID)
+	fileURL, err := handler.fileStore.PutFile(reader, fileID, isPublished)
 	if err != nil {
 		return nil, err
 	}
 
-	downloads := map[string]dataset.Download{
-		"CSV": {Size: strconv.Itoa(int(reader.TotalBytesRead())), URL: fileURL},
+	downloads := make(map[string]dataset.Download)
+	downloadURL := fmt.Sprintf("%s/downloads/datasets/%s/editions/%s/versions/%s.csv",
+		handler.downloadServiceURL,
+		event.DatasetID,
+		event.Edition,
+		event.Version,
+	)
+
+	if isPublished {
+		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, URL: downloadURL}
+	} else {
+		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, URL: downloadURL}
 	}
+
+	log.Info("updating dataset api with download link", log.Data{
+		"isPublished":        isPublished,
+		"downloadServiceURL": downloadURL,
+		"s3URL":              fileURL,
+	})
 
 	v := dataset.Version{Downloads: downloads}
 
-	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v); err != nil {
+	var config dataset.Config
+
+	config.AuthToken = handler.serviceToken
+
+	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
 		return nil, errors.Wrap(err, "error while attempting update version downloads")
 	}
 

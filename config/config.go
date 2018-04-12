@@ -19,12 +19,17 @@ type Config struct {
 	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN" json:"-"`
 	AWSRegion                string        `envconfig:"AWS_REGION"`
 	S3BucketName             string        `envconfig:"S3_BUCKET_NAME"`
+	S3PrivateBucketName      string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
 	CSVExportedProducerTopic string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
 	DatasetAPIURL            string        `envconfig:"DATASET_API_URL"`
 	DatasetAPIAuthToken      string        `envconfig:"DATASET_API_AUTH_TOKEN" json:"-"`
 	ErrorProducerTopic       string        `envconfig:"ERROR_PRODUCER_TOPIC"`
 	GracefulShutdownTimeout  time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
 	HealthCheckInterval      time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
+	VaultToken               string        `envconfig:"VAULT_TOKEN"                json:"-"`
+	VaultAddress             string        `envconfig:"VAULT_ADDR"`
+	VaultPath                string        `envconfig:"VAULT_PATH"`
+	DownloadServiceURL       string        `envconfig:"DOWNLOAD_SERVICE_URL"`
 	ServiceAuthToken         string        `envconfig:"SERVICE_AUTH_TOKEN" json:"-"`
 	ZebedeeURL               string        `envconfig:"ZEBEDEE_URL"`
 }
@@ -43,12 +48,17 @@ func Get() (*Config, error) {
 		FilterAPIAuthToken:       "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		CSVExportedProducerTopic: "common-output-created",
 		S3BucketName:             "csv-exported",
+		S3PrivateBucketName:      "csv-exported",
 		AWSRegion:                "eu-west-1",
 		DatasetAPIURL:            "http://localhost:22000",
 		DatasetAPIAuthToken:      "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		ErrorProducerTopic:       "filter-error",
 		GracefulShutdownTimeout:  time.Second * 10,
 		HealthCheckInterval:      time.Minute,
+		VaultPath:                "secret/shared/psk",
+		VaultAddress:             "http://localhost:8200",
+		VaultToken:               "",
+		DownloadServiceURL:       "http://localhost:23600",
 		ServiceAuthToken:         "0f49d57b-c551-4d33-af1e-a442801dd851",
 		ZebedeeURL:               "http://localhost:8082",
 	}

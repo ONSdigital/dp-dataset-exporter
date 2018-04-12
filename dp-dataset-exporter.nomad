@@ -58,6 +58,9 @@ job "dp-dataset-exporter" {
 
       vault {
         policies = ["dp-dataset-exporter"]
+
+        change_mode   = "signal"
+        change_signal = "SIGUSR1"
       }
     }
   }
