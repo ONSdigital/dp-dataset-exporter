@@ -65,7 +65,7 @@ func NewExportHandler(filterStore FilterStore,
 // FilterStore provides existing filter data.
 type FilterStore interface {
 	GetFilter(filterID string) (*observation.Filter, error)
-	PutCSVData(filterID string, csvURL string, csvSize int64) error
+	PutCSVData(filterID string, downloadItem observation.DownloadItem) error
 	PutStateAsEmpty(filterJobID string) error
 	PutStateAsError(filterJobID string) error
 }
@@ -88,19 +88,29 @@ type Producer interface {
 // Handle the export of a single filter output.
 func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	var csvExported *CSVExported
-	state, err := handler.getVersionState(event)
-	if err != nil {
-		return err
-	}
 
 	if event.FilterID != "" {
-		csvExported, err = handler.filterJob(event, state == publishedState)
+		isPublished, err := handler.getFilterOutputState(event)
+		if err != nil {
+			return err
+		}
+		log.Debug("nathan got here (filter)", log.Data{"published": isPublished})
+		csvExported, err = handler.filterJob(event, isPublished)
+		if err != nil {
+			log.ErrorC("nathan got error (filter)", err, log.Data{"published": isPublished})
+			return err
+		}
 	} else {
-		csvExported, err = handler.fullDownload(event, state == publishedState)
-	}
-
-	if err != nil {
-		return err
+		isPublished, err := handler.getVersionState(event)
+		if err != nil {
+			return err
+		}
+		log.Debug("nathan got here (dataset)", log.Data{"published": isPublished})
+		csvExported, err = handler.fullDownload(event, isPublished)
+		if err != nil {
+			log.ErrorC("nathan got error (filter)", err, log.Data{"published": isPublished})
+			return err
+		}
 	}
 
 	if err := handler.eventProducer.CSVExported(csvExported); err != nil {
@@ -109,28 +119,31 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	return nil
 }
 
-func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (string, error) {
-	// We currently only get a filter id for a filter job so return published
-	// TODO: ensure an instance id is given for filter jobs
-	if len(event.FilterID) > 0 {
-		return "published", nil
+func (handler *ExportHandler) getFilterOutputState(event *FilterSubmitted) (bool, error) {
+	filter, err := handler.filterStore.GetFilter(event.FilterID)
+	if err != nil {
+		return false, err
 	}
 
+	return filter.Published != nil && *filter.Published == observation.Published, nil
+}
+
+func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (bool, error) {
 	if len(event.InstanceID) == 0 {
 		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version, dataset.Config{AuthToken: handler.serviceToken})
 		if err != nil {
-			return "", err
+			return false, err
 		}
 
-		return version.State, nil
+		return version.State == publishedState, nil
 	}
 
 	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID, dataset.Config{AuthToken: handler.serviceToken})
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
-	return instance.State, nil
+	return instance.State == publishedState, nil
 }
 
 func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
@@ -177,8 +190,20 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		return nil, err
 	}
 
+	var csv observation.DownloadItem
+	downloadURL := fmt.Sprintf("%s/downloads/filter-outputs/%s.csv",
+		handler.downloadServiceURL,
+		event.FilterID,
+	)
+
+	if isPublished {
+		csv = observation.DownloadItem{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, HRef: downloadURL}
+	} else {
+		csv = observation.DownloadItem{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, HRef: downloadURL}
+	}
+
 	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(filter.FilterID, fileURL, reader.TotalBytesRead())
+	err = handler.filterStore.PutCSVData(filter.FilterID, csv)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}

@@ -56,8 +56,8 @@ type DatasetAPIMock struct {
 		}
 		// GetVersion holds details about calls to the GetVersion method.
 		GetVersion []struct {
-			// ID is the id argument value.
-			ID string
+			// Id is the id argument value.
+			Id string
 			// Edition is the edition argument value.
 			Edition string
 			// Version is the version argument value.
@@ -67,8 +67,8 @@ type DatasetAPIMock struct {
 		}
 		// PutVersion holds details about calls to the PutVersion method.
 		PutVersion []struct {
-			// ID is the id argument value.
-			ID string
+			// Id is the id argument value.
+			Id string
 			// Edition is the edition argument value.
 			Edition string
 			// Version is the version argument value.
@@ -122,12 +122,12 @@ func (mock *DatasetAPIMock) GetVersion(id string, edition string, version string
 		panic("moq: DatasetAPIMock.GetVersionFunc is nil but DatasetAPI.GetVersion was just called")
 	}
 	callInfo := struct {
-		ID      string
+		Id      string
 		Edition string
 		Version string
 		Cfg     []dataset.Config
 	}{
-		ID:      id,
+		Id:      id,
 		Edition: edition,
 		Version: version,
 		Cfg:     cfg,
@@ -142,13 +142,13 @@ func (mock *DatasetAPIMock) GetVersion(id string, edition string, version string
 // Check the length with:
 //     len(mockedDatasetAPI.GetVersionCalls())
 func (mock *DatasetAPIMock) GetVersionCalls() []struct {
-	ID      string
+	Id      string
 	Edition string
 	Version string
 	Cfg     []dataset.Config
 } {
 	var calls []struct {
-		ID      string
+		Id      string
 		Edition string
 		Version string
 		Cfg     []dataset.Config
@@ -165,13 +165,13 @@ func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string
 		panic("moq: DatasetAPIMock.PutVersionFunc is nil but DatasetAPI.PutVersion was just called")
 	}
 	callInfo := struct {
-		ID      string
+		Id      string
 		Edition string
 		Version string
 		M       dataset.Version
 		Cfg     []dataset.Config
 	}{
-		ID:      id,
+		Id:      id,
 		Edition: edition,
 		Version: version,
 		M:       m,
@@ -187,14 +187,14 @@ func (mock *DatasetAPIMock) PutVersion(id string, edition string, version string
 // Check the length with:
 //     len(mockedDatasetAPI.PutVersionCalls())
 func (mock *DatasetAPIMock) PutVersionCalls() []struct {
-	ID      string
+	Id      string
 	Edition string
 	Version string
 	M       dataset.Version
 	Cfg     []dataset.Config
 } {
 	var calls []struct {
-		ID      string
+		Id      string
 		Edition string
 		Version string
 		M       dataset.Version
