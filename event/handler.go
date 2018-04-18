@@ -91,7 +91,7 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 
 	if event.FilterID != "" {
 
-		isPublished, err := handler.getFilterOutputState(event)
+		isPublished, err := handler.isFilterOutputPublished(event)
 		if err != nil {
 			return err
 		}
@@ -105,16 +105,16 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 			return err
 		}
 	} else {
-		isPublished, err := handler.getVersionState(event)
+		isPublished, err := handler.isVersionPublished(event)
 		if err != nil {
 			return err
 		}
 
 		logData := log.Data{"instance_id": event.InstanceID,
 			"dataset_id": event.DatasetID,
-			"edition": event.Edition,
-			"version": event.Version,
-			"published": isPublished}
+			"edition":    event.Edition,
+			"version":    event.Version,
+			"published":  isPublished}
 
 		log.Debug("dataset download job identified", logData)
 		csvExported, err = handler.fullDownload(event, isPublished)
@@ -130,7 +130,7 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	return nil
 }
 
-func (handler *ExportHandler) getFilterOutputState(event *FilterSubmitted) (bool, error) {
+func (handler *ExportHandler) isFilterOutputPublished(event *FilterSubmitted) (bool, error) {
 	filter, err := handler.filterStore.GetFilter(event.FilterID)
 	if err != nil {
 		return false, err
@@ -139,7 +139,7 @@ func (handler *ExportHandler) getFilterOutputState(event *FilterSubmitted) (bool
 	return filter.Published != nil && *filter.Published == observation.Published, nil
 }
 
-func (handler *ExportHandler) getVersionState(event *FilterSubmitted) (bool, error) {
+func (handler *ExportHandler) isVersionPublished(event *FilterSubmitted) (bool, error) {
 	if len(event.InstanceID) == 0 {
 		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version, dataset.Config{AuthToken: handler.serviceToken})
 		if err != nil {
