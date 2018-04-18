@@ -90,14 +90,18 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 	var csvExported *CSVExported
 
 	if event.FilterID != "" {
+
 		isPublished, err := handler.getFilterOutputState(event)
 		if err != nil {
 			return err
 		}
-		log.Debug("nathan got here (filter)", log.Data{"published": isPublished})
+
+		logData := log.Data{"filter_id": event.FilterID, "published": isPublished}
+
+		log.Debug("filter job identified", logData)
 		csvExported, err = handler.filterJob(event, isPublished)
 		if err != nil {
-			log.ErrorC("nathan got error (filter)", err, log.Data{"published": isPublished})
+			log.ErrorC("error handling filter job", err, logData)
 			return err
 		}
 	} else {
@@ -105,10 +109,17 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 		if err != nil {
 			return err
 		}
-		log.Debug("nathan got here (dataset)", log.Data{"published": isPublished})
+
+		logData := log.Data{"instance_id": event.InstanceID,
+			"dataset_id": event.DatasetID,
+			"edition": event.Edition,
+			"version": event.Version,
+			"published": isPublished}
+
+		log.Debug("dataset download job identified", logData)
 		csvExported, err = handler.fullDownload(event, isPublished)
 		if err != nil {
-			log.ErrorC("nathan got error (filter)", err, log.Data{"published": isPublished})
+			log.ErrorC("error handling dataset download job", err, logData)
 			return err
 		}
 	}
