@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"time"
 
-	"strconv"
-
 	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/log"
 )
@@ -33,6 +31,7 @@ type FilterOuput struct {
 	State      string     `json:"state,omitempty"`
 	Downloads  *Downloads `json:"downloads,omitempty"`
 	Events     Events     `json:"events,omitempty"`
+	Published  bool       `json:"published,omitempty"`
 }
 
 // Events represents a list of array objects containing event information against the filter job
@@ -55,8 +54,10 @@ type Downloads struct {
 
 // DownloadItem represents an object containing information for the download item
 type DownloadItem struct {
-	Size string `json:"size,omitempty"`
-	URL  string `json:"url,omitempty"`
+	HRef    string `json:"href,omitempty"`
+	Private string `json:"private,omitempty"`
+	Public  string `json:"public,omitempty"`
+	Size    string `json:"size,omitempty"`
 }
 
 // ErrFilterJobNotFound returned when the filter job count not be found for the given ID.
@@ -84,14 +85,16 @@ type HTTPClient interface {
 }
 
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
-func (store *Store) PutCSVData(filterJobID string, fileURL string, size int64) error {
+func (store *Store) PutCSVData(filterJobID string, csv observation.DownloadItem) error {
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
 	putBody := FilterOuput{
 		Downloads: &Downloads{
 			CSV: &DownloadItem{
-				Size: strconv.FormatInt(size, 10),
-				URL:  fileURL,
+				HRef:    csv.HRef,
+				Private: csv.Private,
+				Public:  csv.Public,
+				Size:    csv.Size,
 			},
 		},
 	}
@@ -137,8 +140,8 @@ func (store *Store) updateFilterOutput(filterJobID string, filter *FilterOuput) 
 }
 
 // GetFilter returns filter data from the filter API for the given ID
-func (store *Store) GetFilter(filterJobID string) (*observation.Filter, error) {
-	filter, err := store.getFilterData(filterJobID)
+func (store *Store) GetFilter(filterOutputID string) (*observation.Filter, error) {
+	filter, err := store.getFilterData(filterOutputID)
 	if err != nil {
 		return nil, err
 	}

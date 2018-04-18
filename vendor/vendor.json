@@ -3,7 +3,7 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "zi71EEnkYFDI1o31AZ7Yvhs/2Qo=",
+			"checksumSHA1": "w4WYJOG6u77qJORANUwGKdxkOYY=",
 			"path": "github.com/ONSdigital/dp-filter/observation",
 			"revision": "7bebb654cb92b77a370812cd593cc045d03be22f",
 			"revisionTime": "2018-01-12T09:09:21Z"
