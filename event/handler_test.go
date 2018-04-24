@@ -15,7 +15,7 @@ import (
 
 const (
 	filterOutputId  = "345"
-	fileUrl         = "s3://some/url/123.csv"
+	fileHRef        = "s3://some/url/123.csv"
 	publishedState  = "published"
 	associatedState = "associated"
 	ServiceToken    = "gravy"
@@ -349,7 +349,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
-			PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
+			PutCSVDataFunc: func(filterJobID string, csv observation.DownloadItem) error {
 				return nil
 			},
 		}
@@ -362,7 +362,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 
 		mockedFileStore := &eventtest.FileStoreMock{
 			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
-				return fileUrl, nil
+				return fileHRef, nil
 			},
 		}
 
@@ -408,7 +408,7 @@ func TestExportHandler_Handle(t *testing.T) {
 			GetFilterFunc: func(filterJobId string) (*observation.Filter, error) {
 				return filter, nil
 			},
-			PutCSVDataFunc: func(filterJobID string, csvURL string, csvSize int64) error {
+			PutCSVDataFunc: func(filterJobID string, csv observation.DownloadItem) error {
 				return nil
 			},
 		}
@@ -421,7 +421,7 @@ func TestExportHandler_Handle(t *testing.T) {
 
 		mockedFileStore := &eventtest.FileStoreMock{
 			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
-				return fileUrl, nil
+				return fileHRef, nil
 			},
 		}
 
@@ -443,7 +443,7 @@ func TestExportHandler_Handle(t *testing.T) {
 
 			Convey("The filter store is called with the correct filter job ID", func() {
 
-				So(len(mockFilterStore.GetFilterCalls()), ShouldEqual, 1)
+				So(len(mockFilterStore.GetFilterCalls()), ShouldEqual, 2)
 
 				actualFilterID := mockFilterStore.GetFilterCalls()[0].FilterID
 				So(actualFilterID, ShouldEqual, filterOutputEvent.FilterID)
@@ -470,7 +470,9 @@ func TestExportHandler_Handle(t *testing.T) {
 				So(len(mockFilterStore.PutCSVDataCalls()), ShouldEqual, 1)
 
 				So(mockFilterStore.PutCSVDataCalls()[0].FilterID, ShouldEqual, filterOutputEvent.FilterID)
-				So(mockFilterStore.PutCSVDataCalls()[0].CsvURL, ShouldEqual, fileUrl)
+				So(mockFilterStore.PutCSVDataCalls()[0].DownloadItem.HRef, ShouldEqual, "/downloads/filter-outputs/"+filterOutputId+".csv")
+				So(mockFilterStore.PutCSVDataCalls()[0].DownloadItem.Private, ShouldEqual, fileHRef)
+				So(mockFilterStore.PutCSVDataCalls()[0].DownloadItem.Public, ShouldBeEmpty)
 			})
 
 			Convey("The event producer is called with the filter ID.", func() {
