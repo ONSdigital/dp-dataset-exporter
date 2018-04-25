@@ -31,7 +31,8 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		expectedEvent := getExampleEvent()
 
 		messages <- kafkatest.NewMessage([]byte("invalid schema"))
-		messages <- kafkatest.NewMessage(marshal(*expectedEvent))
+		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		messages <- message
 
 		consumer := event.NewConsumer()
 
@@ -39,7 +40,7 @@ func TestConsume_UnmarshallError(t *testing.T) {
 			isReady := make(chan bool)
 			consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
 			isReady <- true
-			waitForEventsToBeSentToHandler(mockEventHandler)
+			waitForMessageToBeCommitted(message)
 
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
@@ -74,7 +75,7 @@ func TestConsume(t *testing.T) {
 			isReady := make(chan bool)
 			consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
 			isReady <- true
-			waitForEventsToBeSentToHandler(mockEventHandler)
+			waitForMessageToBeCommitted(message)
 
 			Convey("A event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
@@ -121,7 +122,7 @@ func TestConsume_HandlerError(t *testing.T) {
 			isReady := make(chan bool)
 			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler, isReady)
 			isReady <- true
-			waitForEventsToBeSentToHandler(mockEventHandler)
+			waitForMessageToBeCommitted(message)
 
 			Convey("The error handler is given the error returned from the event handler", func() {
 				So(len(mockErrorHandler.HandleCalls()), ShouldEqual, 1)
@@ -182,13 +183,13 @@ func getExampleEvent() *event.FilterSubmitted {
 	return expectedEvent
 }
 
-func waitForEventsToBeSentToHandler(eventHandler *eventtest.HandlerMock) {
+func waitForMessageToBeCommitted(message *kafkatest.Message) {
 
 	start := time.Now()
 	timeout := start.Add(time.Millisecond * 500)
 	for {
-		if len(eventHandler.HandleCalls()) > 0 {
-			log.Debug("events have been sent to the handler", nil)
+		if message.Committed() {
+			log.Debug("message has been committed", nil)
 			break
 		}
 
