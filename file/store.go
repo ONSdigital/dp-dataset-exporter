@@ -91,7 +91,9 @@ func (store *Store) PutFile(reader io.Reader, fileID string, isPublished bool) (
 		})
 
 		psk := createPSK()
-		if err := store.vaultClient.WriteKey(store.vaultPath, filename, hex.EncodeToString(psk)); err != nil {
+		vaultPath := store.vaultPath + "/" + filename
+		vaultKey := "key"
+		if err := store.vaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
 			return "", err
 		}
 
