@@ -30,21 +30,13 @@ type FilterOuput struct {
 	InstanceID string     `json:"instance_id"`
 	State      string     `json:"state,omitempty"`
 	Downloads  *Downloads `json:"downloads,omitempty"`
-	Events     Events     `json:"events,omitempty"`
+	Events     []*Event    `json:"events,omitempty"`
 	Published  bool       `json:"published,omitempty"`
 }
 
-// Events represents a list of array objects containing event information against the filter job
-type Events struct {
-	Error []EventItem `json:"error,omitempty"`
-	Info  []EventItem `json:"info,omitempty"`
-}
-
-// EventItem represents an event object containing event information
-type EventItem struct {
-	Message string    `json:"message,omitempty"`
-	Time    time.Time `json:"time,omitempty"`
-	Type    string    `json:"type,omitempty"`
+type Event struct {
+	Type string    `bson:"type,omitempty" json:"type"`
+	Time time.Time `bson:"time,omitempty" json:"time"`
 }
 
 // Downloads represents the CSV which has been generated
@@ -106,10 +98,6 @@ func (store *Store) PutCSVData(filterJobID string, csv observation.DownloadItem)
 func (store *Store) PutStateAsEmpty(filterJobID string) error {
 	putBody := FilterOuput{
 		State: "completed",
-		Events: Events{
-			Info: []EventItem{EventItem{Message: "No results where found when using the provided filter options",
-				Time: time.Now().UTC()}},
-		},
 	}
 
 	return store.updateFilterOutput(filterJobID, &putBody)
@@ -120,10 +108,6 @@ func (store *Store) PutStateAsEmpty(filterJobID string) error {
 func (store *Store) PutStateAsError(filterJobID string) error {
 	putBody := FilterOuput{
 		State: "failed",
-		Events: Events{
-			Error: []EventItem{EventItem{Message: "Failed to find any data with the requested information",
-				Time: time.Now().UTC()}},
-		},
 	}
 
 	return store.updateFilterOutput(filterJobID, &putBody)
