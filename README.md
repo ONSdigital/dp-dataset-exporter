@@ -10,9 +10,9 @@ Ensure you have vault running.
 `brew install vault`
 `vault server -dev`
 
+* Setup AWS credentials. The app uses the default provider chain. When running locally this typically means they are provided by the `~/.aws/credentials` file.  Alternatively you can inject the credentials via environment variables as described in the configuration section
 * Run `make debug`
 * Run the auth-stub-api
-
 
 ### Configuration
 
@@ -44,6 +44,8 @@ environment variables, or with a link to a configuration guide.
 | VAULT_PATH                  | secret/shared/psk                    | The vault path to store psks
 | SERVICE_AUTH_TOKEN          | 0f49d57b-c551-4d33-af1e-a442801dd851 | The service token for this app
 | ZEBEDEE_URL                 | http://localhost:8082                | The URL to zebedee
+| AWS_ACCESS_KEY_ID           | -                                    | The AWS access key credential
+| AWS_SECRET_ACCESS_KEY       | -                                    | The AWS secret key credential
 
 ### Healthcheck
 
