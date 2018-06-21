@@ -46,6 +46,8 @@ environment variables, or with a link to a configuration guide.
 | ZEBEDEE_URL                 | http://localhost:8082                | The URL to zebedee
 | AWS_ACCESS_KEY_ID           | -                                    | The AWS access key credential
 | AWS_SECRET_ACCESS_KEY       | -                                    | The AWS secret key credential
+| FULL_DATASET_FILE_PREFIX    | full-datasets                        | The prefix added to full dataset download files
+| FILTERED_DATASET_FILE_PREFIX| filtered-dataset                     | The prefix added to filtered dataset download files
 
 ### Healthcheck
 

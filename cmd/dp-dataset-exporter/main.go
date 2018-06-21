@@ -69,14 +69,30 @@ func main() {
 
 	filterStore := filter.NewStore(cfg.FilterAPIURL, cfg.FilterAPIAuthToken, cfg.ServiceAuthToken, &httpClient)
 	observationStore := observation.NewStore(neo4jConnPool)
-	fileStore, err := file.NewStore(cfg.AWSRegion, cfg.S3BucketName, cfg.S3PrivateBucketName, cfg.VaultPath, vaultClient)
+
+	fileStore, err := file.NewStore(
+		cfg.AWSRegion,
+		cfg.S3BucketName,
+		cfg.S3PrivateBucketName,
+		cfg.VaultPath,
+		vaultClient)
 	exitIfError(err)
+
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
 	datasetAPICli := dataset.New(cfg.DatasetAPIURL)
 	datasetAPICli.SetInternalToken(cfg.DatasetAPIAuthToken)
 
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, cfg.ServiceAuthToken, cfg.DownloadServiceURL)
+	eventHandler := event.NewExportHandler(
+		filterStore,
+		observationStore,
+		fileStore,
+		eventProducer,
+		datasetAPICli,
+		cfg.ServiceAuthToken,
+		cfg.DownloadServiceURL,
+		cfg.FullDatasetFilePrefix,
+		cfg.FilteredDatasetFilePrefix)
 
 	isReady := make(chan bool)
 
