@@ -27,7 +27,6 @@ func TestSpec(t *testing.T) {
 				So(cfg.FilterConsumerGroup, ShouldEqual, "dp-dataset-exporter")
 				So(cfg.DatabaseAddress, ShouldEqual, "bolt://localhost:7687")
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")
-				So(cfg.FilterAPIAuthToken, ShouldEqual, "FD0108EA-825D-411C-9B1D-41EF7727F465")
 				So(cfg.CSVExportedProducerTopic, ShouldEqual, "common-output-created")
 				So(cfg.DatasetAPIURL, ShouldEqual, "http://localhost:22000")
 				So(cfg.DatasetAPIAuthToken, ShouldEqual, "FD0108EA-825D-411C-9B1D-41EF7727F465")

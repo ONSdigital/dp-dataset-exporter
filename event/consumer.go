@@ -15,11 +15,12 @@ import (
 // MessageConsumer provides a generic interface for consuming []byte messages
 type MessageConsumer interface {
 	Incoming() chan kafka.Message
+	CommitAndRelease(kafka.Message)
 }
 
 // Handler represents a handler for processing a single event.
 type Handler interface {
-	Handle(filterSubmittedEvent *FilterSubmitted) error
+	Handle(ctx context.Context, filterSubmittedEvent *FilterSubmitted) error
 }
 
 // Consumer consumes event messages.
@@ -37,23 +38,33 @@ func NewConsumer() *Consumer {
 }
 
 // Consume converts messages to event instances, and pass the event to the provided handler.
-func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler, isReady chan bool) {
+func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler, healthChangeChan chan bool) {
 
 	go func() {
 		defer close(consumer.closed)
 
-		log.Info("waiting for authentication before consuming messages", nil)
-		if <-isReady {
-			log.Info("starting to consume messages", nil)
-			for {
-				select {
-				case message := <-messageConsumer.Incoming():
+		log.Info("starting to consume messages", nil)
+		for {
+			select {
+			case message := <-messageConsumer.Incoming():
 
-					processMessage(message, handler, errorHandler)
+				err := processMessage(message, handler, errorHandler)
+				if err == nil {
+					logData := log.Data{"message_offset": message.Offset()}
+					log.Debug("event processed - committing message", logData)
+					messageConsumer.CommitAndRelease(message)
+					log.Debug("message committed", logData)
+				}
 
-				case <-consumer.closing:
-					log.Info("closing event consumer loop", nil)
-					return
+			case <-consumer.closing:
+				log.Info("closing event consumer loop", nil)
+				return
+
+			case healthy := <-healthChangeChan:
+				if !healthy {
+					log.Info("poor health - pausing Consume", nil)
+					<-healthChangeChan
+					log.Info("good health - resuming Consume", nil)
 				}
 			}
 		}
@@ -80,26 +91,33 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 	}
 }
 
-func processMessage(message kafka.Message, handler Handler, errorHandler errors.Handler) {
+func processMessage(message kafka.Message, handler Handler, errorHandler errors.Handler) error {
+	logData := log.Data{"message_offset": message.Offset()}
 
 	event, err := unmarshal(message)
 	if err != nil {
-		log.Error(err, log.Data{"message": "failed to unmarshal event"})
-		return
+		logData["message_error"] = "failed to unmarshal event"
+		log.Error(err, logData)
+		// return nil here to commit message because this message will never succeed
+		return nil
 	}
 
-	log.Debug("event received", log.Data{"event": event})
+	logData["event"] = event
 
-	err = handler.Handle(event)
+	// TODO need better context passing
+	ctx := context.Background()
+
+	log.Debug("event received", logData)
+
+	err = handler.Handle(ctx, event)
 	if err != nil {
 		errorHandler.Handle(event.FilterID, err)
-		log.Error(err, log.Data{"message": "failed to handle event"})
+		logData["message_error"] = "failed to handle event"
+		log.Error(err, logData)
+		return err
 	}
 
-	log.Debug("event processed - committing message", log.Data{"event": event})
-	message.Commit()
-	log.Debug("message committed", log.Data{"event": event})
-
+	return nil
 }
 
 // unmarshal converts a event instance to []byte.

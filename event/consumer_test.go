@@ -23,7 +23,7 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
+			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
 			},
 		}
@@ -37,9 +37,7 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		consumer := event.NewConsumer()
 
 		Convey("When consume messages is called", func() {
-			isReady := make(chan bool)
-			consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
-			isReady <- true
+			consumer.Consume(mockConsumer, mockEventHandler, nil, nil)
 			waitForMessageToBeCommitted(message)
 
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
@@ -59,7 +57,7 @@ func TestConsume(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
+			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
 			},
 		}
@@ -72,9 +70,7 @@ func TestConsume(t *testing.T) {
 		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
-			isReady := make(chan bool)
-			consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
-			isReady <- true
+			consumer.Consume(mockConsumer, mockEventHandler, nil, nil)
 			waitForMessageToBeCommitted(message)
 
 			Convey("A event is sent to the mockEventHandler ", func() {
@@ -100,7 +96,7 @@ func TestConsume_HandlerError(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
+			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return expectedError
 			},
 		}
@@ -119,9 +115,7 @@ func TestConsume_HandlerError(t *testing.T) {
 		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
-			isReady := make(chan bool)
-			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler, isReady)
-			isReady <- true
+			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler, nil)
 			waitForMessageToBeCommitted(message)
 
 			Convey("The error handler is given the error returned from the event handler", func() {
@@ -131,7 +125,7 @@ func TestConsume_HandlerError(t *testing.T) {
 			})
 
 			Convey("The message is committed", func() {
-				So(message.Committed(), ShouldEqual, true)
+				So(message.Committed(), ShouldEqual, false)
 			})
 		})
 	})
@@ -144,7 +138,7 @@ func TestClose(t *testing.T) {
 		messages := make(chan kafka.Message, 1)
 		mockConsumer := kafkatest.NewMessageConsumer(messages)
 		mockEventHandler := &eventtest.HandlerMock{
-			HandleFunc: func(filterJobSubmittedEvent *event.FilterSubmitted) error {
+			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
 			},
 		}
@@ -155,9 +149,7 @@ func TestClose(t *testing.T) {
 		messages <- message
 
 		consumer := event.NewConsumer()
-		isReady := make(chan bool)
-		consumer.Consume(mockConsumer, mockEventHandler, nil, isReady)
-		isReady <- true
+		consumer.Consume(mockConsumer, mockEventHandler, nil, nil)
 		Convey("When close is called", func() {
 
 			err := consumer.Close(context.Background())

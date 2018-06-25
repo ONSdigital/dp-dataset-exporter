@@ -1,18 +1,18 @@
 package event
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
-
-	"strconv"
 
 	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	"github.com/ONSdigital/go-ns/log"
-	"github.com/pkg/errors"
 )
 
 //go:generate moq -out eventtest/filter_store.go -pkg eventtest . FilterStore
@@ -32,15 +32,14 @@ type ExportHandler struct {
 	fileStore          FileStore
 	eventProducer      Producer
 	datasetAPICli      DatasetAPI
-	serviceToken       string
 	downloadServiceURL string
 }
 
 // DatasetAPI contains functions to call the dataset API.
 type DatasetAPI interface {
-	PutVersion(id, edition, version string, m dataset.Version, cfg ...dataset.Config) error
-	GetVersion(id, edition, version string, cfg ...dataset.Config) (m dataset.Version, err error)
-	GetInstance(instanceID string, cfg ...dataset.Config) (m dataset.Instance, err error)
+	PutVersion(ctx context.Context, id, edition, version string, m dataset.Version) error
+	GetVersion(ctx context.Context, id, edition, version string) (m dataset.Version, err error)
+	GetInstance(ctx context.Context, instanceID string) (m dataset.Instance, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -49,7 +48,7 @@ func NewExportHandler(filterStore FilterStore,
 	fileStore FileStore,
 	eventProducer Producer,
 	datasetAPI DatasetAPI,
-	serviceToken, downloadServiceURL string) *ExportHandler {
+	downloadServiceURL string) *ExportHandler {
 
 	return &ExportHandler{
 		filterStore:        filterStore,
@@ -57,7 +56,6 @@ func NewExportHandler(filterStore FilterStore,
 		fileStore:          fileStore,
 		eventProducer:      eventProducer,
 		datasetAPICli:      datasetAPI,
-		serviceToken:       serviceToken,
 		downloadServiceURL: downloadServiceURL,
 	}
 }
@@ -86,7 +84,7 @@ type Producer interface {
 }
 
 // Handle the export of a single filter output.
-func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
+func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted) error {
 	var csvExported *CSVExported
 
 	if event.FilterID != "" {
@@ -105,7 +103,7 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 			return err
 		}
 	} else {
-		isPublished, err := handler.isVersionPublished(event)
+		isPublished, err := handler.isVersionPublished(ctx, event)
 		if err != nil {
 			return err
 		}
@@ -117,7 +115,7 @@ func (handler *ExportHandler) Handle(event *FilterSubmitted) error {
 			"published":  isPublished}
 
 		log.Debug("dataset download job identified", logData)
-		csvExported, err = handler.fullDownload(event, isPublished)
+		csvExported, err = handler.fullDownload(ctx, event, isPublished)
 		if err != nil {
 			log.ErrorC("error handling dataset download job", err, logData)
 			return err
@@ -139,9 +137,9 @@ func (handler *ExportHandler) isFilterOutputPublished(event *FilterSubmitted) (b
 	return filter.Published != nil && *filter.Published == observation.Published, nil
 }
 
-func (handler *ExportHandler) isVersionPublished(event *FilterSubmitted) (bool, error) {
+func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *FilterSubmitted) (bool, error) {
 	if len(event.InstanceID) == 0 {
-		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version, dataset.Config{AuthToken: handler.serviceToken})
+		version, err := handler.datasetAPICli.GetVersion(ctx, event.DatasetID, event.Edition, event.Version)
 		if err != nil {
 			return false, err
 		}
@@ -149,7 +147,7 @@ func (handler *ExportHandler) isVersionPublished(event *FilterSubmitted) (bool, 
 		return version.State == publishedState, nil
 	}
 
-	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID, dataset.Config{AuthToken: handler.serviceToken})
+	instance, err := handler.datasetAPICli.GetInstance(ctx, event.InstanceID)
 	if err != nil {
 		return false, err
 	}
@@ -223,7 +221,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL}, nil
 }
 
-func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
+func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 	log.Info("handling pre canned job", log.Data{
 		"instance_id": event.InstanceID,
 		"dataset_id":  event.DatasetID,
@@ -274,11 +272,7 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 
 	v := dataset.Version{Downloads: downloads}
 
-	var config dataset.Config
-
-	config.AuthToken = handler.serviceToken
-
-	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
+	if err := handler.datasetAPICli.PutVersion(ctx, event.DatasetID, event.Edition, event.Version, v); err != nil {
 		return nil, errors.Wrap(err, "error while attempting update version downloads")
 	}
 

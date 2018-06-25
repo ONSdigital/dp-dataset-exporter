@@ -15,7 +15,6 @@ type Config struct {
 	FilterConsumerTopic      string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
 	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS" json:"-"`
 	Neo4jPoolSize            int           `envconfig:"NEO4J_POOL_SIZE"`
-	FilterAPIURL             string        `envconfig:"FILTER_API_URL"`
 	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN" json:"-"`
 	AWSRegion                string        `envconfig:"AWS_REGION"`
 	S3BucketName             string        `envconfig:"S3_BUCKET_NAME"`
@@ -45,7 +44,6 @@ func Get() (*Config, error) {
 		DatabaseAddress:          "bolt://localhost:7687",
 		Neo4jPoolSize:            5,
 		FilterAPIURL:             "http://localhost:22100",
-		FilterAPIAuthToken:       "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		CSVExportedProducerTopic: "common-output-created",
 		S3BucketName:             "csv-exported",
 		S3PrivateBucketName:      "csv-exported",
