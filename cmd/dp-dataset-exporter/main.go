@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	bolt "github.com/johnnadratowski/golang-neo4j-bolt-driver"
+
 	"github.com/ONSdigital/go-ns/healthcheck"
 	"github.com/ONSdigital/go-ns/neo4j"
 	"github.com/ONSdigital/go-ns/vault"
@@ -24,7 +26,6 @@ import (
 	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
-	bolt "github.com/ONSdigital/golang-neo4j-bolt-driver"
 )
 
 func main() {
