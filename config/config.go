@@ -15,7 +15,7 @@ type Config struct {
 	FilterConsumerTopic      string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
 	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS" json:"-"`
 	Neo4jPoolSize            int           `envconfig:"NEO4J_POOL_SIZE"`
-	FilterAPIAuthToken       string        `envconfig:"FILTER_API_AUTH_TOKEN" json:"-"`
+	FilterAPIURL             string        `envconfig:"FILTER_API_URL"`
 	AWSRegion                string        `envconfig:"AWS_REGION"`
 	S3BucketName             string        `envconfig:"S3_BUCKET_NAME"`
 	S3PrivateBucketName      string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
@@ -37,28 +37,30 @@ type Config struct {
 func Get() (*Config, error) {
 
 	cfg := &Config{
-		BindAddr:                 ":22500",
-		KafkaAddr:                []string{"localhost:9092"},
-		FilterConsumerTopic:      "filter-job-submitted",
-		FilterConsumerGroup:      "dp-dataset-exporter",
-		DatabaseAddress:          "bolt://localhost:7687",
-		Neo4jPoolSize:            5,
-		FilterAPIURL:             "http://localhost:22100",
-		CSVExportedProducerTopic: "common-output-created",
-		S3BucketName:             "csv-exported",
-		S3PrivateBucketName:      "csv-exported",
-		AWSRegion:                "eu-west-1",
-		DatasetAPIURL:            "http://localhost:22000",
-		DatasetAPIAuthToken:      "FD0108EA-825D-411C-9B1D-41EF7727F465",
-		ErrorProducerTopic:       "filter-error",
-		GracefulShutdownTimeout:  time.Second * 10,
-		HealthCheckInterval:      time.Minute,
-		VaultPath:                "secret/shared/psk",
-		VaultAddress:             "http://localhost:8200",
-		VaultToken:               "",
-		DownloadServiceURL:       "http://localhost:23600",
-		ServiceAuthToken:         "0f49d57b-c551-4d33-af1e-a442801dd851",
-		ZebedeeURL:               "http://localhost:8082",
+		BindAddr:                    ":22500",
+		KafkaAddr:                   []string{"localhost:9092"},
+		FilterConsumerTopic:         "filter-job-submitted",
+		FilterConsumerGroup:         "dp-dataset-exporter",
+		DatabaseAddress:             "bolt://localhost:7687",
+		Neo4jPoolSize:               5,
+		FilterAPIURL:                "http://localhost:22100",
+		CSVExportedProducerTopic:    "common-output-created",
+		S3BucketName:                "csv-exported",
+		S3PrivateBucketName:         "csv-exported",
+		AWSRegion:                   "eu-west-1",
+		DatasetAPIURL:               "http://localhost:22000",
+		DatasetAPIAuthToken:         "FD0108EA-825D-411C-9B1D-41EF7727F465",
+		ErrorProducerTopic:          "filter-error",
+		GracefulShutdownTimeout:     time.Second * 10,
+		HealthCheckInterval:         time.Minute,
+		HealthCheckRecoveryInterval: time.Second * 2,
+		VaultPath:                   "secret/shared/psk",
+		VaultAddress:                "http://localhost:8200",
+		VaultToken:                  "",
+		DownloadServiceURL:          "http://localhost:23600",
+		ServiceAuthToken:            "0f49d57b-c551-4d33-af1e-a442801dd851",
+		StartupTimeout:              time.Second * 125,
+		ZebedeeURL:                  "http://localhost:8082",
 	}
 
 	err := envconfig.Process("", cfg)
