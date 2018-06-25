@@ -9,28 +9,30 @@ import (
 
 // Config values for the application.
 type Config struct {
-	BindAddr                 string        `envconfig:"BIND_ADDR"`
-	KafkaAddr                []string      `envconfig:"KAFKA_ADDR"`
-	FilterConsumerGroup      string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
-	FilterConsumerTopic      string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
-	DatabaseAddress          string        `envconfig:"DATABASE_ADDRESS" json:"-"`
-	Neo4jPoolSize            int           `envconfig:"NEO4J_POOL_SIZE"`
-	FilterAPIURL             string        `envconfig:"FILTER_API_URL"`
-	AWSRegion                string        `envconfig:"AWS_REGION"`
-	S3BucketName             string        `envconfig:"S3_BUCKET_NAME"`
-	S3PrivateBucketName      string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
-	CSVExportedProducerTopic string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
-	DatasetAPIURL            string        `envconfig:"DATASET_API_URL"`
-	DatasetAPIAuthToken      string        `envconfig:"DATASET_API_AUTH_TOKEN" json:"-"`
-	ErrorProducerTopic       string        `envconfig:"ERROR_PRODUCER_TOPIC"`
-	GracefulShutdownTimeout  time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
-	HealthCheckInterval      time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
-	VaultToken               string        `envconfig:"VAULT_TOKEN"                json:"-"`
-	VaultAddress             string        `envconfig:"VAULT_ADDR"`
-	VaultPath                string        `envconfig:"VAULT_PATH"`
-	DownloadServiceURL       string        `envconfig:"DOWNLOAD_SERVICE_URL"`
-	ServiceAuthToken         string        `envconfig:"SERVICE_AUTH_TOKEN" json:"-"`
-	ZebedeeURL               string        `envconfig:"ZEBEDEE_URL"`
+	BindAddr                    string        `envconfig:"BIND_ADDR"`
+	KafkaAddr                   []string      `envconfig:"KAFKA_ADDR"`
+	FilterConsumerGroup         string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
+	FilterConsumerTopic         string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
+	DatabaseAddress             string        `envconfig:"DATABASE_ADDRESS"              json:"-"`
+	Neo4jPoolSize               int           `envconfig:"NEO4J_POOL_SIZE"`
+	FilterAPIURL                string        `envconfig:"FILTER_API_URL"`
+	AWSRegion                   string        `envconfig:"AWS_REGION"`
+	S3BucketName                string        `envconfig:"S3_BUCKET_NAME"`
+	S3PrivateBucketName         string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
+	CSVExportedProducerTopic    string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
+	DatasetAPIURL               string        `envconfig:"DATASET_API_URL"`
+	DatasetAPIAuthToken         string        `envconfig:"DATASET_API_AUTH_TOKEN"        json:"-"`
+	ErrorProducerTopic          string        `envconfig:"ERROR_PRODUCER_TOPIC"`
+	GracefulShutdownTimeout     time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
+	HealthCheckInterval         time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
+	HealthCheckRecoveryInterval time.Duration `envconfig:"HEALTHCHECK_RECOVERY_INTERVAL"`
+	VaultToken                  string        `envconfig:"VAULT_TOKEN"                   json:"-"`
+	VaultAddress                string        `envconfig:"VAULT_ADDR"`
+	VaultPath                   string        `envconfig:"VAULT_PATH"`
+	DownloadServiceURL          string        `envconfig:"DOWNLOAD_SERVICE_URL"`
+	ServiceAuthToken            string        `envconfig:"SERVICE_AUTH_TOKEN"            json:"-"`
+	StartupTimeout              time.Duration `envconfig:"STARTUP_TIMEOUT"`
+	ZebedeeURL                  string        `envconfig:"ZEBEDEE_URL"`
 }
 
 // Get the configuration values from the environment or provide the defaults.

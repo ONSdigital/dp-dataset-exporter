@@ -81,9 +81,13 @@ func main() {
 	// eventConsumer will Consume when the service is healthy - see goroutine below
 	eventConsumer := event.NewConsumer()
 
+	healthAlertChan := make(chan bool, 1)
+	healthcheckRequestChan := make(chan bool, 1)
+	healthChecker := healthcheck.NewServerWithAlerts(
 		cfg.BindAddr,
-		cfg.HealthCheckInterval,
+		cfg.HealthCheckInterval, cfg.HealthCheckRecoveryInterval,
 		errorChannel,
+		healthAlertChan, healthcheckRequestChan,
 		filterHealthCheck.New(cfg.FilterAPIURL, "", ""),
 		neo4j.NewHealthCheckClient(neo4jConnPool),
 		vaultClient,
