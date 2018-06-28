@@ -118,13 +118,13 @@ func TestConsume_HandlerError(t *testing.T) {
 			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler, nil)
 			waitForMessageToBeCommitted(message)
 
-			Convey("The error handler is given the error returned from the event handler", func() {
+			Convey("Then the error handler is given the error returned from the event handler", func() {
 				So(len(mockErrorHandler.HandleCalls()), ShouldEqual, 1)
 				So(mockErrorHandler.HandleCalls()[0].Err, ShouldEqual, expectedError)
 				So(mockErrorHandler.HandleCalls()[0].FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 
-			Convey("The message is committed", func() {
+			Convey("and the message is not committed - to be retried", func() {
 				So(message.Committed(), ShouldEqual, false)
 			})
 		})
