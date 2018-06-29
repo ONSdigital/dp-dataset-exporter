@@ -33,6 +33,8 @@ type Config struct {
 	ServiceAuthToken            string        `envconfig:"SERVICE_AUTH_TOKEN"            json:"-"`
 	StartupTimeout              time.Duration `envconfig:"STARTUP_TIMEOUT"`
 	ZebedeeURL                  string        `envconfig:"ZEBEDEE_URL"`
+	FullDatasetFilePrefix       string        `envconfig:"FULL_DATASET_FILE_PREFIX"`
+	FilteredDatasetFilePrefix   string        `envconfig:"FILTERED_DATASET_FILE_PREFIX"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -63,6 +65,8 @@ func Get() (*Config, error) {
 		ServiceAuthToken:            "0f49d57b-c551-4d33-af1e-a442801dd851",
 		StartupTimeout:              time.Second * 125,
 		ZebedeeURL:                  "http://localhost:8082",
+		FullDatasetFilePrefix:       "full-datasets/",
+		FilteredDatasetFilePrefix:   "filtered-datasets/",
 	}
 
 	err := envconfig.Process("", cfg)

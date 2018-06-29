@@ -70,13 +70,30 @@ func main() {
 	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
 
 	observationStore := observation.NewStore(neo4jConnPool)
-	fileStore, err := file.NewStore(cfg.AWSRegion, cfg.S3BucketName, cfg.S3PrivateBucketName, cfg.VaultPath, vaultClient)
+
+	fileStore, err := file.NewStore(
+		cfg.AWSRegion,
+		cfg.S3BucketName,
+		cfg.S3PrivateBucketName,
+		cfg.VaultPath,
+		vaultClient,
+	)
 	exitIfError(err)
+
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
 	datasetAPICli := dataset.NewAPIClient(cfg.DatasetAPIURL, cfg.DatasetAPIAuthToken, "")
 
-	eventHandler := event.NewExportHandler(filterStore, observationStore, fileStore, eventProducer, datasetAPICli, cfg.DownloadServiceURL)
+	eventHandler := event.NewExportHandler(
+		filterStore,
+		observationStore,
+		fileStore,
+		eventProducer,
+		datasetAPICli,
+		cfg.DownloadServiceURL,
+		cfg.FullDatasetFilePrefix,
+		cfg.FilteredDatasetFilePrefix,
+	)
 
 	// eventConsumer will Consume when the service is healthy - see goroutine below
 	eventConsumer := event.NewConsumer()

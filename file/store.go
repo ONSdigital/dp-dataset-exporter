@@ -43,7 +43,12 @@ type Store struct {
 }
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
-func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaultClient VaultClient) (*Store, error) {
+func NewStore(
+	region,
+	publicBucket,
+	privateBucket,
+	vaultPath string,
+	vaultClient VaultClient) (*Store, error) {
 
 	config := aws.NewConfig().WithRegion(region)
 
@@ -63,9 +68,7 @@ func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaul
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
-func (store *Store) PutFile(reader io.Reader, fileID string, isPublished bool) (url string, err error) {
-
-	filename := fileID + ".csv"
+func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (url string, err error) {
 
 	var location string
 	if isPublished {
