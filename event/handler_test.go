@@ -158,7 +158,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
 				return "", expectedError
 			},
 		}
@@ -318,7 +318,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
 				return "", expectedError
 			},
 		}
@@ -374,7 +374,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
 				return fileHRef, nil
 			},
 		}
@@ -434,7 +434,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
 				return fileHRef, nil
 			},
 		}
@@ -539,7 +539,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
 				return fileHRef, nil
 			},
 		}
@@ -681,7 +681,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		fileStockMock.PutFileFunc = func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "", mockErr
 		}
 
@@ -726,7 +726,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		fileStockMock.PutFileFunc = func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "/url", nil
 		}
 
@@ -812,7 +812,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		fileStockMock.PutFileFunc = func(reader io.Reader, fileID string, isPublished bool) (string, error) {
+		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "/url", nil
 		}
 
