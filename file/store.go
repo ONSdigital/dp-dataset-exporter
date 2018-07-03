@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"io"
+	"path"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -94,8 +95,12 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 		})
 
 		psk := createPSK()
-		vaultPath := store.vaultPath + "/" + filename
+		vaultPath := store.vaultPath + "/" + path.Base(filename)
 		vaultKey := "key"
+
+		log.Info("writing key to vault", log.Data{
+			"vault_path": vaultPath,
+		})
 		if err := store.vaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
 			return "", err
 		}

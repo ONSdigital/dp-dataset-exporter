@@ -35,7 +35,8 @@ type Config struct {
 	PublicKey  *rsa.PublicKey
 	PrivateKey *rsa.PrivateKey
 
-	HasUserDefinedPSK bool
+	HasUserDefinedPSK  bool
+	MultipartChunkSize int
 }
 
 // CryptoClient provides a wrapper to the aws-sdk-go S3
@@ -46,6 +47,7 @@ type CryptoClient struct {
 	privKey           *rsa.PrivateKey
 	publicKey         *rsa.PublicKey
 	hasUserDefinedPSK bool
+	chunkSize         int
 }
 
 // Uploader provides a wrapper to the aws-sdk-go s3manager uploader
@@ -59,7 +61,7 @@ type Uploader struct {
 // New supports the creation of an Encryption supported client
 // with a given aws session and rsa Private Key.
 func New(sess *session.Session, cfg *Config) *CryptoClient {
-	cc := &CryptoClient{s3.New(sess), cfg.PrivateKey, cfg.PublicKey, cfg.HasUserDefinedPSK}
+	cc := &CryptoClient{s3.New(sess), cfg.PrivateKey, cfg.PublicKey, cfg.HasUserDefinedPSK, cfg.MultipartChunkSize}
 
 	if cc.privKey != nil {
 		cc.publicKey = &cc.privKey.PublicKey
@@ -70,7 +72,7 @@ func New(sess *session.Session, cfg *Config) *CryptoClient {
 
 // NewUploader creates a new instance of the s3crypto Uploader
 func NewUploader(sess *session.Session, cfg *Config) *Uploader {
-	cc := &CryptoClient{s3.New(sess), cfg.PrivateKey, cfg.PublicKey, cfg.HasUserDefinedPSK}
+	cc := &CryptoClient{s3.New(sess), cfg.PrivateKey, cfg.PublicKey, cfg.HasUserDefinedPSK, cfg.MultipartChunkSize}
 
 	if cc.privKey != nil {
 		cc.publicKey = &cc.privKey.PublicKey
@@ -283,7 +285,12 @@ func (c *CryptoClient) GetObjectRequest(input *s3.GetObjectInput) (req *request.
 		return
 	}
 
-	content, err := decryptObjectContent(psk, out.Body)
+	var content []byte
+	if c.chunkSize > 0 {
+		content, err = decryptObjectContentChunks(c.chunkSize, psk, out.Body)
+	} else {
+		content, err = decryptObjectContent(psk, out.Body)
+	}
 	if err != nil {
 		req.Error = err
 		return
@@ -304,7 +311,12 @@ func (c *CryptoClient) GetObjectRequestWithPSK(input *s3.GetObjectInput, psk []b
 		return
 	}
 
-	content, err := decryptObjectContent(psk, out.Body)
+	var content []byte
+	if c.chunkSize > 0 {
+		content, err = decryptObjectContentChunks(c.chunkSize, psk, out.Body)
+	} else {
+		content, err = decryptObjectContent(psk, out.Body)
+	}
 	if err != nil {
 		req.Error = err
 		return
@@ -479,42 +491,70 @@ func (u *Uploader) UploadWithPSK(input *s3manager.UploadInput, psk []byte) (outp
 }
 
 func encryptObjectContent(psk []byte, b io.Reader) ([]byte, error) {
+	unencryptedBytes, err := ioutil.ReadAll(b)
+	if err != nil {
+		return nil, err
+	}
+
 	block, err := aes.NewCipher(psk)
 	if err != nil {
 		return nil, err
 	}
 
-	var iv [aes.BlockSize]byte
-	stream := cipher.NewOFB(block, iv[:])
+	encryptedBytes := make([]byte, len(unencryptedBytes))
 
-	buf := new(bytes.Buffer)
-	writer := &cipher.StreamWriter{S: stream, W: buf}
+	stream := cipher.NewCFBEncrypter(block, psk)
 
-	if _, err := io.Copy(writer, b); err != nil {
+	stream.XORKeyStream(encryptedBytes, unencryptedBytes)
+
+	return encryptedBytes, nil
+}
+
+func decryptObjectContentChunks(size int, psk []byte, r io.ReadCloser) ([]byte, error) {
+
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
 		return nil, err
+	}
+
+	var buf bytes.Buffer
+	for chunkOffset := 0; chunkOffset < len(b); chunkOffset += size {
+		chunkEnd := chunkOffset + size
+		if chunkEnd > len(b) {
+			chunkEnd = len(b)
+		}
+
+		unencryptedChunk, err := decryptObjectContent(psk, ioutil.NopCloser(bytes.NewReader(b[chunkOffset:chunkEnd])))
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = buf.Write(unencryptedChunk)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return buf.Bytes(), nil
 }
 
 func decryptObjectContent(psk []byte, b io.ReadCloser) ([]byte, error) {
+	encryptedBytes, err := ioutil.ReadAll(b)
+	if err != nil {
+		return nil, err
+	}
+
 	block, err := aes.NewCipher(psk)
 	if err != nil {
 		return nil, err
 	}
 
-	var iv [aes.BlockSize]byte
-	stream := cipher.NewOFB(block, iv[:])
+	stream := cipher.NewCFBDecrypter(block, psk)
 
-	buf := new(bytes.Buffer)
+	unencryptedBytes := make([]byte, len(encryptedBytes))
+	stream.XORKeyStream(unencryptedBytes, encryptedBytes)
 
-	reader := &cipher.StreamReader{S: stream, R: b}
-
-	if _, err := io.Copy(buf, reader); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+	return unencryptedBytes, nil
 }
 
 func createPSK() []byte {
