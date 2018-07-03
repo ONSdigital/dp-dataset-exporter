@@ -2,6 +2,7 @@ package file
 
 import (
 	"errors"
+	"path"
 	"strings"
 	"testing"
 
@@ -98,7 +99,8 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 		})
 	})
 
-	Convey("Given a store with a valid vault client and cryptoUploader", t, func() {
+	Convey("Given an unpublished file", t, func() {
+
 		vaultClientMock := &filetest.VaultClientMock{}
 		vaultClientMock.WriteKeyFunc = func(string, string, string) error {
 			return nil
@@ -111,12 +113,22 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 
 		store := &Store{vaultClient: vaultClientMock, cryptoUploader: cryptoUploaderMock}
 
-		Convey("When PutFile is called for an unpublished version", func() {
-			url, err := store.PutFile(strings.NewReader(""), "", false)
+		Convey("When PutFile is called", func() {
+
+			filename := "datasets/123.csv"
+			url, err := store.PutFile(strings.NewReader(""), filename, false)
 
 			Convey("Then the correct location is returned", func() {
 				So(err, ShouldBeNil)
 				So(url, ShouldEqual, privateTestLocation)
+			})
+
+			Convey("Then the vault client is called to store the key", func() {
+				So(len(vaultClientMock.WriteKeyCalls()), ShouldEqual, 1)
+			})
+
+			Convey("Then the vault client is called without the path contained in the filename", func() {
+				So(vaultClientMock.WriteKeyCalls()[0].Path, ShouldEqual, store.vaultPath+"/"+path.Base(filename))
 			})
 		})
 	})
