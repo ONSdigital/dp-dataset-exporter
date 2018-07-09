@@ -27,13 +27,15 @@ const publishedState = "published"
 
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
-	filterStore        FilterStore
-	observationStore   ObservationStore
-	fileStore          FileStore
-	eventProducer      Producer
-	datasetAPICli      DatasetAPI
-	serviceToken       string
-	downloadServiceURL string
+	filterStore               FilterStore
+	observationStore          ObservationStore
+	fileStore                 FileStore
+	eventProducer             Producer
+	datasetAPICli             DatasetAPI
+	serviceToken              string
+	downloadServiceURL        string
+	fullDatasetFilePrefix     string
+	filteredDatasetFilePrefix string
 }
 
 // DatasetAPI contains functions to call the dataset API.
@@ -49,16 +51,21 @@ func NewExportHandler(filterStore FilterStore,
 	fileStore FileStore,
 	eventProducer Producer,
 	datasetAPI DatasetAPI,
-	serviceToken, downloadServiceURL string) *ExportHandler {
+	serviceToken,
+	downloadServiceURL,
+	fullDatasetFilePrefix,
+	filteredDatasetFilePrefix string) *ExportHandler {
 
 	return &ExportHandler{
-		filterStore:        filterStore,
-		observationStore:   observationStore,
-		fileStore:          fileStore,
-		eventProducer:      eventProducer,
-		datasetAPICli:      datasetAPI,
-		serviceToken:       serviceToken,
-		downloadServiceURL: downloadServiceURL,
+		filterStore:               filterStore,
+		observationStore:          observationStore,
+		fileStore:                 fileStore,
+		eventProducer:             eventProducer,
+		datasetAPICli:             datasetAPI,
+		serviceToken:              serviceToken,
+		downloadServiceURL:        downloadServiceURL,
+		fullDatasetFilePrefix:     fullDatasetFilePrefix,
+		filteredDatasetFilePrefix: filteredDatasetFilePrefix,
 	}
 }
 
@@ -77,7 +84,7 @@ type ObservationStore interface {
 
 // FileStore provides storage for filtered output files.
 type FileStore interface {
-	PutFile(reader io.Reader, fileID string, isPublished bool) (url string, err error)
+	PutFile(reader io.Reader, filename string, isPublished bool) (url string, err error)
 }
 
 // Producer handles producing output events.
@@ -177,9 +184,11 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		}
 	}()
 
+	filename := handler.filteredDatasetFilePrefix + filter.FilterID + ".csv"
+
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(reader, filter.FilterID, isPublished)
+	fileURL, err := handler.fileStore.PutFile(reader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Debug("empty results from filter job", log.Data{"instance_id": filter.InstanceID,
@@ -247,7 +256,9 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 	fileID := uuid.NewV4().String()
 	log.Info("storing pre-publish file", log.Data{"fileID": fileID})
 
-	fileURL, err := handler.fileStore.PutFile(reader, fileID, isPublished)
+	filename := handler.fullDatasetFilePrefix + fileID + ".csv"
+
+	fileURL, err := handler.fileStore.PutFile(reader, filename, isPublished)
 	if err != nil {
 		return nil, err
 	}

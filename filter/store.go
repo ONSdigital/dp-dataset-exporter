@@ -30,7 +30,7 @@ type FilterOuput struct {
 	InstanceID string     `json:"instance_id"`
 	State      string     `json:"state,omitempty"`
 	Downloads  *Downloads `json:"downloads,omitempty"`
-	Events     []*Event    `json:"events,omitempty"`
+	Events     []*Event   `json:"events,omitempty"`
 	Published  bool       `json:"published,omitempty"`
 }
 

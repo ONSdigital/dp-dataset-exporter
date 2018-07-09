@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"io"
+	"path"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -43,7 +44,12 @@ type Store struct {
 }
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
-func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaultClient VaultClient) (*Store, error) {
+func NewStore(
+	region,
+	publicBucket,
+	privateBucket,
+	vaultPath string,
+	vaultClient VaultClient) (*Store, error) {
 
 	config := aws.NewConfig().WithRegion(region)
 
@@ -63,9 +69,7 @@ func NewStore(region string, publicBucket, privateBucket, vaultPath string, vaul
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
-func (store *Store) PutFile(reader io.Reader, fileID string, isPublished bool) (url string, err error) {
-
-	filename := fileID + ".csv"
+func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (url string, err error) {
 
 	var location string
 	if isPublished {
@@ -91,8 +95,12 @@ func (store *Store) PutFile(reader io.Reader, fileID string, isPublished bool) (
 		})
 
 		psk := createPSK()
-		vaultPath := store.vaultPath + "/" + filename
+		vaultPath := store.vaultPath + "/" + path.Base(filename)
 		vaultKey := "key"
+
+		log.Info("writing key to vault", log.Data{
+			"vault_path": vaultPath,
+		})
 		if err := store.vaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
 			return "", err
 		}
