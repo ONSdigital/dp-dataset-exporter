@@ -54,6 +54,31 @@ var publishedDataset = dataset.Version{
 var associatedDataset = dataset.Version{
 	State: associatedState,
 }
+
+var metadata = dataset.Metadata{
+	Version: dataset.Version{
+		Downloads: map[string]dataset.Download{
+			"CSV": dataset.Download{
+				URL: "/url",
+			},
+		},
+		Dimensions: []dataset.Dimension{
+			dataset.Dimension{},
+			dataset.Dimension{},
+		},
+	},
+	Model: dataset.Model{
+		Publisher: &dataset.Publisher{},
+	},
+}
+
+var csvBytes = []byte(`v4_0, a,b,c,
+1,e,f,g,
+2,h,i,j,
+`)
+
+var csvContent = string(csvBytes)
+
 var cfg = dataset.Config{
 	AuthToken: ServiceToken,
 }
@@ -61,9 +86,13 @@ var cfg = dataset.Config{
 func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 	Convey("Given a handler with a mock filter store that returns an error", t, func() {
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockError := errors.New("get filters failed")
@@ -94,9 +123,13 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in the database")
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		var mockFilterStore = &eventtest.FilterStoreMock{
@@ -131,14 +164,18 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in the database")
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "wut", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -181,14 +218,18 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 
 	Convey("Given a handler with a filter query job returns no results", t, func() {
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -224,7 +265,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 
 			Convey("The filter state is updated to empty", func() {
 				So(err, ShouldNotBeNil)
-				So(1, ShouldEqual, len(mockFilterStore.PutStateAsEmptyCalls()))
+				So(mockFilterStore.PutStateAsEmptyCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
@@ -234,14 +275,18 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 
 	Convey("Given a handler with a filter query job returns no results", t, func() {
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -277,7 +322,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 
 			Convey("The filter state is updated to empty", func() {
 				So(err, ShouldNotBeNil)
-				So(1, ShouldEqual, len(mockFilterStore.PutStateAsErrorCalls()))
+				So(mockFilterStore.PutStateAsErrorCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
@@ -289,14 +334,18 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in put CSV data")
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "wut", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -341,14 +390,18 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in event producer")
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "wut", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -400,14 +453,18 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 	Convey("Given a handler with a mocked dependencies", t, func() {
 
-		datasetAPIMock := &eventtest.DatasetAPIMock{}
-		datasetAPIMock.GetVersionFunc = func(string, string, string, ...dataset.Config) (dataset.Version, error) {
-			return associatedDataset, nil
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
+				return associatedDataset, nil
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 		}
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "wut", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -453,7 +510,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 			Convey("The filter store is called with the correct filter job ID", func() {
 
-				So(len(mockFilterStore.GetFilterCalls()), ShouldEqual, 2)
+				So(mockFilterStore.GetFilterCalls(), ShouldHaveLength, 2)
 
 				actualFilterID := mockFilterStore.GetFilterCalls()[0].FilterID
 				So(actualFilterID, ShouldEqual, filterSubmittedEvent.FilterID)
@@ -461,7 +518,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 			Convey("The observation store is called with the filter returned from the filter store", func() {
 
-				So(len(mockObservationStore.GetCSVRowsCalls()), ShouldEqual, 1)
+				So(mockObservationStore.GetCSVRowsCalls(), ShouldHaveLength, 1)
 
 				actualFilter := mockObservationStore.GetCSVRowsCalls()[0].Filter
 				So(actualFilter, ShouldEqual, filter)
@@ -469,7 +526,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 			Convey("The file store is called with the reader returned from the observation store.", func() {
 
-				So(len(mockedFileStore.PutFileCalls()), ShouldEqual, 1)
+				So(mockedFileStore.PutFileCalls(), ShouldHaveLength, 1)
 
 				actual := mockedFileStore.PutFileCalls()[0].Reader
 				So(actual, ShouldNotBeNil)
@@ -477,7 +534,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 			Convey("The file store is called with a filename containing the configured prefix.", func() {
 
-				So(mockedFileStore.PutFileCalls()[0].FileID, ShouldStartWith, filteredDatasetFilePrefix)
+				So(mockedFileStore.PutFileCalls()[0].Filename, ShouldStartWith, filteredDatasetFilePrefix)
 			})
 
 			Convey("The filter store is called with file FileURL returned from the file store.", func() {
@@ -492,12 +549,12 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 			Convey("The event producer is called with the filter ID.", func() {
 
-				So(len(mockedEventProducer.CSVExportedCalls()), ShouldEqual, 1)
+				So(mockedEventProducer.CSVExportedCalls(), ShouldHaveLength, 1)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.FilterID, ShouldEqual, filterSubmittedEvent.FilterID)
 			})
 
 			Convey("The CSV row reader returned from the DB is closed.", func() {
-				So(len(mockRowReader.CloseCalls()), ShouldEqual, 1)
+				So(mockRowReader.CloseCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
@@ -511,6 +568,12 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			GetVersionFunc: func(string, string, string, ...dataset.Config) (dataset.Version, error) {
 				return associatedDataset, nil
 			},
+			GetMetadataURLFunc: func(string, string, string) string {
+				return "/metadata"
+			},
+			GetVersionMetadataFunc: func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+				return metadata, nil
+			},
 			PutVersionFunc: func(id string, edition string, version string, m dataset.Version, cfg ...dataset.Config) error {
 				return nil
 			},
@@ -518,7 +581,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 
 		mockRowReader := &observationtest.CSVRowReaderMock{
 			ReadFunc: func() (string, error) {
-				return "wut", nil
+				return csvContent, nil
 			},
 			CloseFunc: func() error {
 				return nil
@@ -557,22 +620,25 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 
 			Convey("The dataset API is called with the correct version parameters", func() {
 
-				So(len(datasetAPIMock.GetVersionCalls()), ShouldEqual, 1)
+				So(datasetAPIMock.GetVersionCalls(), ShouldHaveLength, 1)
 
 				getVersionCall := datasetAPIMock.GetVersionCalls()[0]
 
-				So(getVersionCall.Id, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
+				So(getVersionCall.ID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
 				So(getVersionCall.Edition, ShouldEqual, fullFileDownloadSubmittedEvent.Edition)
 				So(getVersionCall.Version, ShouldEqual, fullFileDownloadSubmittedEvent.Version)
+
+				So(datasetAPIMock.GetVersionMetadataCalls(), ShouldHaveLength, 1)
+
 			})
 
 			Convey("The observation store is called", func() {
-				So(len(mockObservationStore.GetCSVRowsCalls()), ShouldEqual, 1)
+				So(mockObservationStore.GetCSVRowsCalls(), ShouldHaveLength, 1)
 			})
 
 			Convey("The file store is called with the reader returned from the observation store.", func() {
 
-				So(len(mockedFileStore.PutFileCalls()), ShouldEqual, 1)
+				So(mockedFileStore.PutFileCalls(), ShouldHaveLength, 2)
 
 				actual := mockedFileStore.PutFileCalls()[0].Reader
 				So(actual, ShouldNotBeNil)
@@ -580,28 +646,28 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 
 			Convey("The file store is called with a filename containing the configured prefix.", func() {
 
-				So(mockedFileStore.PutFileCalls()[0].FileID, ShouldStartWith, fullDatasetFilePrefix)
+				So(mockedFileStore.PutFileCalls()[0].Filename, ShouldStartWith, fullDatasetFilePrefix)
 			})
 
 			Convey("The filter store is called with file FileURL returned from the file store.", func() {
 
-				So(len(datasetAPIMock.PutVersionCalls()), ShouldEqual, 1)
+				So(datasetAPIMock.PutVersionCalls(), ShouldHaveLength, 1)
 
-				So(datasetAPIMock.PutVersionCalls()[0].Id, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
+				So(datasetAPIMock.PutVersionCalls()[0].ID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
 				So(datasetAPIMock.PutVersionCalls()[0].Edition, ShouldEqual, fullFileDownloadSubmittedEvent.Edition)
 				So(datasetAPIMock.PutVersionCalls()[0].Version, ShouldEqual, fullFileDownloadSubmittedEvent.Version)
 			})
 
 			Convey("The event producer is called with the filter ID.", func() {
 
-				So(len(mockedEventProducer.CSVExportedCalls()), ShouldEqual, 1)
+				So(mockedEventProducer.CSVExportedCalls(), ShouldHaveLength, 1)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.DatasetID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.Edition, ShouldEqual, fullFileDownloadSubmittedEvent.Edition)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.Version, ShouldEqual, fullFileDownloadSubmittedEvent.Version)
 			})
 
 			Convey("The CSV row reader returned from the DB is closed.", func() {
-				So(len(mockRowReader.CloseCalls()), ShouldEqual, 1)
+				So(mockRowReader.CloseCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
@@ -639,6 +705,14 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
+		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
+			return "/metadata"
+		}
+
+		datasetApiMock.GetVersionMetadataFunc = func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+			return metadata, nil
+		}
+
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg.AuthToken, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("when handle is called", func() {
@@ -649,11 +723,12 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and only the expected calls are made", func() {
-				So(len(observationStoreMock.GetCSVRowsCalls()), ShouldEqual, 1)
-				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 0)
+				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
+				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetVersionCalls(), ShouldHaveLength, 0)
+				So(datasetApiMock.GetVersionMetadataCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetInstanceCalls(), ShouldHaveLength, 1)
-				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 0)
+				So(datasetApiMock.PutVersionCalls(), ShouldHaveLength, 0)
 			})
 		})
 	})
@@ -668,6 +743,9 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		csvRowReaderMock := &observationtest.CSVRowReaderMock{
 			CloseFunc: func() error {
 				return nil
+			},
+			ReadFunc: func() (string, error) {
+				return csvContent, nil
 			},
 		}
 
@@ -689,15 +767,16 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and only the expected calls are made", func() {
-				So(len(observationStoreMock.GetCSVRowsCalls()), ShouldEqual, 1)
+				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
 				So(observationStoreMock.GetCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
 
-				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 1)
+				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 1)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
 
 				So(datasetApiMock.GetVersionCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetInstanceCalls(), ShouldHaveLength, 1)
-				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 0)
+				So(datasetApiMock.GetVersionMetadataCalls(), ShouldHaveLength, 0)
+				So(datasetApiMock.PutVersionCalls(), ShouldHaveLength, 0)
 			})
 		})
 	})
@@ -709,9 +788,20 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
+		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
+			return "/metadata"
+		}
+
+		datasetApiMock.GetVersionMetadataFunc = func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+			return metadata, nil
+		}
+
 		csvRowReaderMock := &observationtest.CSVRowReaderMock{
 			CloseFunc: func() error {
 				return nil
+			},
+			ReadFunc: func() (string, error) {
+				return csvContent, nil
 			},
 		}
 
@@ -741,17 +831,21 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and the expected calls are made with the expected ", func() {
-				So(len(observationStoreMock.GetCSVRowsCalls()), ShouldEqual, 1)
+				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
 				So(observationStoreMock.GetCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
 
-				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 1)
+				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 2)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
 
-				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 1)
 				So(datasetApiMock.GetVersionCalls(), ShouldHaveLength, 0)
+				So(datasetApiMock.GetVersionMetadataCalls(), ShouldHaveLength, 1)
 				So(datasetApiMock.GetInstanceCalls(), ShouldHaveLength, 1)
-				So(datasetApiMock.PutVersionCalls()[0].M.Downloads, ShouldResemble, map[string]dataset.Download{
-					"CSV": {Size: "0", URL: downloadServiceURL + "/downloads/datasets/111/editions/333/versions/444.csv", Private: "/url"},
+
+				So(datasetApiMock.PutVersionCalls(), ShouldHaveLength, 1)
+				So(datasetApiMock.PutVersionCalls()[0].M.Downloads["CSV"], ShouldResemble, dataset.Download{
+					Size:    "0",
+					URL:     downloadServiceURL + "/downloads/datasets/111/editions/333/versions/444.csv",
+					Private: "/url",
 				})
 			})
 		})
@@ -762,6 +856,19 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		datasetApiMock.GetInstanceFunc = func(string, ...dataset.Config) (dataset.Instance, error) {
 			return dataset.Instance{}, errors.New("dataset instances error")
+		}
+
+		csvRowReaderMock := &observationtest.CSVRowReaderMock{
+			CloseFunc: func() error {
+				return nil
+			},
+			ReadFunc: func() (string, error) {
+				return csvContent, nil
+			},
+		}
+
+		observationStoreMock.GetCSVRowsFunc = func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			return csvRowReaderMock, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg.AuthToken, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
@@ -776,10 +883,9 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			Convey("and the expected calls are made", func() {
 				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 0)
 
-				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 0)
-
-				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 0)
+				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetVersionCalls(), ShouldHaveLength, 0)
+				So(datasetApiMock.GetVersionMetadataCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetInstanceCalls(), ShouldHaveLength, 1)
 				So(datasetApiMock.PutVersionCalls(), ShouldHaveLength, 0)
 			})
@@ -793,9 +899,20 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
+		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
+			return "/metadata"
+		}
+
+		datasetApiMock.GetVersionMetadataFunc = func(string, string, string, ...dataset.Config) (dataset.Metadata, error) {
+			return metadata, nil
+		}
+
 		csvRowReaderMock := &observationtest.CSVRowReaderMock{
 			CloseFunc: func() error {
 				return nil
+			},
+			ReadFunc: func() (string, error) {
+				return csvContent, nil
 			},
 		}
 
@@ -825,17 +942,21 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and the expected calls are made with the expected ", func() {
-				So(len(observationStoreMock.GetCSVRowsCalls()), ShouldEqual, 1)
+				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
 				So(observationStoreMock.GetCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
 
-				So(len(fileStockMock.PutFileCalls()), ShouldEqual, 1)
+				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 2)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
 
-				So(len(datasetApiMock.PutVersionCalls()), ShouldEqual, 1)
 				So(datasetApiMock.GetVersionCalls(), ShouldHaveLength, 0)
+				So(datasetApiMock.GetVersionMetadataCalls(), ShouldHaveLength, 1)
 				So(datasetApiMock.GetInstanceCalls(), ShouldHaveLength, 1)
-				So(datasetApiMock.PutVersionCalls()[0].M.Downloads, ShouldResemble, map[string]dataset.Download{
-					"CSV": {Size: "0", URL: downloadServiceURL + "/downloads/datasets/111/editions/333/versions/444.csv", Private: "/url"},
+
+				So(datasetApiMock.PutVersionCalls(), ShouldHaveLength, 1)
+				So(datasetApiMock.PutVersionCalls()[0].M.Downloads["CSV"], ShouldResemble, dataset.Download{
+					Size:    "0",
+					URL:     downloadServiceURL + "/downloads/datasets/111/editions/333/versions/444.csv",
+					Private: "/url",
 				})
 			})
 		})

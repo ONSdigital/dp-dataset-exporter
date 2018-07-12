@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"io"
 	"path"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -17,6 +18,8 @@ import (
 //go:generate moq -out filetest/uploader.go -pkg filetest . Uploader
 //go:generate moq -out filetest/cryptouploader.go -pkg filetest . CryptoUploader
 //go:generate moq -out filetest/vault.go -pkg filetest . VaultClient
+
+var csvContentType = "application/csvm+json"
 
 // Uploader represents the methods required to upload to s3 without encryption
 type Uploader interface {
@@ -78,11 +81,20 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			"name":   filename,
 		})
 
-		result, err := store.uploader.Upload(&s3manager.UploadInput{
+		var result *s3manager.UploadOutput
+		var err error
+
+		params := &s3manager.UploadInput{
 			Body:   reader,
 			Bucket: &store.publicBucket,
 			Key:    &filename,
-		})
+		}
+
+		if strings.Contains(filename, "-metadata.json") {
+			params.ContentType = &csvContentType
+		}
+
+		result, err = store.uploader.Upload(params)
 		if err != nil {
 			return "", err
 		}
@@ -105,11 +117,17 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			return "", err
 		}
 
-		result, err := store.cryptoUploader.UploadWithPSK(&s3manager.UploadInput{
+		params := &s3manager.UploadInput{
 			Body:   reader,
-			Bucket: &store.privateBucket,
+			Bucket: &store.publicBucket,
 			Key:    &filename,
-		}, psk)
+		}
+
+		if strings.Contains(filename, "-metadata.json") {
+			params.ContentType = &csvContentType
+		}
+
+		result, err := store.cryptoUploader.UploadWithPSK(params, psk)
 		if err != nil {
 			return "", err
 		}

@@ -1,6 +1,7 @@
 package event
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -9,6 +10,8 @@ import (
 
 	"strconv"
 
+	"github.com/ONSdigital/dp-dataset-exporter/csvw"
+	"github.com/ONSdigital/dp-dataset-exporter/reader"
 	"github.com/ONSdigital/dp-filter/observation"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	"github.com/ONSdigital/go-ns/log"
@@ -24,6 +27,7 @@ import (
 var _ Handler = (*ExportHandler)(nil)
 
 const publishedState = "published"
+const metadataExtension = "-metadata.json"
 
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
@@ -43,6 +47,8 @@ type DatasetAPI interface {
 	PutVersion(id, edition, version string, m dataset.Version, cfg ...dataset.Config) error
 	GetVersion(id, edition, version string, cfg ...dataset.Config) (m dataset.Version, err error)
 	GetInstance(instanceID string, cfg ...dataset.Config) (m dataset.Instance, err error)
+	GetMetadataURL(id, edition, version string) (url string)
+	GetVersionMetadata(id, edition, version string, cfg ...dataset.Config) (m dataset.Metadata, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -240,30 +246,16 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 		"version":     event.Version,
 	})
 
-	csvRowReader, err := handler.observationStore.GetCSVRows(&observation.Filter{InstanceID: event.InstanceID}, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	reader := observation.NewReader(csvRowReader)
-	defer func() {
-		closeErr := reader.Close()
-		if closeErr != nil {
-			log.Error(closeErr, nil)
-		}
-	}()
-
 	fileID := uuid.NewV4().String()
 	log.Info("storing pre-publish file", log.Data{"fileID": fileID})
 
 	filename := handler.fullDatasetFilePrefix + fileID + ".csv"
 
-	fileURL, err := handler.fileStore.PutFile(reader, filename, isPublished)
+	csvDownload, csvS3URL, header, err := handler.generateFullCSV(event, filename, isPublished)
 	if err != nil {
 		return nil, err
 	}
 
-	downloads := make(map[string]dataset.Download)
 	downloadURL := fmt.Sprintf("%s/downloads/datasets/%s/editions/%s/versions/%s.csv",
 		handler.downloadServiceURL,
 		event.DatasetID,
@@ -271,33 +263,21 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 		event.Version,
 	)
 
-	if isPublished {
-		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, URL: downloadURL}
-	} else {
-		downloads["CSV"] = dataset.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, URL: downloadURL}
+	metadataDownload, err := handler.generateMetadata(event, filename, header, downloadURL, isPublished)
+	if err != nil {
+		return nil, err
 	}
 
-	log.Info("updating dataset api with download link", log.Data{
-		"isPublished":        isPublished,
-		"downloadServiceURL": downloadURL,
-		"s3URL":              fileURL,
-	})
-
-	v := dataset.Version{Downloads: downloads}
-
-	var config dataset.Config
-
-	config.AuthToken = handler.serviceToken
-
-	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
-		return nil, errors.Wrap(err, "error while attempting update version downloads")
+	if err := handler.updateVersionLinks(event, isPublished, csvDownload, metadataDownload, downloadURL); err != nil {
+		return nil, err
 	}
 
 	log.Info("pre publish version csv download file generation completed", log.Data{
-		"dataset_id": event.DatasetID,
-		"edition":    event.Edition,
-		"version":    event.Version,
-		"url":        fileURL,
+		"dataset_id":        event.DatasetID,
+		"edition":           event.Edition,
+		"version":           event.Version,
+		"csv_download":      csvDownload,
+		"metadata_download": metadataDownload,
 	})
 
 	return &CSVExported{
@@ -305,7 +285,113 @@ func (handler *ExportHandler) fullDownload(event *FilterSubmitted, isPublished b
 		DatasetID:  event.DatasetID,
 		Edition:    event.Edition,
 		Version:    event.Version,
-		FileURL:    fileURL,
+		FileURL:    csvS3URL,
 		Filename:   fileID,
 	}, nil
+}
+
+func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, error) {
+
+	csvRowReader, err := handler.observationStore.GetCSVRows(&observation.Filter{InstanceID: event.InstanceID}, nil)
+	if err != nil {
+		return nil, "", "", err
+	}
+
+	rReader := observation.NewReader(csvRowReader)
+	defer func() (*dataset.Download, string, string, error) {
+		closeErr := rReader.Close()
+		if closeErr != nil {
+			log.Error(closeErr, nil)
+		}
+		return nil, "", "", closeErr
+	}()
+
+	hReader := reader.New(rReader)
+
+	header, err := hReader.PeekBytes('\n')
+	if err != nil {
+		return nil, "", "", errors.Wrap(err, "could not peek")
+	}
+
+	log.Info("header extracted from csv", log.Data{"header": header})
+
+	url, err := handler.fileStore.PutFile(hReader, filename, isPublished)
+	if err != nil {
+		return nil, "", "", err
+	}
+
+	download := &dataset.Download{
+		Size: strconv.Itoa(hReader.TotalBytesRead()),
+	}
+
+	if isPublished {
+		download.Public = url
+	} else {
+		download.Private = url
+	}
+
+	return download, url, header, nil
+}
+
+func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, header, downloadURL string, isPublished bool) (*dataset.Download, error) {
+	var config dataset.Config
+	config.AuthToken = handler.serviceToken
+
+	m, err := handler.datasetAPICli.GetVersionMetadata(event.DatasetID, event.Edition, event.Version, config)
+	if err != nil {
+		return nil, err
+	}
+
+	aboutURL := handler.datasetAPICli.GetMetadataURL(event.DatasetID, event.Edition, event.Version)
+
+	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL)
+	if err != nil {
+		return nil, err
+	}
+
+	r := bytes.NewReader(csvwFile)
+
+	url, err := handler.fileStore.PutFile(r, s3path+metadataExtension, isPublished)
+	if err != nil {
+		return nil, err
+	}
+
+	download := &dataset.Download{
+		Size: strconv.Itoa(int(r.Size())),
+	}
+
+	if isPublished {
+		download.Public = url
+	} else {
+		download.Private = url
+	}
+
+	return download, nil
+}
+
+func (handler *ExportHandler) updateVersionLinks(event *FilterSubmitted, isPublished bool, csv, md *dataset.Download, downloadURL string) error {
+	csv.URL = downloadURL
+	md.URL = downloadURL + metadataExtension
+
+	log.Info("updating dataset api with download link", log.Data{
+		"isPublished":      isPublished,
+		"csvDownload":      csv,
+		"metadataDownload": md,
+	})
+
+	v := dataset.Version{
+		Downloads: map[string]dataset.Download{
+			"CSV":  *csv,
+			"CSVW": *md,
+		},
+	}
+
+	var config dataset.Config
+	config.AuthToken = handler.serviceToken
+
+	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
+		return errors.Wrap(err, "error while attempting update version downloads")
+	}
+
+	return nil
 }
