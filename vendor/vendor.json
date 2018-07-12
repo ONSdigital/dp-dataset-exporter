@@ -81,10 +81,10 @@
 			"revisionTime": "2017-12-21T09:34:27Z"
 		},
 		{
-			"checksumSHA1": "eqT3lUe+1W+njYJOealHQ+LsXv0=",
+			"checksumSHA1": "Q0yXst+MpStLo6iPp3FJkZWdWqQ=",
 			"path": "github.com/ONSdigital/go-ns/rchttp",
-			"revision": "f0dafcaf053f2a91da7443b2a2796ecd2c61fb60",
-			"revisionTime": "2018-03-28T11:08:33Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "Ohl8JaJRUL+/Y+NTL8y97PZlFfs=",
