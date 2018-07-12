@@ -9,10 +9,10 @@
 			"revisionTime": "2018-01-12T09:09:21Z"
 		},
 		{
-			"checksumSHA1": "WI5P8MbnHHGqzuQje+qFoQSUHgk=",
+			"checksumSHA1": "vyzH2Rju6G4A/uK4zqWIidfk3dA=",
 			"path": "github.com/ONSdigital/go-ns/avro",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "+rsjNtumZUdoJ5k3D6TI8+RkkTU=",
@@ -35,50 +35,50 @@
 		{
 			"checksumSHA1": "8GX4z3tt4e6rXHJtJv8q8YZrFwk=",
 			"path": "github.com/ONSdigital/go-ns/common",
-			"revision": "3fdd13a161b0d6221b2405cce8bbe5ec69168ab7",
-			"revisionTime": "2018-07-05T11:25:05Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
-			"checksumSHA1": "J9OiPnhPHFPhQ+R+dq6LFj+dTxE=",
+			"checksumSHA1": "Vjyl/gfY0qx2lW9te3Ieb5HV3/s=",
 			"path": "github.com/ONSdigital/go-ns/handlers/requestID",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
-			"checksumSHA1": "DckitWw2qJIUkRAYkeTcBJ9wFhI=",
+			"checksumSHA1": "wIYbelWEcrOcrlS2PmtlmQiWooU=",
 			"path": "github.com/ONSdigital/go-ns/healthcheck",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
-			"checksumSHA1": "BIF0W+bUAeNWG9eYVgpXvgWj1Hs=",
+			"checksumSHA1": "tbpmGqkqN79SspYfFUgob5rxKik=",
 			"path": "github.com/ONSdigital/go-ns/identity",
-			"revision": "291aa23799e2c5bcae4680ef34dec90a38833c69",
-			"revisionTime": "2018-04-03T10:47:08Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "qqaN4hllMTNueffB5bcz8xQnwX0=",
 			"path": "github.com/ONSdigital/go-ns/kafka",
-			"revision": "b7a9d79bc028131d34399e7ef420b73007786202",
-			"revisionTime": "2018-01-23T16:28:19Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "9ISFg1xnb4/WsxOIzhgAFe22LmU=",
 			"path": "github.com/ONSdigital/go-ns/kafka/kafkatest",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "g9flYl+PBs6cYflFY3EpG6IcJGM=",
 			"path": "github.com/ONSdigital/go-ns/log",
-			"revision": "3fdd13a161b0d6221b2405cce8bbe5ec69168ab7",
-			"revisionTime": "2018-07-05T11:25:05Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
-			"checksumSHA1": "x8ng6l9R6AECmXMMFklTlrCP4K4=",
+			"checksumSHA1": "ZXfEqZ/3ekHfv7QKSUO+av7SEWA=",
 			"path": "github.com/ONSdigital/go-ns/neo4j",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "Q0yXst+MpStLo6iPp3FJkZWdWqQ=",
@@ -89,20 +89,20 @@
 		{
 			"checksumSHA1": "Ohl8JaJRUL+/Y+NTL8y97PZlFfs=",
 			"path": "github.com/ONSdigital/go-ns/rhttp",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "GQdzMpAMb42KQQ/GsJFSRU5dj1Y=",
 			"path": "github.com/ONSdigital/go-ns/server",
-			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
-			"revisionTime": "2017-12-21T09:34:27Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "w1sdmdfk217GHSl8fn4WKV9ZFsY=",
 			"path": "github.com/ONSdigital/go-ns/vault",
-			"revision": "15f1b42c2d66ad2881fe4497cfc9f7c19439f215",
-			"revisionTime": "2018-03-16T08:19:17Z"
+			"revision": "303357ce79b67b0cf8ed4b4e66814e9e3b636aea",
+			"revisionTime": "2018-07-12T13:10:53Z"
 		},
 		{
 			"checksumSHA1": "WjSWGeNopWuQ0sPZUtw2NmnlHLo=",
@@ -536,6 +536,12 @@
 			"path": "github.com/jmespath/go-jmespath",
 			"revision": "d0cb8551ac28d362e77ea475e5b7b2ebaec06b6b",
 			"revisionTime": "2017-12-21T23:52:18Z"
+		},
+		{
+			"checksumSHA1": "TsX+LuxHhV9GFmua8C1nxflFcTA=",
+			"path": "github.com/johnnadratowski/golang-neo4j-bolt-driver",
+			"revision": "1108d6e66ccf2c8e68ab26b5f64e6c0a2ad00899",
+			"revisionTime": "2017-12-18T14:36:11Z"
 		},
 		{
 			"checksumSHA1": "Js/yx9fZ3+wH1wZpHNIxSTMIaCg=",

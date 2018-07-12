@@ -80,7 +80,7 @@ func main() {
 
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
-	datasetAPICli := dataset.NewAPIClient(cfg.DatasetAPIURL, cfg.DatasetAPIAuthToken, "")
+	datasetAPICli := dataset.NewAPIClient(cfg.DatasetAPIURL, cfg.ServiceAuthToken, "")
 
 	eventHandler := event.NewExportHandler(
 		filterStore,
