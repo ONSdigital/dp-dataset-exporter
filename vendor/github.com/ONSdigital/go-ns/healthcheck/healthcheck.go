@@ -14,10 +14,8 @@ type Client interface {
 	Healthcheck() (string, error)
 }
 
-type HealthState map[string]error
-
 var (
-	healthState       = make(HealthState)
+	healthState       = make(map[string]error)
 	healthLastChecked time.Time
 	healthLastSuccess time.Time
 	mutex             = &sync.RWMutex{}
@@ -37,7 +35,7 @@ type healthError struct {
 // MonitorExternal concurrently monitors external service health and if they are unhealthy,
 // records the status in a map
 func MonitorExternal(clients ...Client) {
-	hs := make(HealthState)
+	hs := make(map[string]error)
 
 	type externalError struct {
 		name string
@@ -71,36 +69,37 @@ func MonitorExternal(clients ...Client) {
 
 	mutex.Lock()
 	healthState = hs
-	healthLastChecked = time.Now()
 	if len(hs) == 0 {
-		healthLastSuccess = healthLastChecked
+		healthLastSuccess = time.Now()
 	}
+	healthLastChecked = time.Now()
 	mutex.Unlock()
 }
 
 // Do is responsible for returning the healthcheck status to the user
 func Do(w http.ResponseWriter, req *http.Request) {
-	state, lastTry, lastSuccess := GetState()
+	mutex.RLock()
+	defer mutex.RUnlock()
 
 	w.Header().Set("Content-Type", "application/json")
 
 	var healthStateInfo healthResponse
-	if len(state) > 0 {
+	if len(healthState) > 0 {
 		w.WriteHeader(http.StatusInternalServerError)
 		healthStateInfo = healthResponse{Status: "error", Errors: &[]healthError{}}
 		// add errors to healthStateInfo and set its Status to "error"
-		for stateKey := range state {
-			*(healthStateInfo.Errors) = append(*(healthStateInfo.Errors), healthError{Namespace: stateKey, ErrorMessage: state[stateKey].Error()})
+		for stateKey := range healthState {
+			*(healthStateInfo.Errors) = append(*(healthStateInfo.Errors), healthError{Namespace: stateKey, ErrorMessage: healthState[stateKey].Error()})
 		}
-	} else if lastTry.IsZero() {
+	} else if healthLastChecked.IsZero() {
 		w.WriteHeader(http.StatusTooManyRequests)
 		return
 	} else {
 		w.WriteHeader(http.StatusOK)
 		healthStateInfo.Status = "OK"
 	}
-	healthStateInfo.LastChecked = lastTry
-	healthStateInfo.LastSuccess = lastSuccess
+	healthStateInfo.LastChecked = healthLastChecked
+	healthStateInfo.LastSuccess = healthLastSuccess
 
 	healthStateJSON, err := json.Marshal(healthStateInfo)
 	if err != nil {
@@ -110,17 +109,4 @@ func Do(w http.ResponseWriter, req *http.Request) {
 	if _, err = w.Write(healthStateJSON); err != nil {
 		log.ErrorC("writing json body", err, log.Data{"json": string(healthStateJSON)})
 	}
-}
-
-// GetState returns current map of errors and times of last check, last success
-func GetState() (HealthState, time.Time, time.Time) {
-	mutex.RLock()
-	defer mutex.RUnlock()
-
-	hs := make(HealthState)
-	for key := range healthState {
-		hs[key] = healthState[key]
-	}
-
-	return hs, healthLastChecked, healthLastSuccess
 }
