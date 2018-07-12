@@ -11,6 +11,13 @@ job "dp-dataset-exporter" {
       value     = "publishing"
     }
 
+    restart {
+      attempts = 3
+      delay    = "15s"
+      interval = "1m"
+      mode     = "delay"
+    }
+
     task "dp-dataset-exporter" {
       driver = "exec"
 
