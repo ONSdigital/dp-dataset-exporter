@@ -47,7 +47,7 @@ type DatasetAPI interface {
 	PutVersion(ctx context.Context, id, edition, version string, m dataset.Version) error
 	GetVersion(ctx context.Context, id, edition, version string) (m dataset.Version, err error)
 	GetInstance(ctx context.Context, instanceID string) (m dataset.Instance, err error)
-	GetMetadataURL(ctx context.Context, id, edition, version string) (url string)
+	GetMetadataURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, id, edition, version string) (m dataset.Metadata, err error)
 }
 
@@ -337,7 +337,7 @@ func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, h
 		return nil, err
 	}
 
-	aboutURL := handler.datasetAPICli.GetMetadataURL(context.Background(), event.DatasetID, event.Edition, event.Version)
+	aboutURL := handler.datasetAPICli.GetMetadataURL(event.DatasetID, event.Edition, event.Version)
 
 	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL)
 	if err != nil {

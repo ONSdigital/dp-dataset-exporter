@@ -568,7 +568,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			GetVersionFunc: func(context.Context, string, string, string) (dataset.Version, error) {
 				return associatedDataset, nil
 			},
-			GetMetadataURLFunc: func(context.Context, string, string, string) string {
+			GetMetadataURLFunc: func(string, string, string) string {
 				return "/metadata"
 			},
 			GetVersionMetadataFunc: func(context.Context, string, string, string) (dataset.Metadata, error) {
@@ -705,7 +705,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
-		datasetApiMock.GetMetadataURLFunc = func(context.Context, string, string, string) string {
+		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
 			return "/metadata"
 		}
 
@@ -788,7 +788,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
-		datasetApiMock.GetMetadataURLFunc = func(context.Context, string, string, string) string {
+		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
 			return "/metadata"
 		}
 
@@ -899,7 +899,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
-		datasetApiMock.GetMetadataURLFunc = func(context.Context, string, string, string) string {
+		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
 			return "/metadata"
 		}
 

@@ -26,7 +26,7 @@ var (
 //             GetInstanceFunc: func(ctx context.Context, instanceID string) (dataset.Instance, error) {
 // 	               panic("TODO: mock out the GetInstance method")
 //             },
-//             GetMetadataURLFunc: func(ctx context.Context, id string, edition string, version string) string {
+//             GetMetadataURLFunc: func(id string, edition string, version string) string {
 // 	               panic("TODO: mock out the GetMetadataURL method")
 //             },
 //             GetVersionFunc: func(ctx context.Context, id string, edition string, version string) (dataset.Version, error) {
@@ -49,7 +49,7 @@ type DatasetAPIMock struct {
 	GetInstanceFunc func(ctx context.Context, instanceID string) (dataset.Instance, error)
 
 	// GetMetadataURLFunc mocks the GetMetadataURL method.
-	GetMetadataURLFunc func(ctx context.Context, id string, edition string, version string) string
+	GetMetadataURLFunc func(id string, edition string, version string) string
 
 	// GetVersionFunc mocks the GetVersion method.
 	GetVersionFunc func(ctx context.Context, id string, edition string, version string) (dataset.Version, error)
@@ -71,8 +71,6 @@ type DatasetAPIMock struct {
 		}
 		// GetMetadataURL holds details about calls to the GetMetadataURL method.
 		GetMetadataURL []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
 			// ID is the id argument value.
 			ID string
 			// Edition is the edition argument value.
@@ -154,17 +152,15 @@ func (mock *DatasetAPIMock) GetInstanceCalls() []struct {
 }
 
 // GetMetadataURL calls GetMetadataURLFunc.
-func (mock *DatasetAPIMock) GetMetadataURL(ctx context.Context, id string, edition string, version string) string {
+func (mock *DatasetAPIMock) GetMetadataURL(id string, edition string, version string) string {
 	if mock.GetMetadataURLFunc == nil {
 		panic("DatasetAPIMock.GetMetadataURLFunc: method is nil but DatasetAPI.GetMetadataURL was just called")
 	}
 	callInfo := struct {
-		Ctx     context.Context
 		ID      string
 		Edition string
 		Version string
 	}{
-		Ctx:     ctx,
 		ID:      id,
 		Edition: edition,
 		Version: version,
@@ -172,20 +168,18 @@ func (mock *DatasetAPIMock) GetMetadataURL(ctx context.Context, id string, editi
 	lockDatasetAPIMockGetMetadataURL.Lock()
 	mock.calls.GetMetadataURL = append(mock.calls.GetMetadataURL, callInfo)
 	lockDatasetAPIMockGetMetadataURL.Unlock()
-	return mock.GetMetadataURLFunc(ctx, id, edition, version)
+	return mock.GetMetadataURLFunc(id, edition, version)
 }
 
 // GetMetadataURLCalls gets all the calls that were made to GetMetadataURL.
 // Check the length with:
 //     len(mockedDatasetAPI.GetMetadataURLCalls())
 func (mock *DatasetAPIMock) GetMetadataURLCalls() []struct {
-	Ctx     context.Context
 	ID      string
 	Edition string
 	Version string
 } {
 	var calls []struct {
-		Ctx     context.Context
 		ID      string
 		Edition string
 		Version string

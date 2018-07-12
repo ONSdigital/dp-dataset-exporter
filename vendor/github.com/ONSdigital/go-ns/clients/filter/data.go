@@ -12,18 +12,33 @@ type DimensionOption struct {
 	Option              string `json:"option"`
 }
 
+// CreateBlueprint represents the fields required to create a filter blueprint
+type CreateBlueprint struct {
+	Dataset    Dataset          `json:"dataset"`
+	Dimensions []ModelDimension `json:"dimensions"`
+	FilterID   string           `json:"filter_id"`
+}
+
+// Dataset represents the dataset fields required to create a filter blueprint
+type Dataset struct {
+	DatasetID string `json:"id"`
+	Edition   string `json:"edition"`
+	Version   int    `json:"version"`
+}
+
 // Model represents a model returned from the filter api
 type Model struct {
-	FilterID   string              `json:"filter_id"`
-	InstanceID string              `json:"instance_id"`
-	Links      Links               `json:"links"`
-	Dataset    string              `json:"dataset"`
-	Edition    string              `json:"edition"`
-	Version    string              `json:"version"`
-	State      string              `json:"state"`
-	Dimensions []ModelDimension    `json:"dimensions,omitempty"`
-	Downloads  map[string]Download `json:"downloads,omitempty"`
-	Events     map[string][]Event  `json:"events,omitempty"`
+	FilterID    string              `json:"filter_id"`
+	InstanceID  string              `json:"instance_id"`
+	Links       Links               `json:"links"`
+	DatasetID   string              `json:"dataset_id"`
+	Edition     string              `json:"edition"`
+	Version     string              `json:"version"`
+	State       string              `json:"state"`
+	Dimensions  []ModelDimension    `json:"dimensions,omitempty"`
+	Downloads   map[string]Download `json:"downloads,omitempty"`
+	Events      []Event             `json:"events,omitempty"`
+	IsPublished bool                `json:"published"`
 }
 
 // Links represents a links object on the filter api response
@@ -41,22 +56,23 @@ type Link struct {
 
 // ModelDimension represents a dimension to be filtered upon
 type ModelDimension struct {
-	Name   string   `json:"name"`
-	Values []string `json:"values"`
-	IDs    []string `json:"ids"`
+	Name    string   `json:"name"`
+	Options []string `json:"options"`
+	Values  []string `json:"values"`
 }
 
 // Download represents a download within a filter from api response
 type Download struct {
-	URL  string `json:"url"`
-	Size string `json:"size"`
+	URL     string `json:"href"`
+	Size    string `json:"size"`
+	Public  string `json:"public,omitempty"`
+	Private string `json:"private,omitempty"`
 }
 
 // Event represents an event from a filter api response
 type Event struct {
 	Time    string `json:"time"`
 	Type    string `json:"type"`
-	Message string `json:"message"`
 }
 
 // Preview represents a preview document returned from the filter api

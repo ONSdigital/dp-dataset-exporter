@@ -88,7 +88,6 @@ func main() {
 		fileStore,
 		eventProducer,
 		datasetAPICli,
-		cfg.ServiceAuthToken,
 		cfg.DownloadServiceURL,
 		cfg.FullDatasetFilePrefix,
 		cfg.FilteredDatasetFilePrefix)
@@ -102,7 +101,7 @@ func main() {
 		cfg.BindAddr,
 		cfg.HealthCheckInterval,
 		errorChannel,
-		filterHealthCheck.New(cfg.FilterAPIURL),
+		filterHealthCheck.New(cfg.FilterAPIURL, cfg.ServiceAuthToken, ""),
 		neo4j.NewHealthCheckClient(neo4jConnPool),
 		vaultClient)
 
