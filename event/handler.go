@@ -2,6 +2,7 @@ package event
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"strings"
@@ -36,7 +37,6 @@ type ExportHandler struct {
 	fileStore                 FileStore
 	eventProducer             Producer
 	datasetAPICli             DatasetAPI
-	serviceToken              string
 	downloadServiceURL        string
 	fullDatasetFilePrefix     string
 	filteredDatasetFilePrefix string
@@ -44,11 +44,11 @@ type ExportHandler struct {
 
 // DatasetAPI contains functions to call the dataset API.
 type DatasetAPI interface {
-	PutVersion(id, edition, version string, m dataset.Version, cfg ...dataset.Config) error
-	GetVersion(id, edition, version string, cfg ...dataset.Config) (m dataset.Version, err error)
-	GetInstance(instanceID string, cfg ...dataset.Config) (m dataset.Instance, err error)
-	GetMetadataURL(id, edition, version string) (url string)
-	GetVersionMetadata(id, edition, version string, cfg ...dataset.Config) (m dataset.Metadata, err error)
+	PutVersion(ctx context.Context, id, edition, version string, m dataset.Version) error
+	GetVersion(ctx context.Context, id, edition, version string) (m dataset.Version, err error)
+	GetInstance(ctx context.Context, instanceID string) (m dataset.Instance, err error)
+	GetMetadataURL(ctx context.Context, id, edition, version string) (url string)
+	GetVersionMetadata(ctx context.Context, id, edition, version string) (m dataset.Metadata, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -57,7 +57,6 @@ func NewExportHandler(filterStore FilterStore,
 	fileStore FileStore,
 	eventProducer Producer,
 	datasetAPI DatasetAPI,
-	serviceToken,
 	downloadServiceURL,
 	fullDatasetFilePrefix,
 	filteredDatasetFilePrefix string) *ExportHandler {
@@ -68,7 +67,6 @@ func NewExportHandler(filterStore FilterStore,
 		fileStore:                 fileStore,
 		eventProducer:             eventProducer,
 		datasetAPICli:             datasetAPI,
-		serviceToken:              serviceToken,
 		downloadServiceURL:        downloadServiceURL,
 		fullDatasetFilePrefix:     fullDatasetFilePrefix,
 		filteredDatasetFilePrefix: filteredDatasetFilePrefix,
@@ -154,7 +152,7 @@ func (handler *ExportHandler) isFilterOutputPublished(event *FilterSubmitted) (b
 
 func (handler *ExportHandler) isVersionPublished(event *FilterSubmitted) (bool, error) {
 	if len(event.InstanceID) == 0 {
-		version, err := handler.datasetAPICli.GetVersion(event.DatasetID, event.Edition, event.Version, dataset.Config{AuthToken: handler.serviceToken})
+		version, err := handler.datasetAPICli.GetVersion(context.Background(), event.DatasetID, event.Edition, event.Version)
 		if err != nil {
 			return false, err
 		}
@@ -162,7 +160,7 @@ func (handler *ExportHandler) isVersionPublished(event *FilterSubmitted) (bool, 
 		return version.State == publishedState, nil
 	}
 
-	instance, err := handler.datasetAPICli.GetInstance(event.InstanceID, dataset.Config{AuthToken: handler.serviceToken})
+	instance, err := handler.datasetAPICli.GetInstance(context.Background(), event.InstanceID)
 	if err != nil {
 		return false, err
 	}
@@ -334,15 +332,12 @@ func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename s
 }
 
 func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, header, downloadURL string, isPublished bool) (*dataset.Download, error) {
-	var config dataset.Config
-	config.AuthToken = handler.serviceToken
-
-	m, err := handler.datasetAPICli.GetVersionMetadata(event.DatasetID, event.Edition, event.Version, config)
+	m, err := handler.datasetAPICli.GetVersionMetadata(context.Background(), event.DatasetID, event.Edition, event.Version)
 	if err != nil {
 		return nil, err
 	}
 
-	aboutURL := handler.datasetAPICli.GetMetadataURL(event.DatasetID, event.Edition, event.Version)
+	aboutURL := handler.datasetAPICli.GetMetadataURL(context.Background(), event.DatasetID, event.Edition, event.Version)
 
 	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL)
 	if err != nil {
@@ -386,10 +381,7 @@ func (handler *ExportHandler) updateVersionLinks(event *FilterSubmitted, isPubli
 		},
 	}
 
-	var config dataset.Config
-	config.AuthToken = handler.serviceToken
-
-	if err := handler.datasetAPICli.PutVersion(event.DatasetID, event.Edition, event.Version, v, config); err != nil {
+	if err := handler.datasetAPICli.PutVersion(context.Background(), event.DatasetID, event.Edition, event.Version, v); err != nil {
 		return errors.Wrap(err, "error while attempting update version downloads")
 	}
 

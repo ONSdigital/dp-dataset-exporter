@@ -205,7 +205,7 @@ func newCodeAndLabelColumns(offset, i int, downloadURL string, header []string, 
 	}
 
 	codeCol := newColumn(offset+i, downloadURL, "", codeHeader)
-	codeCol["valueURL"] = dim.HRef + "/codes/{" + codeHeader + "}" //// TODO: could this link to the code list or API?
+	codeCol["valueURL"] = dim.Links.Self.URL + "/codes/{" + codeHeader + "}" //// TODO: could this link to the code list or API?
 	codeCol["required"] = true
 	// TODO: determine what could go in c["datatype"]
 
