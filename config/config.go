@@ -72,8 +72,6 @@ func Get() (*Config, error) {
 		return nil, err
 	}
 
-	cfg.ServiceAuthToken = "Bearer " + cfg.ServiceAuthToken
-
 	return cfg, nil
 }
 

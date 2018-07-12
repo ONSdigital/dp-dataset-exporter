@@ -80,8 +80,7 @@ func main() {
 
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
-	datasetAPICli := dataset.New(cfg.DatasetAPIURL)
-	datasetAPICli.SetInternalToken(cfg.DatasetAPIAuthToken)
+	datasetAPICli := dataset.NewAPIClient(cfg.DatasetAPIURL, cfg.ServiceAuthToken, "")
 
 	eventHandler := event.NewExportHandler(
 		filterStore,
@@ -89,7 +88,6 @@ func main() {
 		fileStore,
 		eventProducer,
 		datasetAPICli,
-		cfg.ServiceAuthToken,
 		cfg.DownloadServiceURL,
 		cfg.FullDatasetFilePrefix,
 		cfg.FilteredDatasetFilePrefix)
@@ -103,7 +101,7 @@ func main() {
 		cfg.BindAddr,
 		cfg.HealthCheckInterval,
 		errorChannel,
-		filterHealthCheck.New(cfg.FilterAPIURL),
+		filterHealthCheck.New(cfg.FilterAPIURL, cfg.ServiceAuthToken, ""),
 		neo4j.NewHealthCheckClient(neo4jConnPool),
 		vaultClient)
 
