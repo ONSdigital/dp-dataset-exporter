@@ -19,10 +19,8 @@ APP_TOKEN:="$(shell echo $(TOKEN_INFO) | awk '{print $$6}')"
 build:
 	@mkdir -p $(BUILD_ARCH)/$(BIN_DIR)
 	go build -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
-debug: build
+debug acceptance:
 	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run -race cmd/dp-dataset-exporter/main.go
-acceptance:
-	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run cmd/dp-dataset-exporter/main.go
 test:
 	go test -cover $(shell go list ./... | grep -v /vendor/)
 vault:
