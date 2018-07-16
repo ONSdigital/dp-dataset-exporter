@@ -114,10 +114,9 @@ func processMessage(message kafka.Message, handler Handler, errorHandler errors.
 		errorHandler.Handle(event.FilterID, err)
 		logData["message_error"] = "failed to handle event"
 		log.Error(err, logData)
-		return err
 	}
 
-	return nil
+	return err
 }
 
 // unmarshal converts a event instance to []byte.
