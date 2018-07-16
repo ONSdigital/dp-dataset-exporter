@@ -16,18 +16,25 @@ import (
 //The URL field in the CSVW must reference a CSV file, and all other data
 //should describe that CSVs contents.
 type CSVW struct {
-	Context     string          `json:"@context"`
-	URL         string          `json:"url"`
-	Title       string          `json:"dct:title"`
-	Description string          `json:"dct:description,omitempty"`
-	Issued      string          `json:"dct:issued,omitempty"`
-	Publisher   Publisher       `json:"dct:publisher"`
-	Contact     dataset.Contact `json:"dcat:contactPoint,omitempty"` //// TODO: handle array as per spec
-	TableSchema Columns         `json:"tableSchema"`
-	Theme       string          `json:"dcat:theme,omitempty"`
-	License     string          `json:"dct:license,omitempty"`
-	Frequency   string          `json:"dct:accrualPeriodicity,omitempty"`
-	Notes       []Note          `json:"notes,omitempty"`
+	Context     string    `json:"@context"`
+	URL         string    `json:"url"`
+	Title       string    `json:"dct:title"`
+	Description string    `json:"dct:description,omitempty"`
+	Issued      string    `json:"dct:issued,omitempty"`
+	Publisher   Publisher `json:"dct:publisher"`
+	Contact     []Contact `json:"dcat:contactPoint"`
+	TableSchema Columns   `json:"tableSchema"`
+	Theme       string    `json:"dcat:theme,omitempty"`
+	License     string    `json:"dct:license,omitempty"`
+	Frequency   string    `json:"dct:accrualPeriodicity,omitempty"`
+	Notes       []Note    `json:"notes,omitempty"`
+}
+
+// Contact represents a response model within a dataset
+type Contact struct {
+	Name      string `json:"vcard:fn"`
+	Telephone string `json:"vcard:tel"`
+	Email     string `json:"vcard:email"`
 }
 
 //Publisher defines the entity primarily responsible for the dataset
@@ -57,6 +64,9 @@ type Note struct {
 	Motivation string `json:"motivation,omitempty"` // how is this different from type? do we need this? is this an enum?
 }
 
+var invalidHeader = errors.New("invalid header row - no V4_X cell")
+var missingDimensions = errors.New("no dimensions in provided metadata")
+
 //New CSVW returned with top level fields populated based on provided metadata
 func New(m *dataset.Metadata, csvURL string) *CSVW {
 	csvw := &CSVW{
@@ -70,9 +80,12 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 		URL:         csvURL,
 	}
 
-	//// TODO: handle multiple contacts
-	if len(m.Contacts) != 0 {
-		csvw.Contact = m.Contacts[0]
+	for _, c := range m.Contacts {
+		csvw.Contact = append(csvw.Contact, Contact{
+			Name:      c.Name,
+			Telephone: c.Telephone,
+			Email:     c.Email,
+		})
 	}
 
 	if m.Publisher != nil {
@@ -89,7 +102,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 //Generate the CSVW structured metadata file to describe a CSV
 func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL string) ([]byte, error) {
 	if len(metadata.Dimensions) == 0 {
-		return nil, errors.New("no dimensions in provided metadata")
+		return nil, missingDimensions
 	}
 
 	h, offset, err := splitHeader(header)
@@ -169,12 +182,12 @@ func splitHeader(header string) ([]string, int, error) {
 
 	parts := strings.Split(h[0], "_")
 	if len(parts) != 2 {
-		return nil, 0, errors.New("invalid header row - no V4_X cell")
+		return nil, 0, invalidHeader
 	}
 
 	offset, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return nil, 0, errors.New("invalid header row - no V4_X cell")
+		return nil, 0, invalidHeader
 	}
 
 	return h, offset, err
