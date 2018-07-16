@@ -218,11 +218,12 @@ func newCodeAndLabelColumns(offset, i int, downloadURL string, header []string, 
 	}
 
 	codeCol := newColumn(offset+i, downloadURL, "", codeHeader)
-	codeCol["valueURL"] = dim.Links.Self.URL + "/codes/{" + codeHeader + "}" //// TODO: could this link to the code list or API?
+
+	codeCol["valueURL"] = dim.URL + "/codes/{" + codeHeader + "}" //// TODO: could this link to the code list or API?
 	codeCol["required"] = true
 	// TODO: determine what could go in c["datatype"]
 
-	labelCol := newColumn(offset+i+1, downloadURL, dim.Label, dimHeader)
+	labelCol := newColumn(offset+i+1, downloadURL, dim.Name, dim.Label)
 	labelCol["description"] = dim.Description
 	// TODO: determine what could go in c["datatype"] and c["required"]
 
