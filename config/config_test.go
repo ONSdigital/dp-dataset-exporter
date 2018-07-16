@@ -29,7 +29,6 @@ func TestSpec(t *testing.T) {
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")
 				So(cfg.CSVExportedProducerTopic, ShouldEqual, "common-output-created")
 				So(cfg.DatasetAPIURL, ShouldEqual, "http://localhost:22000")
-				So(cfg.DatasetAPIAuthToken, ShouldEqual, "FD0108EA-825D-411C-9B1D-41EF7727F465")
 				So(cfg.AWSRegion, ShouldEqual, "eu-west-1")
 				So(cfg.S3BucketName, ShouldEqual, "csv-exported")
 				So(cfg.S3PrivateBucketName, ShouldEqual, "csv-exported")
@@ -40,7 +39,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.VaultPath, ShouldEqual, "secret/shared/psk")
 				So(cfg.VaultToken, ShouldEqual, "")
 				So(cfg.DownloadServiceURL, ShouldEqual, "http://localhost:23600")
-				So(cfg.ServiceAuthToken, ShouldEqual, "Bearer 0f49d57b-c551-4d33-af1e-a442801dd851")
+				So(cfg.ServiceAuthToken, ShouldEqual, "0f49d57b-c551-4d33-af1e-a442801dd851")
 				So(cfg.StartupTimeout, ShouldEqual, 125*time.Second)
 
 			})

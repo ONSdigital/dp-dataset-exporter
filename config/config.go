@@ -21,7 +21,6 @@ type Config struct {
 	S3PrivateBucketName         string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
 	CSVExportedProducerTopic    string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
 	DatasetAPIURL               string        `envconfig:"DATASET_API_URL"`
-	DatasetAPIAuthToken         string        `envconfig:"DATASET_API_AUTH_TOKEN"        json:"-"`
 	ErrorProducerTopic          string        `envconfig:"ERROR_PRODUCER_TOPIC"`
 	GracefulShutdownTimeout     time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
 	HealthCheckInterval         time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
@@ -53,7 +52,6 @@ func Get() (*Config, error) {
 		S3PrivateBucketName:         "csv-exported",
 		AWSRegion:                   "eu-west-1",
 		DatasetAPIURL:               "http://localhost:22000",
-		DatasetAPIAuthToken:         "FD0108EA-825D-411C-9B1D-41EF7727F465",
 		ErrorProducerTopic:          "filter-error",
 		GracefulShutdownTimeout:     time.Second * 10,
 		HealthCheckInterval:         time.Minute,
@@ -73,8 +71,6 @@ func Get() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	cfg.ServiceAuthToken = "Bearer " + cfg.ServiceAuthToken
 
 	return cfg, nil
 }
