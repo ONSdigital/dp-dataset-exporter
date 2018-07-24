@@ -9,7 +9,7 @@ import (
 )
 
 func TestRead(t *testing.T) {
-	data := []byte(`Header line` + "\n" + `First line` + "\n" + `Second line` + "\n")
+	data := []byte("Header line\nFirst line\nSecond line\n")
 
 	Convey("Reader can read all data", t, func() {
 		inner := bytes.NewReader(data)
