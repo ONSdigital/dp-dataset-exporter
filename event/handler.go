@@ -38,6 +38,7 @@ type ExportHandler struct {
 	eventProducer             Producer
 	datasetAPICli             DatasetAPI
 	downloadServiceURL        string
+	apiDomainURL              string
 	fullDatasetFilePrefix     string
 	filteredDatasetFilePrefix string
 }
@@ -59,6 +60,7 @@ func NewExportHandler(
 	eventProducer Producer,
 	datasetAPI DatasetAPI,
 	downloadServiceURL,
+	apiDomainURL,
 	fullDatasetFilePrefix,
 	filteredDatasetFilePrefix string,
 ) *ExportHandler {
@@ -70,6 +72,7 @@ func NewExportHandler(
 		eventProducer:             eventProducer,
 		datasetAPICli:             datasetAPI,
 		downloadServiceURL:        downloadServiceURL,
+		apiDomainURL:              apiDomainURL,
 		fullDatasetFilePrefix:     fullDatasetFilePrefix,
 		filteredDatasetFilePrefix: filteredDatasetFilePrefix,
 	}
@@ -341,7 +344,7 @@ func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, h
 
 	aboutURL := handler.datasetAPICli.GetMetadataURL(event.DatasetID, event.Edition, event.Version)
 
-	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL)
+	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL, handler.apiDomainURL)
 	if err != nil {
 		return nil, err
 	}

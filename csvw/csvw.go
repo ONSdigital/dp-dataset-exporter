@@ -3,6 +3,8 @@ package csvw
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -100,7 +102,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 }
 
 //Generate the CSVW structured metadata file to describe a CSV
-func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL string) ([]byte, error) {
+func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
 	if len(metadata.Dimensions) == 0 {
 		return nil, errMissingDimensions
 	}
@@ -132,7 +134,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL string) 
 
 	//add dimension columns
 	for i := 0; i < len(h); i = i + 2 {
-		c, l := newCodeAndLabelColumns(offset, i, downloadURL, h, metadata.Dimensions)
+		c, l := newCodeAndLabelColumns(offset, i, downloadURL, apiDomain, h, metadata.Dimensions)
 		log.Info("added pair of dimension columns to CSVW", log.Data{"code_column": c, "label_column": l})
 		list = append(list, c, l)
 	}
@@ -203,7 +205,7 @@ func newObservationColumn(url, title, name string) Column {
 	return c
 }
 
-func newCodeAndLabelColumns(offset, i int, downloadURL string, header []string, dims []dataset.Dimension) (Column, Column) {
+func newCodeAndLabelColumns(offset, i int, downloadURL string, apiDomain string, header []string, dims []dataset.Dimension) (Column, Column) {
 	codeHeader := header[i]
 	dimHeader := header[i+1]
 	dimHeader = strings.ToLower(dimHeader)
@@ -219,7 +221,17 @@ func newCodeAndLabelColumns(offset, i int, downloadURL string, header []string, 
 
 	codeCol := newColumn(offset+i, downloadURL, "", codeHeader)
 
-	codeCol["valueURL"] = dim.URL + "/codes/{" + codeHeader + "}"
+	dimURL := dim.URL
+	if len(apiDomain) > 0 {
+		uri, err := url.Parse(dim.URL)
+		if err != nil {
+			return nil, nil
+		}
+
+		dimURL = fmt.Sprintf("%s%s", apiDomain, uri.Path)
+	}
+
+	codeCol["valueURL"] = dimURL + "/codes/{" + codeHeader + "}"
 	codeCol["required"] = true
 	// TODO: determine what could go in c["datatype"]
 

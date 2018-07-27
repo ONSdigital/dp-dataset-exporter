@@ -23,6 +23,7 @@ const (
 	ServiceToken    = "gravy"
 
 	downloadServiceURL        = "http://download-service"
+	apiDomainURL              = "http://api-example"
 	fullDatasetFilePrefix     = "full-dataset"
 	filteredDatasetFilePrefix = "filtered-dataset"
 )
@@ -103,7 +104,7 @@ func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, nil, nil, nil, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 
@@ -145,7 +146,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 
@@ -198,7 +199,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 
@@ -255,7 +256,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 			ctx := context.Background()
@@ -313,7 +314,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 			ctx := context.Background()
@@ -370,7 +371,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 			ctx := context.Background()
@@ -436,7 +437,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 			ctx := context.Background()
@@ -500,7 +501,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 			ctx := context.Background()
@@ -611,7 +612,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			},
 		}
 
-		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("When handle is called", func() {
 			ctx := context.Background()
@@ -714,7 +715,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return metadata, nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("when handle is called", func() {
 			ctx := context.Background()
@@ -759,7 +760,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return "", mockErr
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("when handle is called", func() {
 			ctx := context.Background()
@@ -824,7 +825,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("when handle is called", func() {
 			ctx := context.Background()
@@ -876,7 +877,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("when handle is called", func() {
 			ctx := context.Background()
@@ -940,7 +941,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
+		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
 
 		Convey("when handle is called", func() {
 			ctx := context.Background()
