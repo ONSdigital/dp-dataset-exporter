@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"io"
+	"net/url"
 	"path"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -69,7 +70,7 @@ func NewStore(
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
-func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (url string, err error) {
+func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (uploadedFileURL string, err error) {
 
 	var location string
 	if isPublished {
@@ -114,7 +115,15 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			return "", err
 		}
 
-		location = result.Location
+		log.Info("writing key to vault", log.Data{
+			"result.Location": result.Location,
+			"vault_path":      vaultPath,
+		})
+
+		location, err = url.PathUnescape(result.Location)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return location, nil

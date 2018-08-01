@@ -2,6 +2,7 @@ package filter
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,17 +12,14 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/go-ns/common"
 	"github.com/ONSdigital/go-ns/log"
 )
 
-//go:generate moq -out filtertest/http_client.go -pkg filtertest . HTTPClient
-
 // Store provides access to stored dimension data.
 type Store struct {
-	filterAPIURL       string
-	filterAPIAuthToken string // Deprecated variable
-	serviceToken       string
-	httpClient         HTTPClient
+	filterAPIURL string
+	httpClient   common.RCHTTPClienter
 }
 
 // FilterOuput represents a structure used to update the filter api
@@ -62,18 +60,11 @@ var ErrFilterAPIError = errors.New("Internal error from the filter api")
 var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the filter api")
 
 // NewStore returns a new instance of a filter store.
-func NewStore(filterAPIURL, filterAPIAuthToken, serviceToken string, httpClient HTTPClient) *Store {
+func NewStore(filterAPIURL string, httpClient common.RCHTTPClienter) *Store {
 	return &Store{
-		filterAPIURL:       filterAPIURL,
-		filterAPIAuthToken: filterAPIAuthToken,
-		serviceToken:       serviceToken,
-		httpClient:         httpClient,
+		filterAPIURL: filterAPIURL,
+		httpClient:   httpClient,
 	}
-}
-
-// HTTPClient dependency.
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
 }
 
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
@@ -159,10 +150,8 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Internal-Token", store.filterAPIAuthToken)
-	request.Header.Set("Authorization", store.serviceToken)
 
-	response, responseError := store.httpClient.Do(request)
+	response, responseError := store.httpClient.Do(context.Background(), request)
 	if responseError != nil {
 		return nil, responseError
 	}
