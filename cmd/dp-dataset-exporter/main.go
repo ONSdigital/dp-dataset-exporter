@@ -91,6 +91,7 @@ func main() {
 		eventProducer,
 		datasetAPICli,
 		cfg.DownloadServiceURL,
+		cfg.APIDomainURL,
 		cfg.FullDatasetFilePrefix,
 		cfg.FilteredDatasetFilePrefix,
 	)

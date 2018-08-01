@@ -29,6 +29,7 @@ type Config struct {
 	VaultAddress                string        `envconfig:"VAULT_ADDR"`
 	VaultPath                   string        `envconfig:"VAULT_PATH"`
 	DownloadServiceURL          string        `envconfig:"DOWNLOAD_SERVICE_URL"`
+	APIDomainURL                string        `envconfig:"API_DOMAIN_URL"`
 	ServiceAuthToken            string        `envconfig:"SERVICE_AUTH_TOKEN"            json:"-"`
 	StartupTimeout              time.Duration `envconfig:"STARTUP_TIMEOUT"`
 	ZebedeeURL                  string        `envconfig:"ZEBEDEE_URL"`
@@ -60,6 +61,7 @@ func Get() (*Config, error) {
 		VaultAddress:                "http://localhost:8200",
 		VaultToken:                  "",
 		DownloadServiceURL:          "http://localhost:23600",
+		APIDomainURL:                "http://localhost:23200",
 		ServiceAuthToken:            "0f49d57b-c551-4d33-af1e-a442801dd851",
 		StartupTimeout:              time.Second * 125,
 		ZebedeeURL:                  "http://localhost:8082",

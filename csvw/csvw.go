@@ -3,6 +3,8 @@ package csvw
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -100,7 +102,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 }
 
 //Generate the CSVW structured metadata file to describe a CSV
-func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL string) ([]byte, error) {
+func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
 	if len(metadata.Dimensions) == 0 {
 		return nil, errMissingDimensions
 	}
@@ -114,14 +116,14 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL string) 
 	csvw := New(metadata, downloadURL)
 
 	var list []Column
-	obs := newObservationColumn(downloadURL, h[0], metadata.UnitOfMeasure)
+	obs := newObservationColumn(h[0], metadata.UnitOfMeasure)
 	list = append(list, obs)
 	log.Info("added observation column to CSVW", log.Data{"column": obs})
 
 	//add data markings columns
 	if offset != 0 {
 		for i := 1; i <= offset; i++ {
-			c := newColumn(i, downloadURL, h[i], "")
+			c := newColumn(h[i], "")
 			list = append(list, c)
 			log.Info("added observation metadata column to CSVW", log.Data{"column": c})
 		}
@@ -132,7 +134,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL string) 
 
 	//add dimension columns
 	for i := 0; i < len(h); i = i + 2 {
-		c, l := newCodeAndLabelColumns(offset, i, downloadURL, h, metadata.Dimensions)
+		c, l := newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
 		log.Info("added pair of dimension columns to CSVW", log.Data{"code_column": c, "label_column": l})
 		list = append(list, c, l)
 	}
@@ -193,17 +195,16 @@ func splitHeader(header string) ([]string, int, error) {
 	return h, offset, err
 }
 
-func newObservationColumn(url, title, name string) Column {
-	c := newColumn(0, url, title, name)
+func newObservationColumn(title, name string) Column {
+	c := newColumn(title, name)
 
-	c["datatype"] = "number"
-	c["required"] = true
+	c["datatype"] = "string"
 
 	log.Info("adding observations column", log.Data{"column": c})
 	return c
 }
 
-func newCodeAndLabelColumns(offset, i int, downloadURL string, header []string, dims []dataset.Dimension) (Column, Column) {
+func newCodeAndLabelColumns(i int, apiDomain string, header []string, dims []dataset.Dimension) (Column, Column) {
 	codeHeader := header[i]
 	dimHeader := header[i+1]
 	dimHeader = strings.ToLower(dimHeader)
@@ -217,24 +218,31 @@ func newCodeAndLabelColumns(offset, i int, downloadURL string, header []string, 
 		}
 	}
 
-	codeCol := newColumn(offset+i, downloadURL, "", codeHeader)
+	codeCol := newColumn("", codeHeader)
 
-	codeCol["valueURL"] = dim.URL + "/codes/{" + codeHeader + "}"
+	dimURL := dim.URL
+	if len(apiDomain) > 0 {
+		uri, err := url.Parse(dim.URL)
+		if err != nil {
+			return nil, nil
+		}
+
+		dimURL = fmt.Sprintf("%s%s", apiDomain, uri.Path)
+	}
+
+	codeCol["valueURL"] = dimURL + "/codes/{" + codeHeader + "}"
 	codeCol["required"] = true
 	// TODO: determine what could go in c["datatype"]
 
-	labelCol := newColumn(offset+i+1, downloadURL, dim.Name, dim.Label)
+	labelCol := newColumn(dim.Name, dim.Label)
 	labelCol["description"] = dim.Description
 	// TODO: determine what could go in c["datatype"] and c["required"]
 
 	return codeCol, labelCol
 }
 
-func newColumn(n int, url, title, name string) Column {
-	c := Column{
-		"@id": url + "#col=" + strconv.Itoa(n),
-	}
-
+func newColumn(title, name string) Column {
+	c := make(Column)
 	if len(title) > 0 {
 		c["titles"] = title
 	}
@@ -242,5 +250,6 @@ func newColumn(n int, url, title, name string) Column {
 	if len(name) > 0 {
 		c["name"] = name
 	}
+
 	return c
 }

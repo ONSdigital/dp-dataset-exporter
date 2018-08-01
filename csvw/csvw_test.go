@@ -8,6 +8,7 @@ import (
 )
 
 var fileURL = "ons/file.csv"
+var apiURL = "api.example.com"
 
 func TestNew(t *testing.T) {
 	Convey("Given a complete metadata struct", t, func() {
@@ -255,10 +256,10 @@ func TestGenerate(t *testing.T) {
 		}
 
 		Convey("When the Generate csvw function is called", func() {
-			data, err := Generate(m, header, fileURL, fileURL)
+			data, err := Generate(m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
-				So(data, ShouldHaveLength, 503)
+				So(data, ShouldHaveLength, 367)
 				So(err, ShouldBeNil)
 			})
 		})
@@ -273,7 +274,7 @@ func TestGenerate(t *testing.T) {
 		}
 
 		Convey("When the Generate csvw function is called", func() {
-			data, err := Generate(m, header, fileURL, fileURL)
+			data, err := Generate(m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
 				So(data, ShouldHaveLength, 0)
