@@ -139,8 +139,14 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 		list = append(list, c, l)
 	}
 
+	about, err := url.Parse(aboutURL)
+	if err != nil {
+		return nil, err
+	}
+	about.Host = apiDomain
+
 	csvw.TableSchema = Columns{
-		About: aboutURL,
+		About: about.String(),
 		C:     list,
 	}
 
