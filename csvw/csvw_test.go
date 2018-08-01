@@ -189,6 +189,22 @@ func TestAddNotes(t *testing.T) {
 	})
 }
 
+func TestFormatAboutURL(t *testing.T) {
+	Convey("Given a valid domain config and url", t, func() {
+		domain := "http://api.example.com/v1"
+		url := "http://localhost:22000/datasets/1/editions/2/version/3/metadata"
+
+		Convey("When the formatAboutURL function is called", func() {
+			url, err := formatAboutURL(url, domain)
+
+			Convey("Then the returned values should be as expected", func() {
+				So(url, ShouldEqual, "http://api.example.com/v1/datasets/1/editions/2/version/3/metadata")
+				So(err, ShouldBeNil)
+			})
+		})
+	})
+}
+
 func TestSplitHeader(t *testing.T) {
 	Convey("Given a valid string version of a csv header", t, func() {
 		h := "V4_2, a, b, c, d"
@@ -259,7 +275,7 @@ func TestGenerate(t *testing.T) {
 			data, err := Generate(m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
-				So(data, ShouldHaveLength, 385)
+				So(data, ShouldHaveLength, 382)
 				So(err, ShouldBeNil)
 			})
 		})
