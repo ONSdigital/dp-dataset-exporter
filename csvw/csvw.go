@@ -139,14 +139,13 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 		list = append(list, c, l)
 	}
 
-	about, err := url.Parse(aboutURL)
+	aboutURL, err = formatAboutURL(aboutURL, apiDomain)
 	if err != nil {
 		return nil, err
 	}
-	about.Host = apiDomain
 
 	csvw.TableSchema = Columns{
-		About: about.String(),
+		About: aboutURL,
 		C:     list,
 	}
 
@@ -159,6 +158,22 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	}
 
 	return b, nil
+}
+
+func formatAboutURL(aboutURL, domain string) (string, error) {
+	about, err := url.Parse(aboutURL)
+	if err != nil {
+		return "", err
+	}
+
+	d, err := url.Parse(domain)
+	if err != nil {
+		return "", err
+	}
+
+	d.Path = d.Path + about.Path
+
+	return d.String(), nil
 }
 
 //AddNotes to CSVW from alerts or usage notes in provided metadata
