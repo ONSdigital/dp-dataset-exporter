@@ -20,11 +20,11 @@ import (
 type CSVW struct {
 	Context     string    `json:"@context"`
 	URL         string    `json:"url"`
-	Title       string    `json:"dct:title"`
-	Description string    `json:"dct:description,omitempty"`
+	Title       string    `json:"name"`
+	Description string    `json:"description,omitempty"`
 	Issued      string    `json:"dct:issued,omitempty"`
-	Publisher   Publisher `json:"dct:publisher"`
-	Contact     []Contact `json:"dcat:contactPoint"`
+	Publisher   Publisher `json:"creator"`
+	Contact     []Contact `json:"contactPoint"`
 	TableSchema Columns   `json:"tableSchema"`
 	Theme       string    `json:"dcat:theme,omitempty"`
 	License     string    `json:"dct:license,omitempty"`
@@ -35,8 +35,8 @@ type CSVW struct {
 // Contact represents a response model within a dataset
 type Contact struct {
 	Name      string `json:"vcard:fn"`
-	Telephone string `json:"vcard:tel"`
-	Email     string `json:"vcard:email"`
+	Telephone string `json:"telephone"`
+	Email     string `json:"email"`
 }
 
 //Publisher defines the entity primarily responsible for the dataset
@@ -77,7 +77,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 		Description: m.Description,
 		Issued:      m.ReleaseDate,
 		Theme:       m.Theme,
-		License:     m.License,
+		License:     "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3",
 		Frequency:   m.ReleaseFrequency,
 		URL:         csvURL,
 	}
@@ -93,7 +93,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 	if m.Publisher != nil {
 		csvw.Publisher = Publisher{
 			Name: m.Publisher.Name,
-			Type: m.Publisher.Type,
+			Type: "https://schema.org/GovernmentOrganization",
 			ID:   m.Publisher.URL,
 		}
 	}
