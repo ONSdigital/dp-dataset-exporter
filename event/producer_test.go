@@ -49,6 +49,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 				Version:    "",
 				FileURL:    "",
 				Filename:   "",
+				RowCount:   0,
 			}
 			err := eventProducer.CSVExported(event)
 

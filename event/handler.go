@@ -104,6 +104,7 @@ type Producer interface {
 // Handle the export of a single filter output.
 func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted) error {
 	var csvExported *CSVExported
+	var logData log.Data
 
 	if event.FilterID != "" {
 
@@ -112,7 +113,7 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 			return err
 		}
 
-		logData := log.Data{"filter_id": event.FilterID, "published": isPublished}
+		logData = log.Data{"filter_id": event.FilterID, "published": isPublished}
 
 		log.Debug("filter job identified", logData)
 		csvExported, err = handler.filterJob(event, isPublished)
@@ -126,7 +127,7 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 			return err
 		}
 
-		logData := log.Data{"instance_id": event.InstanceID,
+		logData = log.Data{"instance_id": event.InstanceID,
 			"dataset_id": event.DatasetID,
 			"edition":    event.Edition,
 			"version":    event.Version,
@@ -143,6 +144,7 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 	if err := handler.eventProducer.CSVExported(csvExported); err != nil {
 		return errors.Wrap(err, "error while attempting to send csv exported event to producer")
 	}
+
 	return nil
 }
 
@@ -237,8 +239,10 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
 
-	log.Info("CSV export completed", log.Data{"filter_id": filter.FilterID, "file_url": fileURL})
-	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL}, nil
+	rowCount := reader.ObservationsCount()
+
+	log.Info("CSV export completed", log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
+	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
 func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
@@ -254,7 +258,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 
 	filename := handler.fullDatasetFilePrefix + fileID + ".csv"
 
-	csvDownload, csvS3URL, header, err := handler.generateFullCSV(event, filename, isPublished)
+	csvDownload, csvS3URL, header, rowCount, err := handler.generateFullCSV(event, filename, isPublished)
 	if err != nil {
 		return nil, err
 	}
@@ -290,37 +294,38 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 		Version:    event.Version,
 		FileURL:    csvS3URL,
 		Filename:   fileID,
+		RowCount:   rowCount,
 	}, nil
 }
 
-func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, error) {
+func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
 
 	csvRowReader, err := handler.observationStore.GetCSVRows(&observation.Filter{InstanceID: event.InstanceID}, nil)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", 0, err
 	}
 
 	rReader := observation.NewReader(csvRowReader)
-	defer func() (*dataset.Download, string, string, error) {
+	defer func() (*dataset.Download, string, string, int32, error) {
 		closeErr := rReader.Close()
 		if closeErr != nil {
 			log.Error(closeErr, nil)
 		}
-		return nil, "", "", closeErr
+		return nil, "", "", 0, closeErr
 	}()
 
 	hReader := reader.New(rReader)
 
 	header, err := hReader.PeekBytes('\n')
 	if err != nil {
-		return nil, "", "", errors.Wrap(err, "could not peek")
+		return nil, "", "", 0, errors.Wrap(err, "could not peek")
 	}
 
 	log.Info("header extracted from csv", log.Data{"header": header})
 
 	url, err := handler.fileStore.PutFile(hReader, filename, isPublished)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", 0, err
 	}
 
 	download := &dataset.Download{
@@ -333,7 +338,7 @@ func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename s
 		download.Private = url
 	}
 
-	return download, url, header, nil
+	return download, url, header, rReader.ObservationsCount(), nil
 }
 
 func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, header, downloadURL string, isPublished bool) (*dataset.Download, error) {
