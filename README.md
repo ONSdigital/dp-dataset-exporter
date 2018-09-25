@@ -14,6 +14,10 @@ Ensure you have vault running.
 * Run `make debug`
 * Run the auth-stub-api
 
+### Kafka scripts
+
+Scripts for updating and debugging Kafka can be found [here](https://github.com/ONSdigital/dp-data-tools)(dp-data-tools)
+
 ### Configuration
 
 An overview of the configuration options available, either as a table of
