@@ -71,15 +71,15 @@ func NewStore(
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
 func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (uploadedFileURL string, err error) {
+	var result *s3manager.UploadOutput
 
-	var location string
 	if isPublished {
 		log.Info("uploading public file to S3", log.Data{
 			"bucket": store.publicBucket,
 			"name":   filename,
 		})
 
-		result, err := store.uploader.Upload(&s3manager.UploadInput{
+		result, err = store.uploader.Upload(&s3manager.UploadInput{
 			Body:   reader,
 			Bucket: &store.publicBucket,
 			Key:    &filename,
@@ -87,8 +87,6 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 		if err != nil {
 			return "", err
 		}
-
-		location = result.Location
 	} else {
 		log.Info("uploading private file to S3", log.Data{
 			"bucket": store.privateBucket,
@@ -106,7 +104,7 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			return "", err
 		}
 
-		result, err := store.cryptoUploader.UploadWithPSK(&s3manager.UploadInput{
+		result, err = store.cryptoUploader.UploadWithPSK(&s3manager.UploadInput{
 			Body:   reader,
 			Bucket: &store.privateBucket,
 			Key:    &filename,
@@ -119,14 +117,9 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			"result.Location": result.Location,
 			"vault_path":      vaultPath,
 		})
-
-		location, err = url.PathUnescape(result.Location)
-		if err != nil {
-			return "", err
-		}
 	}
 
-	return location, nil
+	return url.PathUnescape(result.Location)
 }
 
 func createPSK() []byte {

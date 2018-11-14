@@ -9,4 +9,5 @@ type CSVExported struct {
 	Edition    string `avro:"edition"`
 	Version    string `avro:"version"`
 	Filename   string `avro:"filename"`
+	RowCount   int32  `avro:"row_count"`
 }
