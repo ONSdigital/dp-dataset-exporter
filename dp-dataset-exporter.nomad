@@ -27,11 +27,7 @@ job "dp-dataset-exporter" {
     }
 
     task "dp-dataset-exporter" {
-      driver = "exec"
-
-      artifact {
-        source = "s3::https://s3-eu-west-1.amazonaws.com/{{BUILD_BUCKET}}/dp-dataset-exporter/{{REVISION}}.tar.gz"
-      }
+      driver = "docker"
 
       artifact {
         source = "s3::https://s3-eu-west-1.amazonaws.com/{{DEPLOYMENT_BUCKET}}/dp-dataset-exporter/{{REVISION}}.tar.gz"
@@ -40,9 +36,13 @@ job "dp-dataset-exporter" {
       config {
         command = "${NOMAD_TASK_DIR}/start-task"
 
-        args    = [
-          "${NOMAD_TASK_DIR}/dp-dataset-exporter",
-        ]
+        args = [“./dp-dataset-exporter”]
+
+        image = “{{ECR_URL}}:concourse-{{REVISION}}”
+
+        port_map {
+          http = “${NOMAD_PORT_http}”
+        }
       }
 
       service {
