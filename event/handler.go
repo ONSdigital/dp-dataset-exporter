@@ -13,7 +13,8 @@ import (
 
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
 	"github.com/ONSdigital/dp-dataset-exporter/reader"
-	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/dp-graph/graph/driver"
+	"github.com/ONSdigital/dp-graph/observation"
 
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	"github.com/ONSdigital/go-ns/log"
@@ -33,7 +34,7 @@ const metadataExtension = "-metadata.json"
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
 	filterStore               FilterStore
-	observationStore          ObservationStore
+	observationStore          driver.Observation
 	fileStore                 FileStore
 	eventProducer             Producer
 	datasetAPICli             DatasetAPI
@@ -88,7 +89,7 @@ type FilterStore interface {
 
 // ObservationStore provides filtered observation data in CSV rows.
 type ObservationStore interface {
-	GetCSVRows(filter *observation.Filter, limit *int) (observation.CSVRowReader, error)
+	GetCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error)
 }
 
 // FileStore provides storage for filtered output files.
@@ -182,14 +183,14 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		return nil, err
 	}
 
-	csvRowReader, err := handler.observationStore.GetCSVRows(filter, nil)
+	csvRowReader, err := handler.observationStore.GetCSVRows(context.Background(), filter, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
-		closeErr := reader.Close()
+		closeErr := reader.Close(context.Background())
 		if closeErr != nil {
 			log.Error(closeErr, nil)
 		}
@@ -300,14 +301,14 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 
 func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
 
-	csvRowReader, err := handler.observationStore.GetCSVRows(&observation.Filter{InstanceID: event.InstanceID}, nil)
+	csvRowReader, err := handler.observationStore.GetCSVRows(context.Background(), &observation.Filter{InstanceID: event.InstanceID}, nil)
 	if err != nil {
 		return nil, "", "", 0, err
 	}
 
 	rReader := observation.NewReader(csvRowReader)
 	defer func() (*dataset.Download, string, string, int32, error) {
-		closeErr := rReader.Close()
+		closeErr := rReader.Close(context.Background())
 		if closeErr != nil {
 			log.Error(closeErr, nil)
 		}

@@ -7,15 +7,12 @@ import (
 	"syscall"
 	"time"
 
-	bolt "github.com/johnnadratowski/golang-neo4j-bolt-driver"
-
-	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/dp-graph/graph"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/healthcheck"
 	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
-	"github.com/ONSdigital/go-ns/neo4j"
 	"github.com/ONSdigital/go-ns/rchttp"
 	"github.com/ONSdigital/go-ns/vault"
 
@@ -54,7 +51,7 @@ func main() {
 	kafkaErrorProducer, err := kafka.NewProducer(cfg.KafkaAddr, cfg.ErrorProducerTopic, 0)
 	exitIfError(err)
 
-	neo4jConnPool, err := bolt.NewClosableDriverPool(cfg.DatabaseAddress, cfg.Neo4jPoolSize)
+	db, err := graph.New(context.Background(), graph.Subsets{Observation: true})
 	exitIfError(err)
 
 	vaultClient, err := vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, 3)
@@ -69,7 +66,8 @@ func main() {
 	)
 	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
 
-	observationStore := observation.NewStore(neo4jConnPool)
+	observationStore, err := graph.New(context.Background(), graph.Subsets{Observation: true})
+	exitIfError(err)
 
 	fileStore, err := file.NewStore(
 		cfg.AWSRegion,
@@ -107,7 +105,7 @@ func main() {
 		errorChannel,
 		healthAlertChan, healthcheckRequestChan,
 		filterHealthCheck.New(cfg.FilterAPIURL, "", ""),
-		neo4j.NewHealthCheckClient(neo4jConnPool),
+		observationStore,
 		vaultClient,
 		datasetAPICli,
 	)
@@ -175,6 +173,9 @@ func main() {
 		logIfError(err)
 
 		err = kafkaErrorProducer.Close(ctx)
+		logIfError(err)
+
+		err = observationStore.Close(ctx)
 		logIfError(err)
 
 		err = healthChecker.Close(ctx)

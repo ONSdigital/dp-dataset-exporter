@@ -24,30 +24,17 @@ type Store struct {
 
 // FilterOuput represents a structure used to update the filter api
 type FilterOuput struct {
-	FilterID   string     `json:"filter_id,omitempty"`
-	InstanceID string     `json:"instance_id"`
-	State      string     `json:"state,omitempty"`
-	Downloads  *Downloads `json:"downloads,omitempty"`
-	Events     []*Event   `json:"events,omitempty"`
-	Published  bool       `json:"published,omitempty"`
+	FilterID   string                 `json:"filter_id,omitempty"`
+	InstanceID string                 `json:"instance_id"`
+	State      string                 `json:"state,omitempty"`
+	Downloads  *observation.Downloads `json:"downloads,omitempty"`
+	Events     []*Event               `json:"events,omitempty"`
+	Published  bool                   `json:"published,omitempty"`
 }
 
 type Event struct {
 	Type string    `bson:"type,omitempty" json:"type"`
 	Time time.Time `bson:"time,omitempty" json:"time"`
-}
-
-// Downloads represents the CSV which has been generated
-type Downloads struct {
-	CSV *DownloadItem `json:"csv,omitempty"`
-}
-
-// DownloadItem represents an object containing information for the download item
-type DownloadItem struct {
-	HRef    string `json:"href,omitempty"`
-	Private string `json:"private,omitempty"`
-	Public  string `json:"public,omitempty"`
-	Size    string `json:"size,omitempty"`
 }
 
 // ErrFilterJobNotFound returned when the filter job count not be found for the given ID.
@@ -72,8 +59,8 @@ func (store *Store) PutCSVData(filterJobID string, csv observation.DownloadItem)
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
 	putBody := FilterOuput{
-		Downloads: &Downloads{
-			CSV: &DownloadItem{
+		Downloads: &observation.Downloads{
+			CSV: &observation.DownloadItem{
 				HRef:    csv.HRef,
 				Private: csv.Private,
 				Public:  csv.Public,
