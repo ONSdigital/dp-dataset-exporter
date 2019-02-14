@@ -14,7 +14,7 @@ import (
 
 type Neo4jDriver interface {
 	Read(query string, mapp mapper.ResultMapper, single bool) error
-	ReadRows(query string) (*BoltRowReader, error)
+	StreamRows(query string) (*BoltRowReader, error)
 	Count(query string) (count int64, err error)
 	Exec(query string, params map[string]interface{}) error
 	Close(ctx context.Context) error
@@ -25,8 +25,8 @@ type NeoDriver struct {
 	pool bolt.ClosableDriverPool
 }
 
-func New(dbAddr string, size int) (n *NeoDriver, err error) {
-	pool, err := bolt.NewClosableDriverPool(dbAddr, size)
+func New(dbAddr string, size, timeout int) (n *NeoDriver, err error) {
+	pool, err := bolt.NewClosableDriverPoolWithTimeout(dbAddr, size, timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ results:
 	return nil
 }
 
-func (n *NeoDriver) ReadRows(query string) (*BoltRowReader, error) {
+func (n *NeoDriver) StreamRows(query string) (*BoltRowReader, error) {
 	conn, err := n.pool.OpenPool()
 	if err != nil {
 		return nil, err
@@ -97,9 +97,9 @@ func (n *NeoDriver) ReadRows(query string) (*BoltRowReader, error) {
 		conn.Close()
 		return nil, err
 	}
-	defer conn.Close()
-	// The connection can only be closed once the results have been read, so the row reader is responsible for
-	// releasing the connection back into the pool
+
+	// The connection can only be closed once the results have been read, so the caller is responsible for
+	// calling .CLose() which will ultimately release the connection back into the pool
 	return NewBoltRowReader(rows), nil
 }
 

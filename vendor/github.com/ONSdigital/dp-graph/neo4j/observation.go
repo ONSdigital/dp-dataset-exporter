@@ -1,6 +1,7 @@
 package neo4j
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,10 +10,10 @@ import (
 	"github.com/ONSdigital/go-ns/log"
 )
 
-// GetCSVRows returns a reader allowing individual CSV rows to be read. Rows returned
-// can be limited, to stop this pass in nil. If filter.DimensionFilters is nil, empty or contains only empty values then
-// a CSVRowReader for the entire dataset will be returned.
-func (n *Neo4j) GetCSVRows(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+// StreamCSVRows returns a reader allowing individual CSV rows to be read.
+// Rows returned can be limited, to stop this pass in nil. If filter.DimensionFilters
+// is nil, empty or contains only empty values then a StreamRowReader for the entire dataset will be returned.
+func (n *Neo4j) StreamCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 
 	headerRowQuery := fmt.Sprintf("MATCH (i:`_%s_Instance`) RETURN i.header as row", filter.InstanceID)
 
@@ -29,7 +30,7 @@ func (n *Neo4j) GetCSVRows(filter *observation.Filter, limit *int) (observation.
 		"query":      unionQuery,
 	})
 
-	return n.ReadRows(unionQuery)
+	return n.StreamRows(unionQuery)
 }
 
 func createObservationQuery(filter *observation.Filter) string {

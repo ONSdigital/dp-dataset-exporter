@@ -51,9 +51,6 @@ func main() {
 	kafkaErrorProducer, err := kafka.NewProducer(cfg.KafkaAddr, cfg.ErrorProducerTopic, 0)
 	exitIfError(err)
 
-	db, err := graph.New(context.Background(), graph.Subsets{Observation: true})
-	exitIfError(err)
-
 	vaultClient, err := vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, 3)
 	exitIfError(err)
 

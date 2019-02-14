@@ -11,8 +11,8 @@ import (
 // Check that the reader conforms to the io.reader interface.
 var _ io.Reader = (*Reader)(nil)
 
-// CSVRowReader provides a reader of individual rows (lines) of a CSV file.
-type CSVRowReader interface {
+// StreamRowReader provides a reader of individual rows (lines) of a CSV.
+type StreamRowReader interface {
 	Read() (string, error)
 	Close(context.Context) error
 }
@@ -31,7 +31,7 @@ var ErrNoResultsFound = errors.New("the filter options created no results")
 
 // Reader is an io.Reader implementation that wraps a csvRowReader
 type Reader struct {
-	csvRowReader   CSVRowReader
+	csvRowReader   StreamRowReader
 	buffer         []byte // buffer a portion of the current line
 	eof            bool   // are we at the end of the csv rows?
 	totalBytesRead int64  // how many bytes in total have been read?
@@ -39,7 +39,7 @@ type Reader struct {
 }
 
 // NewReader returns a new io.Reader for the given csvRowReader.
-func NewReader(csvRowReader CSVRowReader) *Reader {
+func NewReader(csvRowReader StreamRowReader) *Reader {
 	return &Reader{
 		csvRowReader: csvRowReader,
 	}

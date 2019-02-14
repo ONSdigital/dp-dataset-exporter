@@ -89,7 +89,7 @@ type FilterStore interface {
 
 // ObservationStore provides filtered observation data in CSV rows.
 type ObservationStore interface {
-	GetCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error)
+	StreamCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error)
 }
 
 // FileStore provides storage for filtered output files.
@@ -183,7 +183,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		return nil, err
 	}
 
-	csvRowReader, err := handler.observationStore.GetCSVRows(context.Background(), filter, nil)
+	csvRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +301,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 
 func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
 
-	csvRowReader, err := handler.observationStore.GetCSVRows(context.Background(), &observation.Filter{InstanceID: event.InstanceID}, nil)
+	csvRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), &observation.Filter{InstanceID: event.InstanceID}, nil)
 	if err != nil {
 		return nil, "", "", 0, err
 	}

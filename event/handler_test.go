@@ -141,7 +141,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return nil, expectedError
 			},
 		}
@@ -188,7 +188,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -245,7 +245,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -303,7 +303,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -360,7 +360,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -420,7 +420,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -484,7 +484,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -522,9 +522,9 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 			Convey("The observation store is called with the filter returned from the filter store", func() {
 
-				So(mockObservationStore.GetCSVRowsCalls(), ShouldHaveLength, 1)
+				So(mockObservationStore.StreamCSVRowsCalls(), ShouldHaveLength, 1)
 
-				actualFilter := mockObservationStore.GetCSVRowsCalls()[0].Filter
+				actualFilter := mockObservationStore.StreamCSVRowsCalls()[0].Filter
 				So(actualFilter, ShouldEqual, filter)
 			})
 
@@ -595,7 +595,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 		mockFilterStore := &eventtest.FilterStoreMock{}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
-			GetCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+			StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 				return mockRowReader, nil
 			},
 		}
@@ -636,7 +636,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The observation store is called", func() {
-				So(mockObservationStore.GetCSVRowsCalls(), ShouldHaveLength, 1)
+				So(mockObservationStore.StreamCSVRowsCalls(), ShouldHaveLength, 1)
 			})
 
 			Convey("The file store is called with the reader returned from the observation store.", func() {
@@ -701,7 +701,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 	Convey("given observation store get csv rows returns an error", t, func() {
 		observationStoreMock, filterStoreMock, fileStockMock, producerMock, datasetApiMock := mocks()
-		observationStoreMock.GetCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 			return nil, mockErr
 		}
 		datasetApiMock.GetInstanceFunc = func(context.Context, string) (dataset.Instance, error) {
@@ -726,7 +726,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and only the expected calls are made", func() {
-				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
+				So(observationStoreMock.StreamCSVRowsCalls(), ShouldHaveLength, 1)
 				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetVersionCalls(), ShouldHaveLength, 0)
 				So(datasetApiMock.GetVersionMetadataCalls(), ShouldHaveLength, 0)
@@ -752,7 +752,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			},
 		}
 
-		observationStoreMock.GetCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 			return csvRowReaderMock, nil
 		}
 
@@ -771,8 +771,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and only the expected calls are made", func() {
-				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
-				So(observationStoreMock.GetCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
+				So(observationStoreMock.StreamCSVRowsCalls(), ShouldHaveLength, 1)
+				So(observationStoreMock.StreamCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
 
 				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 1)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
@@ -809,7 +809,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			},
 		}
 
-		observationStoreMock.GetCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 			return csvRowReaderMock, nil
 		}
 
@@ -836,8 +836,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and the expected calls are made with the expected ", func() {
-				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
-				So(observationStoreMock.GetCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
+				So(observationStoreMock.StreamCSVRowsCalls(), ShouldHaveLength, 1)
+				So(observationStoreMock.StreamCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
 
 				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 2)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)
@@ -873,7 +873,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			},
 		}
 
-		observationStoreMock.GetCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 			return csvRowReaderMock, nil
 		}
 
@@ -888,7 +888,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and the expected calls are made", func() {
-				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 0)
+				So(observationStoreMock.StreamCSVRowsCalls(), ShouldHaveLength, 0)
 
 				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 0)
 
@@ -925,7 +925,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			},
 		}
 
-		observationStoreMock.GetCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
+		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
 			return csvRowReaderMock, nil
 		}
 
@@ -952,8 +952,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			})
 
 			Convey("and the expected calls are made with the expected ", func() {
-				So(observationStoreMock.GetCSVRowsCalls(), ShouldHaveLength, 1)
-				So(observationStoreMock.GetCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
+				So(observationStoreMock.StreamCSVRowsCalls(), ShouldHaveLength, 1)
+				So(observationStoreMock.StreamCSVRowsCalls()[0].Filter.InstanceID, ShouldEqual, instanceID)
 
 				So(fileStockMock.PutFileCalls(), ShouldHaveLength, 2)
 				So(fileStockMock.PutFileCalls()[0].Reader, ShouldNotBeNil)

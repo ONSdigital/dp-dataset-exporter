@@ -42,7 +42,7 @@ type Hierarchy interface {
 
 // Observation provides filtered observation data in CSV rows.
 type Observation interface {
-	GetCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.CSVRowReader, error)
+	StreamCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error)
 }
 
 type Instance interface {
