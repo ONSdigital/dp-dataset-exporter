@@ -37,6 +37,10 @@ func NewObservationStore(ctx context.Context) (*DB, error) {
 	return New(ctx, Subsets{Observation: true})
 }
 
+func NewInstanceStore(ctx context.Context) (*DB, error) {
+	return New(ctx, Subsets{Instance: true})
+}
+
 func New(ctx context.Context, choice Subsets) (*DB, error) {
 	cfg, err := config.Get()
 	if err != nil {
@@ -45,47 +49,31 @@ func New(ctx context.Context, choice Subsets) (*DB, error) {
 
 	var ok bool
 	var h driver.Hierarchy
-	if h, ok = cfg.Driver.(driver.Hierarchy); !ok {
-		if choice.Hierarchy {
+	if choice.Hierarchy {
+		if h, ok = cfg.Driver.(driver.Hierarchy); !ok {
 			return nil, errors.New("configured driver does not implement hierarchy subset")
 		}
 	}
 
-	if !choice.Hierarchy {
-		h = nil
-	}
-
 	var c driver.CodeList
-	if c, ok = cfg.Driver.(driver.CodeList); !ok {
-		if choice.CodeList {
+	if choice.CodeList {
+		if c, ok = cfg.Driver.(driver.CodeList); !ok {
 			return nil, errors.New("configured driver does not implement code list subset")
 		}
 	}
 
-	if !choice.CodeList {
-		c = nil
-	}
-
 	var i driver.Instance
-	if i, ok = cfg.Driver.(driver.Instance); !ok {
-		if choice.Instance {
+	if choice.Instance {
+		if i, ok = cfg.Driver.(driver.Instance); !ok {
 			return nil, errors.New("configured driver does not implement instance subset")
 		}
 	}
 
-	if !choice.Instance {
-		i = nil
-	}
-
 	var o driver.Observation
-	if o, ok = cfg.Driver.(driver.Observation); !ok {
-		if choice.Observation {
+	if choice.Observation {
+		if o, ok = cfg.Driver.(driver.Observation); !ok {
 			return nil, errors.New("configured driver does not implement observation subset")
 		}
-	}
-
-	if !choice.Observation {
-		o = nil
 	}
 
 	return &DB{

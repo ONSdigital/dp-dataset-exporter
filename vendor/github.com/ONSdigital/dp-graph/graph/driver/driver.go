@@ -35,9 +35,6 @@ type Hierarchy interface {
 	MarkNodesToRemain(ctx context.Context, attempt int, instanceID, dimensionName string) error
 	RemoveNodesNotMarkedToRemain(ctx context.Context, attempt int, instanceID, dimensionName string) error
 	RemoveRemainMarker(ctx context.Context, attempt int, instanceID, dimensionName string) error
-
-	//would this work for the majority of these? is there a retry wrapper we can implement? does it work better from the exec level?
-	//	Retry(ctx context.Context, attempt int, call func(ctx context.Context, instanceID, dimensionName string) error)
 }
 
 // Observation provides filtered observation data in CSV rows.

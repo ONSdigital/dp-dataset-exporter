@@ -20,15 +20,15 @@ func (m *Mock) Healthcheck() (string, error) {
 }
 
 func (m *Mock) checkForErrors() error {
-	if m.IsBackendReachable != true {
-		return errors.New("database unavailble - 500")
+	if !m.IsBackendReachable {
+		return errors.New("database unavailable - 500")
 	}
 
-	if m.IsQueryValid != true {
+	if !m.IsQueryValid {
 		return errors.New("invalid query - 400")
 	}
 
-	if m.IsContentFound != true {
+	if !m.IsContentFound {
 		return errors.New("not found - 404")
 	}
 
