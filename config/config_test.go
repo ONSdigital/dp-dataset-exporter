@@ -25,7 +25,6 @@ func TestSpec(t *testing.T) {
 				So(cfg.KafkaAddr, ShouldResemble, []string{"localhost:9092"})
 				So(cfg.FilterConsumerTopic, ShouldEqual, "filter-job-submitted")
 				So(cfg.FilterConsumerGroup, ShouldEqual, "dp-dataset-exporter")
-				So(cfg.DatabaseAddress, ShouldEqual, "bolt://localhost:7687")
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")
 				So(cfg.CSVExportedProducerTopic, ShouldEqual, "common-output-created")
 				So(cfg.DatasetAPIURL, ShouldEqual, "http://localhost:22000")
@@ -41,7 +40,6 @@ func TestSpec(t *testing.T) {
 				So(cfg.DownloadServiceURL, ShouldEqual, "http://localhost:23600")
 				So(cfg.ServiceAuthToken, ShouldEqual, "0f49d57b-c551-4d33-af1e-a442801dd851")
 				So(cfg.StartupTimeout, ShouldEqual, 125*time.Second)
-
 			})
 		})
 	})
