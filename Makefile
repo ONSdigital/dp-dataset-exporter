@@ -21,7 +21,7 @@ build:
 	@mkdir -p $(BUILD_ARCH)/$(BIN_DIR)
 	go build -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
 debug acceptance:
-	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) GRAPH_DRIVER=neo4j GRAPH_ADDR="$(DATABASE_ADDRESS)" go run -race cmd/dp-dataset-exporter/main.go
+	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) GRAPH_DRIVER_TYPE=neo4j GRAPH_ADDR="$(DATABASE_ADDRESS)" go run -race cmd/dp-dataset-exporter/main.go
 test:
 	go test -cover $(shell go list ./... | grep -v /vendor/)
 vault:
