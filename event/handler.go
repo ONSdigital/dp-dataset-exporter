@@ -13,7 +13,6 @@ import (
 
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
 	"github.com/ONSdigital/dp-dataset-exporter/reader"
-	"github.com/ONSdigital/dp-graph/graph/driver"
 	"github.com/ONSdigital/dp-graph/observation"
 
 	"github.com/ONSdigital/go-ns/clients/dataset"
@@ -34,7 +33,7 @@ const metadataExtension = "-metadata.json"
 // ExportHandler handles a single CSV export of a filtered dataset.
 type ExportHandler struct {
 	filterStore               FilterStore
-	observationStore          driver.Observation
+	observationStore          ObservationStore
 	fileStore                 FileStore
 	eventProducer             Producer
 	datasetAPICli             DatasetAPI
