@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
-	"github.com/ONSdigital/dp-filter/observation"
+	"github.com/ONSdigital/dp-graph/observation"
 	"github.com/ONSdigital/go-ns/common/commontest"
 	. "github.com/smartystreets/goconvey/convey"
 )
