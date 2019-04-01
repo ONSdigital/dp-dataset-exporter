@@ -4,12 +4,13 @@
 package eventtest
 
 import (
-	"github.com/ONSdigital/dp-filter/observation"
+	"context"
+	"github.com/ONSdigital/dp-graph/observation"
 	"sync"
 )
 
 var (
-	lockObservationStoreMockGetCSVRows sync.RWMutex
+	lockObservationStoreMockStreamCSVRows sync.RWMutex
 )
 
 // ObservationStoreMock is a mock implementation of ObservationStore.
@@ -18,8 +19,8 @@ var (
 //
 //         // make and configure a mocked ObservationStore
 //         mockedObservationStore := &ObservationStoreMock{
-//             GetCSVRowsFunc: func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
-// 	               panic("TODO: mock out the GetCSVRows method")
+//             StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
+// 	               panic("TODO: mock out the StreamCSVRows method")
 //             },
 //         }
 //
@@ -28,13 +29,15 @@ var (
 //
 //     }
 type ObservationStoreMock struct {
-	// GetCSVRowsFunc mocks the GetCSVRows method.
-	GetCSVRowsFunc func(filter *observation.Filter, limit *int) (observation.CSVRowReader, error)
+	// StreamCSVRowsFunc mocks the StreamCSVRows method.
+	StreamCSVRowsFunc func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// GetCSVRows holds details about calls to the GetCSVRows method.
-		GetCSVRows []struct {
+		// StreamCSVRows holds details about calls to the StreamCSVRows method.
+		StreamCSVRows []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// Filter is the filter argument value.
 			Filter *observation.Filter
 			// Limit is the limit argument value.
@@ -43,37 +46,41 @@ type ObservationStoreMock struct {
 	}
 }
 
-// GetCSVRows calls GetCSVRowsFunc.
-func (mock *ObservationStoreMock) GetCSVRows(filter *observation.Filter, limit *int) (observation.CSVRowReader, error) {
-	if mock.GetCSVRowsFunc == nil {
-		panic("ObservationStoreMock.GetCSVRowsFunc: method is nil but ObservationStore.GetCSVRows was just called")
+// StreamCSVRows calls StreamCSVRowsFunc.
+func (mock *ObservationStoreMock) StreamCSVRows(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
+	if mock.StreamCSVRowsFunc == nil {
+		panic("ObservationStoreMock.StreamCSVRowsFunc: method is nil but ObservationStore.StreamCSVRows was just called")
 	}
 	callInfo := struct {
+		Ctx    context.Context
 		Filter *observation.Filter
 		Limit  *int
 	}{
+		Ctx:    ctx,
 		Filter: filter,
 		Limit:  limit,
 	}
-	lockObservationStoreMockGetCSVRows.Lock()
-	mock.calls.GetCSVRows = append(mock.calls.GetCSVRows, callInfo)
-	lockObservationStoreMockGetCSVRows.Unlock()
-	return mock.GetCSVRowsFunc(filter, limit)
+	lockObservationStoreMockStreamCSVRows.Lock()
+	mock.calls.StreamCSVRows = append(mock.calls.StreamCSVRows, callInfo)
+	lockObservationStoreMockStreamCSVRows.Unlock()
+	return mock.StreamCSVRowsFunc(ctx, filter, limit)
 }
 
-// GetCSVRowsCalls gets all the calls that were made to GetCSVRows.
+// StreamCSVRowsCalls gets all the calls that were made to StreamCSVRows.
 // Check the length with:
-//     len(mockedObservationStore.GetCSVRowsCalls())
-func (mock *ObservationStoreMock) GetCSVRowsCalls() []struct {
+//     len(mockedObservationStore.StreamCSVRowsCalls())
+func (mock *ObservationStoreMock) StreamCSVRowsCalls() []struct {
+	Ctx    context.Context
 	Filter *observation.Filter
 	Limit  *int
 } {
 	var calls []struct {
+		Ctx    context.Context
 		Filter *observation.Filter
 		Limit  *int
 	}
-	lockObservationStoreMockGetCSVRows.RLock()
-	calls = mock.calls.GetCSVRows
-	lockObservationStoreMockGetCSVRows.RUnlock()
+	lockObservationStoreMockStreamCSVRows.RLock()
+	calls = mock.calls.StreamCSVRows
+	lockObservationStoreMockStreamCSVRows.RUnlock()
 	return calls
 }

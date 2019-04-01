@@ -13,8 +13,6 @@ type Config struct {
 	KafkaAddr                   []string      `envconfig:"KAFKA_ADDR"`
 	FilterConsumerGroup         string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic         string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
-	DatabaseAddress             string        `envconfig:"DATABASE_ADDRESS"              json:"-"`
-	Neo4jPoolSize               int           `envconfig:"NEO4J_POOL_SIZE"`
 	FilterAPIURL                string        `envconfig:"FILTER_API_URL"`
 	AWSRegion                   string        `envconfig:"AWS_REGION"`
 	S3BucketName                string        `envconfig:"S3_BUCKET_NAME"`
@@ -45,8 +43,6 @@ func Get() (*Config, error) {
 		KafkaAddr:                   []string{"localhost:9092"},
 		FilterConsumerTopic:         "filter-job-submitted",
 		FilterConsumerGroup:         "dp-dataset-exporter",
-		DatabaseAddress:             "bolt://localhost:7687",
-		Neo4jPoolSize:               5,
 		FilterAPIURL:                "http://localhost:22100",
 		CSVExportedProducerTopic:    "common-output-created",
 		S3BucketName:                "csv-exported",

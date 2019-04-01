@@ -4,8 +4,9 @@
 package eventtest
 
 import (
-	"github.com/ONSdigital/dp-filter/observation"
 	"sync"
+
+	"github.com/ONSdigital/dp-graph/observation"
 )
 
 var (
