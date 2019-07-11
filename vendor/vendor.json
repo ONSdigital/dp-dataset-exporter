@@ -57,10 +57,40 @@
 			"revisionTime": "2019-03-25T17:53:13Z"
 		},
 		{
+			"checksumSHA1": "fWNLT90j5B/ygFLfYpUB+TMoMaA=",
+			"path": "github.com/ONSdigital/dp-graph/neo4j/neo4jdriver",
+			"revision": "fef8bdaa41a0a5d8ab515459bc6a16fff20dd63e",
+			"revisionTime": "2019-07-09T10:48:34Z"
+		},
+		{
 			"checksumSHA1": "e2tM4AYGw5b9ZZjEh8eSw0yzGyA=",
 			"path": "github.com/ONSdigital/dp-graph/neo4j/query",
 			"revision": "455120c204d33ab78d5663486630583373856e41",
 			"revisionTime": "2019-03-25T17:53:13Z"
+		},
+		{
+			"checksumSHA1": "Z/T3M7oATp8tPEmQYC0sHRytURQ=",
+			"path": "github.com/ONSdigital/dp-graph/neptune",
+			"revision": "fef8bdaa41a0a5d8ab515459bc6a16fff20dd63e",
+			"revisionTime": "2019-07-09T10:48:34Z"
+		},
+		{
+			"checksumSHA1": "P+57rmjCtppxdRnwqbUJrVgUQfA=",
+			"path": "github.com/ONSdigital/dp-graph/neptune/driver",
+			"revision": "fef8bdaa41a0a5d8ab515459bc6a16fff20dd63e",
+			"revisionTime": "2019-07-09T10:48:34Z"
+		},
+		{
+			"checksumSHA1": "qDfNX1bfN7iQRPVhn4l4hafKL9w=",
+			"path": "github.com/ONSdigital/dp-graph/neptune/internal",
+			"revision": "fef8bdaa41a0a5d8ab515459bc6a16fff20dd63e",
+			"revisionTime": "2019-07-09T10:48:34Z"
+		},
+		{
+			"checksumSHA1": "VtSaawQ1LuaFkCJoX/qD4mgxrk0=",
+			"path": "github.com/ONSdigital/dp-graph/neptune/query",
+			"revision": "fef8bdaa41a0a5d8ab515459bc6a16fff20dd63e",
+			"revisionTime": "2019-07-09T10:48:34Z"
 		},
 		{
 			"checksumSHA1": "4LiEZE5u3kqCBvzigVEhXcjac2g=",
@@ -217,6 +247,12 @@
 			"path": "github.com/ONSdigital/golang-neo4j-bolt-driver/structures/messages",
 			"revision": "da534111531d44d5dfcdda1b9057586bf7aac44c",
 			"revisionTime": "2019-02-28T15:33:39Z"
+		},
+		{
+			"checksumSHA1": "+DgkpN8cOHpalw10Olg+DSGw968=",
+			"path": "github.com/ONSdigital/gremgo-neptune",
+			"revision": "5dac50b0448fb83a12786befca0821fe8ad9ee5c",
+			"revisionTime": "2019-07-09T10:10:16Z"
 		},
 		{
 			"checksumSHA1": "Np4hwKH48LLxaD3kq2qj/2/j5H0=",
@@ -436,6 +472,12 @@
 			"revisionTime": "2018-03-16T08:19:17Z"
 		},
 		{
+			"checksumSHA1": "9UBj0V4zZ4D7nXm1Iiqqytdr6fM=",
+			"path": "github.com/gedge/graphson",
+			"revision": "d39cb8fe4384259290719c4b5693f39f0d8b85ca",
+			"revisionTime": "2019-05-31T09:24:26Z"
+		},
+		{
 			"checksumSHA1": "I6MnUzkLJt+sh73CodD0NKswFrs=",
 			"origin": "github.com/ONSdigital/go-ns/vendor/github.com/go-avro/avro",
 			"path": "github.com/go-avro/avro",
@@ -448,6 +490,12 @@
 			"path": "github.com/go-ini/ini",
 			"revision": "d0cb8551ac28d362e77ea475e5b7b2ebaec06b6b",
 			"revisionTime": "2017-12-21T23:52:18Z"
+		},
+		{
+			"checksumSHA1": "s9C2MKOjpuvhfEIfoG6U9/DdMZ4=",
+			"path": "github.com/gofrs/uuid",
+			"revision": "abfe1881e60ef34074c1b8d8c63b42565c356ed6",
+			"revisionTime": "2019-05-10T20:42:58Z"
 		},
 		{
 			"checksumSHA1": "p/8vSviYF91gFflhrt5vkyksroo=",
@@ -475,6 +523,12 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "02d3d2f2e96f4d8583192a90d6c8e6932d8ff7b6",
 			"revisionTime": "2017-12-21T09:34:27Z"
+		},
+		{
+			"checksumSHA1": "3ORLCzeT6ci2RkN0jo1bY6bmE8A=",
+			"path": "github.com/gorilla/websocket",
+			"revision": "80c2d40e9b91f2ef7a9c1a403aeec64d1b89a9a6",
+			"revisionTime": "2019-04-27T04:03:06Z"
 		},
 		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
@@ -695,6 +749,12 @@
 			"path": "github.com/smartystreets/assertions",
 			"revision": "4ea54c1f28ad3ae597e76607dea3871fa177e263",
 			"revisionTime": "2017-06-07T22:27:57Z"
+		},
+		{
+			"checksumSHA1": "a0CRqejGZH1LxO4G/DZsux7ULWA=",
+			"path": "github.com/smartystreets/assertions/internal/go-diff/diffmatchpatch",
+			"revision": "d380eccd517d419eb73a0a90cc3ffc405f1e029e",
+			"revisionTime": "2019-05-31T22:13:23Z"
 		},
 		{
 			"checksumSHA1": "Vzb+dEH/LTYbvr8RXHmt6xJHz04=",
