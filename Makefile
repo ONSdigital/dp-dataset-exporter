@@ -8,7 +8,7 @@ export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
 
 VAULT_ADDR?='http://127.0.0.1:8200'
-DATABASE_ADDRESS?=bolt://localhost:7687
+DATABASE_ADDRESS?=ws://localhost:8182/gremlin
 
 # The following variables are used to generate a vault token for the app. The reason for declaring variables, is that
 # its difficult to move the token code in a Makefile action. Doing so makes the Makefile more difficult to
@@ -21,7 +21,7 @@ build:
 	@mkdir -p $(BUILD_ARCH)/$(BIN_DIR)
 	go build -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
 debug acceptance:
-	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) GRAPH_DRIVER_TYPE=neo4j GRAPH_ADDR="$(DATABASE_ADDRESS)" go run -race cmd/dp-dataset-exporter/main.go
+	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) GRAPH_DRIVER_TYPE=neptune GRAPH_ADDR="$(DATABASE_ADDRESS)" go run -race cmd/dp-dataset-exporter/main.go
 test:
 	go test -cover $(shell go list ./... | grep -v /vendor/)
 vault:

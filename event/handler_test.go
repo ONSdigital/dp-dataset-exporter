@@ -172,7 +172,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			return associatedDataset, nil
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -226,7 +226,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 			},
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -284,7 +284,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 			},
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -344,7 +344,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			},
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -401,7 +401,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -465,7 +465,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 			},
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -583,7 +583,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			},
 		}
 
-		mockRowReader := &observationtest.CSVRowReaderMock{
+		mockRowReader := &observationtest.StreamRowReaderMock{
 			ReadFunc: func() (string, error) {
 				return csvContent, nil
 			},
@@ -743,7 +743,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{Version: associatedDataset}, nil
 		}
 
-		csvRowReaderMock := &observationtest.CSVRowReaderMock{
+		streamRowReaderMock := &observationtest.StreamRowReaderMock{
 			CloseFunc: func(context.Context) error {
 				return nil
 			},
@@ -753,7 +753,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		}
 
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
-			return csvRowReaderMock, nil
+			return streamRowReaderMock, nil
 		}
 
 		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
@@ -800,7 +800,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return metadata, nil
 		}
 
-		csvRowReaderMock := &observationtest.CSVRowReaderMock{
+		streamRowReaderMock := &observationtest.StreamRowReaderMock{
 			CloseFunc: func(context.Context) error {
 				return nil
 			},
@@ -810,7 +810,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		}
 
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
-			return csvRowReaderMock, nil
+			return streamRowReaderMock, nil
 		}
 
 		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
@@ -864,7 +864,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return dataset.Instance{}, errors.New("dataset instances error")
 		}
 
-		csvRowReaderMock := &observationtest.CSVRowReaderMock{
+		streamRowReaderMock := &observationtest.StreamRowReaderMock{
 			CloseFunc: func(context.Context) error {
 				return nil
 			},
@@ -874,7 +874,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		}
 
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
-			return csvRowReaderMock, nil
+			return streamRowReaderMock, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, downloadServiceURL, apiDomainURL, fullDatasetFilePrefix, filteredDatasetFilePrefix)
@@ -916,7 +916,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return metadata, nil
 		}
 
-		csvRowReaderMock := &observationtest.CSVRowReaderMock{
+		streamRowReaderMock := &observationtest.StreamRowReaderMock{
 			CloseFunc: func(context.Context) error {
 				return nil
 			},
@@ -926,7 +926,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		}
 
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
-			return csvRowReaderMock, nil
+			return streamRowReaderMock, nil
 		}
 
 		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {

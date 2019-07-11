@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
 	"github.com/ONSdigital/dp-dataset-exporter/reader"
@@ -182,12 +182,12 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		return nil, err
 	}
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), filter, nil)
+	streamRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), filter, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	reader := observation.NewReader(csvRowReader)
+	reader := observation.NewReader(streamRowReader)
 	defer func() {
 		closeErr := reader.Close(context.Background())
 		if closeErr != nil {
@@ -300,12 +300,12 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 
 func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), &observation.Filter{InstanceID: event.InstanceID}, nil)
+	streamRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), &observation.Filter{InstanceID: event.InstanceID}, nil)
 	if err != nil {
 		return nil, "", "", 0, err
 	}
 
-	rReader := observation.NewReader(csvRowReader)
+	rReader := observation.NewReader(streamRowReader)
 	defer func() (*dataset.Download, string, string, int32, error) {
 		closeErr := rReader.Close(context.Background())
 		if closeErr != nil {
