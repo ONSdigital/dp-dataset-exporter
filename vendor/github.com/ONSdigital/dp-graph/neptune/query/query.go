@@ -3,18 +3,45 @@ package query
 const (
 	// codelists
 	GetCodeLists          = "g.V().hasLabel('_code_list')"
-	GetCodeListsFiltered  = "g.V().hasLabel('_code_list').has('%s', 'true')"
+	GetCodeListsFiltered  = "g.V().hasLabel('_code_list').has('%s', true)"
 	GetCodeList           = "g.V().hasLabel('_code_list').has('listID', '%s')"
 	CodeListExists        = "g.V().hasLabel('_code_list').has('listID', '%s').count()"
 	CodeListEditionExists = "g.V().hasLabel('_code_list').has('listID', '%s').has('edition', '%s').count()"
-	CountEditions         = "g.V().hasLabel('_code_list').hasLabel('_code_list_%s').has('edition','%s').count()"
-	GetCodes              = "g.V().hasLabel('_code').as('c').out('usedBy').as('r').inV().hasLabel('_code_list').hasLabel('_code_list_%s').has('edition','%s').select('c','r')"
-	GetCode               = "g.V().hasLabel('_code').has('value','%s').as('c').out('usedBy').as('r').inV().hasLabel('_code_list').hasLabel('_code_list_%s').has('edition','%s').select('c','r')"
-	GetCodeDatasets       = "g.V().hasLabel('_code_list').has('listID', '%s').has('edition','%s').inE('usedBy').as('r').match(" +
-		"__.as('r').outV().has('value','%s').as('c')," +
-		"__.as('c').out('inDataset').as('d')," +
-		"__.as('d').has('is_published',true)" +
-		").select('d','r')"
+	GetCodes              = "g.V().hasLabel('_code_list')" +
+		".has('listID', '%s').has('edition', '%s')" +
+		".in('usedBy').hasLabel('_code')"
+	CodeExists = "g.V().hasLabel('_code_list')" +
+		".has('listID', '%s').has('edition', '%s')" +
+		".in('usedBy').has('value', '%s').count()"
+
+	/*
+		This query harvests data from both edges and nodes, so we collapse
+		the response to contain only strings - to make it parse-able with
+		the graphson string-list method.
+
+		%s Parameters: codeListID, codeListEdition, codeValue
+
+		Naming:
+
+			r: usedBy relation
+			rl: usedBy.label
+			c: code node
+			d: dataset
+			de: dataset.edition
+			dv: dataset.version
+	*/
+	GetCodeDatasets = `g.V().hasLabel('_code_list').has('listID', '%s').
+		has('edition','%s').
+		inE('usedBy').as('r').values('label').as('rl').select('r').
+		match(
+			__.as('r').outV().has('value','%s').as('c'),
+			__.as('c').out('inDataset').as('d').
+				select('d').values('edition').as('de').
+				select('d').values('version').as('dv'),
+				select('d').values('dataset_id').as('did').
+			__.as('d').has('is_published',true)).
+		union(select('rl', 'de', 'dv', 'did')).unfold().select(values)
+	`
 
 	// hierarchy write
 	CloneHierarchyNodes = "g.V().hasLabel('_generic_hierarchy_node_%s').as('old')" +

@@ -13,7 +13,7 @@ var _ io.Reader = (*Reader)(nil)
 
 // StreamRowReader provides a reader of individual rows (lines) of a CSV.
 type StreamRowReader interface {
-	Read() (string, error) // this should take context
+	Read() (string, error) // TODO: this should take context
 	Close(context.Context) error
 }
 

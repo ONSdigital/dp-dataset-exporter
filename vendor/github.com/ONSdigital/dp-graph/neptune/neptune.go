@@ -82,6 +82,31 @@ func (n *NeptuneDB) getVertices(gremStmt string) (vertices []graphson.Vertex, er
 	return
 }
 
+func (n *NeptuneDB) getStringList(gremStmt string) (strings []string, err error) {
+	logData := log.Data{"fn": "getStringList", "statement": gremStmt, "attempt": 1}
+
+	for attempt := 1; attempt < n.maxAttempts; attempt++ {
+		if attempt > 1 {
+			log.ErrorC("will retry", err, logData)
+			sleepy(attempt, 20*time.Millisecond)
+			logData["attempt"] = attempt
+		}
+		strings, err = n.Pool.GetStringList(gremStmt, nil, nil)
+		if err == nil {
+			return
+		}
+		// XXX check err for non-retriable errors
+		if !isTransientError(err) {
+			return
+		}
+	}
+	// ASSERT: failed all attempts
+	log.ErrorC("maxAttempts reached", err, logData)
+	err = ErrAttemptsExceededLimit{err}
+	return
+}
+
+
 func (n *NeptuneDB) getVertex(gremStmt string) (vertex graphson.Vertex, err error) {
 	logData := log.Data{"fn": "getVertex", "statement": gremStmt}
 
