@@ -8,7 +8,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestSpec(t *testing.T) {
+func ATestSpec(t *testing.T) {
 
 	cfg, err := config.Get()
 
