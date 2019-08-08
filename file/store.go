@@ -15,9 +15,9 @@ import (
 	"github.com/ONSdigital/s3crypto"
 )
 
-//go:generate moq -out filetest/uploader.go -pkg filetest . Uploader
-//go:generate moq -out filetest/cryptouploader.go -pkg filetest . CryptoUploader
-//go:generate moq -out filetest/vault.go -pkg filetest . VaultClient
+//go:generate moq -out uploader_moq_test.go . Uploader
+//go:generate moq -out cryptouploader_moq_test.go . CryptoUploader
+//go:generate moq -out vault_moq_test.go . VaultClient
 
 // Uploader represents the methods required to upload to s3 without encryption
 type Uploader interface {

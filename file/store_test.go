@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ONSdigital/dp-dataset-exporter/file/filetest"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -18,7 +17,7 @@ const (
 
 func TestPutFileErrorScenarios(t *testing.T) {
 	Convey("Given a store with an uploader that returns an error", t, func() {
-		uploaderMock := &filetest.UploaderMock{}
+		uploaderMock := &UploaderMock{}
 		uploaderMock.UploadFunc = func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 			return nil, errors.New("uploader error")
 		}
@@ -37,7 +36,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 	})
 
 	Convey("Given a store with a vaultClient that returns an error", t, func() {
-		vaultClientMock := &filetest.VaultClientMock{}
+		vaultClientMock := &VaultClientMock{}
 		vaultClientMock.WriteKeyFunc = func(string, string, string) error {
 			return errors.New("vault client error")
 		}
@@ -56,12 +55,12 @@ func TestPutFileErrorScenarios(t *testing.T) {
 	})
 
 	Convey("Given a store with a cryptoUploader that returns an error", t, func() {
-		vaultClientMock := &filetest.VaultClientMock{}
+		vaultClientMock := &VaultClientMock{}
 		vaultClientMock.WriteKeyFunc = func(string, string, string) error {
 			return nil
 		}
 
-		cryptoUploaderMock := &filetest.CryptoUploaderMock{}
+		cryptoUploaderMock := &CryptoUploaderMock{}
 		cryptoUploaderMock.UploadWithPSKFunc = func(*s3manager.UploadInput, []byte) (*s3manager.UploadOutput, error) {
 			return nil, errors.New("crypto uploader error")
 		}
@@ -82,7 +81,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 
 func TestPutFileSuccessSceanarios(t *testing.T) {
 	Convey("Given a store exists with a valid uploader", t, func() {
-		uploaderMock := &filetest.UploaderMock{}
+		uploaderMock := &UploaderMock{}
 		uploaderMock.UploadFunc = func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 			return &s3manager.UploadOutput{Location: publicTestLocation}, nil
 		}
@@ -101,12 +100,12 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 
 	Convey("Given an unpublished file", t, func() {
 
-		vaultClientMock := &filetest.VaultClientMock{}
+		vaultClientMock := &VaultClientMock{}
 		vaultClientMock.WriteKeyFunc = func(string, string, string) error {
 			return nil
 		}
 
-		cryptoUploaderMock := &filetest.CryptoUploaderMock{}
+		cryptoUploaderMock := &CryptoUploaderMock{}
 		cryptoUploaderMock.UploadWithPSKFunc = func(*s3manager.UploadInput, []byte) (*s3manager.UploadOutput, error) {
 			return &s3manager.UploadOutput{Location: privateTestLocation}, nil
 		}
