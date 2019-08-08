@@ -26,7 +26,7 @@ build:
 	go build -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
 debug acceptance:
 	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run -race cmd/dp-dataset-exporter/main.go
-test: generate
+test:
 	go test -count=1 -cover $(shell go list ./... | grep -v /vendor/)
 vault:
 	@echo "$(VAULT_POLICY)"
