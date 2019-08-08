@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"io"
 	"sync"
 )
@@ -12,6 +13,10 @@ var (
 	lockFileStoreMockPutFile sync.RWMutex
 )
 
+// Ensure, that FileStoreMock does implement FileStore.
+// If this is not the case, regenerate this file with moq.
+var _ event.FileStore = &FileStoreMock{}
+
 // FileStoreMock is a mock implementation of FileStore.
 //
 //     func TestSomethingThatUsesFileStore(t *testing.T) {
@@ -19,12 +24,12 @@ var (
 //         // make and configure a mocked FileStore
 //         mockedFileStore := &FileStoreMock{
 //             PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
-// 	               panic("TODO: mock out the PutFile method")
+// 	               panic("mock out the PutFile method")
 //             },
 //         }
 //
-//         // TODO: use mockedFileStore in code that requires FileStore
-//         //       and then make assertions.
+//         // use mockedFileStore in code that requires FileStore
+//         // and then make assertions.
 //
 //     }
 type FileStoreMock struct {

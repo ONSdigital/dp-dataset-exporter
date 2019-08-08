@@ -4,12 +4,17 @@
 package errorstest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"sync"
 )
 
 var (
 	lockMessageProducerMockOutput sync.RWMutex
 )
+
+// Ensure, that MessageProducerMock does implement MessageProducer.
+// If this is not the case, regenerate this file with moq.
+var _ errors.MessageProducer = &MessageProducerMock{}
 
 // MessageProducerMock is a mock implementation of MessageProducer.
 //
@@ -18,12 +23,12 @@ var (
 //         // make and configure a mocked MessageProducer
 //         mockedMessageProducer := &MessageProducerMock{
 //             OutputFunc: func() chan []byte {
-// 	               panic("TODO: mock out the Output method")
+// 	               panic("mock out the Output method")
 //             },
 //         }
 //
-//         // TODO: use mockedMessageProducer in code that requires MessageProducer
-//         //       and then make assertions.
+//         // use mockedMessageProducer in code that requires MessageProducer
+//         // and then make assertions.
 //
 //     }
 type MessageProducerMock struct {

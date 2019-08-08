@@ -12,6 +12,10 @@ var (
 	lockProducerMockCSVExported sync.RWMutex
 )
 
+// Ensure, that ProducerMock does implement Producer.
+// If this is not the case, regenerate this file with moq.
+var _ event.Producer = &ProducerMock{}
+
 // ProducerMock is a mock implementation of Producer.
 //
 //     func TestSomethingThatUsesProducer(t *testing.T) {
@@ -19,12 +23,12 @@ var (
 //         // make and configure a mocked Producer
 //         mockedProducer := &ProducerMock{
 //             CSVExportedFunc: func(e *event.CSVExported) error {
-// 	               panic("TODO: mock out the CSVExported method")
+// 	               panic("mock out the CSVExported method")
 //             },
 //         }
 //
-//         // TODO: use mockedProducer in code that requires Producer
-//         //       and then make assertions.
+//         // use mockedProducer in code that requires Producer
+//         // and then make assertions.
 //
 //     }
 type ProducerMock struct {

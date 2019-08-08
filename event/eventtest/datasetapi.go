@@ -5,6 +5,7 @@ package eventtest
 
 import (
 	"context"
+	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	"sync"
 )
@@ -17,6 +18,10 @@ var (
 	lockDatasetAPIMockPutVersion         sync.RWMutex
 )
 
+// Ensure, that DatasetAPIMock does implement DatasetAPI.
+// If this is not the case, regenerate this file with moq.
+var _ event.DatasetAPI = &DatasetAPIMock{}
+
 // DatasetAPIMock is a mock implementation of DatasetAPI.
 //
 //     func TestSomethingThatUsesDatasetAPI(t *testing.T) {
@@ -24,24 +29,24 @@ var (
 //         // make and configure a mocked DatasetAPI
 //         mockedDatasetAPI := &DatasetAPIMock{
 //             GetInstanceFunc: func(ctx context.Context, instanceID string) (dataset.Instance, error) {
-// 	               panic("TODO: mock out the GetInstance method")
+// 	               panic("mock out the GetInstance method")
 //             },
 //             GetMetadataURLFunc: func(id string, edition string, version string) string {
-// 	               panic("TODO: mock out the GetMetadataURL method")
+// 	               panic("mock out the GetMetadataURL method")
 //             },
 //             GetVersionFunc: func(ctx context.Context, id string, edition string, version string) (dataset.Version, error) {
-// 	               panic("TODO: mock out the GetVersion method")
+// 	               panic("mock out the GetVersion method")
 //             },
 //             GetVersionMetadataFunc: func(ctx context.Context, id string, edition string, version string) (dataset.Metadata, error) {
-// 	               panic("TODO: mock out the GetVersionMetadata method")
+// 	               panic("mock out the GetVersionMetadata method")
 //             },
 //             PutVersionFunc: func(ctx context.Context, id string, edition string, version string, m dataset.Version) error {
-// 	               panic("TODO: mock out the PutVersion method")
+// 	               panic("mock out the PutVersion method")
 //             },
 //         }
 //
-//         // TODO: use mockedDatasetAPI in code that requires DatasetAPI
-//         //       and then make assertions.
+//         // use mockedDatasetAPI in code that requires DatasetAPI
+//         // and then make assertions.
 //
 //     }
 type DatasetAPIMock struct {
