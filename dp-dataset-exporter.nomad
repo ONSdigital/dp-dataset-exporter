@@ -3,6 +3,14 @@ job "dp-dataset-exporter" {
   region      = "eu"
   type        = "service"
 
+  update {
+    stagger          = "60s"
+    min_healthy_time = "30s"
+    healthy_deadline = "2m"
+    max_parallel     = 1
+    auto_revert      = true
+  }
+
   group "publishing" {
     count = "{{PUBLISHING_TASK_COUNT}}"
 
@@ -11,12 +19,15 @@ job "dp-dataset-exporter" {
       value     = "publishing"
     }
 
-    task "dp-dataset-exporter" {
-      driver = "exec"
+    restart {
+      attempts = 3
+      delay    = "15s"
+      interval = "1m"
+      mode     = "delay"
+    }
 
-      artifact {
-        source = "s3::https://s3-eu-west-1.amazonaws.com/{{BUILD_BUCKET}}/dp-dataset-exporter/{{REVISION}}.tar.gz"
-      }
+    task "dp-dataset-exporter" {
+      driver = "docker"
 
       artifact {
         source = "s3::https://s3-eu-west-1.amazonaws.com/{{DEPLOYMENT_BUCKET}}/dp-dataset-exporter/{{REVISION}}.tar.gz"
@@ -25,9 +36,13 @@ job "dp-dataset-exporter" {
       config {
         command = "${NOMAD_TASK_DIR}/start-task"
 
-        args    = [
-          "${NOMAD_TASK_DIR}/dp-dataset-exporter",
-        ]
+        args = ["./dp-dataset-exporter"]
+
+        image = "{{ECR_URL}}:concourse-{{REVISION}}"
+
+        port_map {
+          http = "${NOMAD_PORT_http}"
+        }
       }
 
       service {

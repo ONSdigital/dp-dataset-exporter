@@ -14,6 +14,10 @@ Ensure you have vault running.
 * Run `make debug`
 * Run the auth-stub-api
 
+### Kafka scripts
+
+Scripts for updating and debugging Kafka can be found [here](https://github.com/ONSdigital/dp-data-tools)(dp-data-tools)
+
 ### Configuration
 
 An overview of the configuration options available, either as a table of
@@ -25,10 +29,8 @@ environment variables, or with a link to a configuration guide.
 | KAFKA_ADDR                  | localhost:9092                       | The address of Kafka
 | FILTER_JOB_CONSUMER_TOPIC   | filter-job-submitted                 | The name of the topic to consume messages from
 | FILTER_JOB_CONSUMER_GROUP   | dp-dataset-exporter                  | The consumer group this application to consume filter job messages
-| DATABASE_ADDRESS            | bolt://localhost:7687                | The address of the database to retrieve dataset data from
 | DATASET_API_URL             | http://localhost:22000               | The URL of the dataset API
 | DATASET_API_AUTH_TOKEN      | FD0108EA-825D-411C-9B1D-41EF7727F465 | The auth token for the dataset API
-| NEO4J_POOL_SIZE             | 5                                    | The number of neo4j connections to pool
 | FILTER_API_URL              | http://localhost:22100               | The URL of the filter API
 | FILTER_API_AUTH_TOKEN       | FD0108EA-825D-411C-9B1D-41EF7727F465 | The auth token for the filter API
 | AWS_REGION                  | eu-west-1                            | The AWS region to use

@@ -49,7 +49,9 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 			case message := <-messageConsumer.Incoming():
 
 				err := processMessage(message, handler, errorHandler)
-				if err == nil {
+				if err != nil {
+					log.Info("failed to process message", log.Data{"err": err})
+				} else {
 					logData := log.Data{"message_offset": message.Offset()}
 					log.Debug("event processed - committing message", logData)
 					messageConsumer.CommitAndRelease(message)
