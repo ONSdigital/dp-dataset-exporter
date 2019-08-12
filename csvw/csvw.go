@@ -22,12 +22,14 @@ type CSVW struct {
 	URL         string    `json:"url"`
 	Title       string    `json:"name"`
 	Description string    `json:"description,omitempty"`
-	Issued      string    `json:"dct:issued,omitempty"`
+	Issued      string    `json:"datePublished,omitempty"`
 	Publisher   Publisher `json:"creator"`
 	Contact     []Contact `json:"contactPoint"`
+	Spacial     string    `json:"spacial"`
+	Temporal    string    `json:"temporal"`
 	TableSchema Columns   `json:"tableSchema"`
-	Theme       string    `json:"dcat:theme,omitempty"`
-	License     string    `json:"dct:license,omitempty"`
+	Theme       string    `json:"includedInDataCatalog,omitempty"`
+	License     string    `json:"license,omitempty"`
 	Frequency   string    `json:"dct:accrualPeriodicity,omitempty"`
 	Notes       []Note    `json:"notes,omitempty"`
 }
@@ -49,8 +51,9 @@ type Publisher struct {
 
 //Columns provides the nested structure expected within the tableSchema of a CSVW
 type Columns struct {
-	C     []Column `json:"columns"`
-	About string   `json:"aboutUrl"`
+	C              []Column `json:"columns"`
+	About          string   `json:"aboutUrl"`
+	dimensionNames []string
 }
 
 //Column provides the ability to define the JSON tags required specific
@@ -115,17 +118,14 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 
 	csvw := New(metadata, downloadURL)
 
-	var list []Column
-	obs := newObservationColumn(h[0], metadata.UnitOfMeasure)
-	list = append(list, obs)
+	obs := csvw.newObservationColumn(h[0], metadata.UnitOfMeasure)
 	log.Info("added observation column to CSVW", log.Data{"column": obs})
 
 	//add data markings columns
 	if offset != 0 {
 		for i := 1; i <= offset; i++ {
-			c := newColumn(h[i], "")
-			list = append(list, c)
-			log.Info("added observation metadata column to CSVW", log.Data{"column": c})
+			csvw.addNewColumn(h[i], "", false)
+			log.Info("added observation metadata column to CSVW", log.Data{"csv": downloadURL})
 		}
 	}
 
@@ -134,22 +134,16 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 
 	//add dimension columns
 	for i := 0; i < len(h); i = i + 2 {
-		c, l := newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
-		log.Info("added pair of dimension columns to CSVW", log.Data{"code_column": c, "label_column": l})
-		list = append(list, c, l)
+		csvw.newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
+		log.Info("added pair of dimension columns to CSVW", log.Data{"csv": downloadURL})
 	}
 
-	aboutURL, err = formatAboutURL(aboutURL, apiDomain)
+	csvw.TableSchema.About, err = formatAboutURL(apiDomain, aboutURL, csvw.TableSchema.dimensionNames)
 	if err != nil {
 		return nil, err
 	}
 
-	csvw.TableSchema = Columns{
-		About: aboutURL,
-		C:     list,
-	}
-
-	log.Info("all columns added to CSVW", log.Data{"number_of_columns": strconv.Itoa(len(list))})
+	log.Info("all columns added to CSVW", log.Data{"number_of_columns": strconv.Itoa(len(csvw.TableSchema.C))})
 	csvw.AddNotes(metadata, downloadURL)
 
 	b, err := json.Marshal(csvw)
@@ -160,7 +154,10 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	return b, nil
 }
 
-func formatAboutURL(aboutURL, domain string) (string, error) {
+func formatAboutURL(domain, aboutURL string, queryParams []string) (string, error) {
+	if len(queryParams) == 0 {
+		return "", errors.New("cannot build aboutURL without query parameter keys")
+	}
 	about, err := url.Parse(aboutURL)
 	if err != nil {
 		return "", err
@@ -172,8 +169,12 @@ func formatAboutURL(aboutURL, domain string) (string, error) {
 	}
 
 	d.Path = d.Path + about.Path
+	q := "?"
+	for i := 0; i < len(queryParams); i = i + 2 {
+		q += queryParams[i] + "={" + queryParams[i+1] + "}"
+	}
 
-	return d.String(), nil
+	return d.String() + q, nil
 }
 
 //AddNotes to CSVW from alerts or usage notes in provided metadata
@@ -216,16 +217,18 @@ func splitHeader(header string) ([]string, int, error) {
 	return h, offset, err
 }
 
-func newObservationColumn(title, name string) Column {
-	c := newColumn(title, name)
+func (csvw *CSVW) newObservationColumn(title, unitOfMeasure string) Column {
+	c := newColumn(title, "", true)
 
 	c["datatype"] = "string"
+	c["variable_measured"] = unitOfMeasure
 
 	log.Info("adding observations column", log.Data{"column": c})
+	csvw.TableSchema.C = append(csvw.TableSchema.C, c)
 	return c
 }
 
-func newCodeAndLabelColumns(i int, apiDomain string, header []string, dims []dataset.Dimension) (Column, Column) {
+func (csvw *CSVW) newCodeAndLabelColumns(i int, apiDomain string, header []string, dims []dataset.Dimension) {
 	codeHeader := header[i]
 	dimHeader := header[i+1]
 	dimHeader = strings.ToLower(dimHeader)
@@ -239,30 +242,44 @@ func newCodeAndLabelColumns(i int, apiDomain string, header []string, dims []dat
 		}
 	}
 
-	codeCol := newColumn("", codeHeader)
-
 	dimURL := dim.URL
 	if len(apiDomain) > 0 {
 		uri, err := url.Parse(dim.URL)
 		if err != nil {
-			return nil, nil
+			return
+		}
+
+		//TODO: this should not be needed once the dataset API dimensions refer to code list editions
+		if !strings.Contains(uri.Path, "/editions/") {
+			uri.Path += "/editions/one-off"
 		}
 
 		dimURL = fmt.Sprintf("%s%s", apiDomain, uri.Path)
 	}
 
+	if dimHeader == "time" {
+		csvw.Temporal = dimURL
+	}
+
+	if dimHeader == "geography" {
+		csvw.Spacial = dimURL
+	}
+
+	codeCol := newColumn("", codeHeader, true)
 	codeCol["valueURL"] = dimURL + "/codes/{" + codeHeader + "}"
-	codeCol["required"] = true
-	// TODO: determine what could go in c["datatype"]
 
-	labelCol := newColumn(dim.Name, dim.Label)
+	labelCol := newColumn(dim.Name, dim.Label, false)
 	labelCol["description"] = dim.Description
-	// TODO: determine what could go in c["datatype"] and c["required"]
 
-	return codeCol, labelCol
+	csvw.TableSchema.C = append(csvw.TableSchema.C, codeCol, labelCol)
+	csvw.TableSchema.dimensionNames = append(csvw.TableSchema.dimensionNames, labelCol["titles"].(string), codeCol["name"].(string))
 }
 
-func newColumn(title, name string) Column {
+func (csvw *CSVW) addNewColumn(title, name string, required bool) {
+	csvw.TableSchema.C = append(csvw.TableSchema.C, newColumn(title, name, required))
+}
+
+func newColumn(title, name string, required bool) Column {
 	c := make(Column)
 	if len(title) > 0 {
 		c["titles"] = title
@@ -270,6 +287,10 @@ func newColumn(title, name string) Column {
 
 	if len(name) > 0 {
 		c["name"] = name
+	}
+
+	if required {
+		c["required"] = true
 	}
 
 	return c

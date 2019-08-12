@@ -431,6 +431,11 @@ func (c *Client) GetVersionMetadata(ctx context.Context, id, edition, version st
 	return
 }
 
+// GetObservationsURL returns the URL for the observations endpoint of a given dataset id, edition and version
+func (c *Client) GetObservationsURL(id, edition, version string) string {
+	return fmt.Sprintf("%s/datasets/%s/editions/%s/versions/%s/observations", c.url, id, edition, version)
+}
+
 // GetDimensions will return a versions dimensions
 func (c *Client) GetDimensions(ctx context.Context, id, edition, version string) (m Dimensions, err error) {
 	uri := fmt.Sprintf("%s/datasets/%s/editions/%s/versions/%s/dimensions", c.url, id, edition, version)
@@ -524,7 +529,7 @@ func setCollectionID(ctx context.Context, req *http.Request) *http.Request {
 
 	rawKeyValue := ctx.Value(common.CollectionIDHeaderKey)
 
-	if rawKeyValue != nil {  // avoid stringifying an empty interface
+	if rawKeyValue != nil { // avoid stringifying an empty interface
 		collectionID := rawKeyValue.(string)
 		req.Header.Set(common.CollectionIDHeaderKey, collectionID)
 	}

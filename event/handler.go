@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
 	"github.com/ONSdigital/dp-dataset-exporter/reader"
@@ -48,7 +48,7 @@ type DatasetAPI interface {
 	PutVersion(ctx context.Context, id, edition, version string, m dataset.Version) error
 	GetVersion(ctx context.Context, id, edition, version string) (m dataset.Version, err error)
 	GetInstance(ctx context.Context, instanceID string) (m dataset.Instance, err error)
-	GetMetadataURL(id, edition, version string) (url string)
+	GetObservationsURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, id, edition, version string) (m dataset.Metadata, err error)
 }
 
@@ -347,9 +347,9 @@ func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, h
 		return nil, err
 	}
 
-	aboutURL := handler.datasetAPICli.GetMetadataURL(event.DatasetID, event.Edition, event.Version)
+	observationsURL := handler.datasetAPICli.GetObservationsURL(event.DatasetID, event.Edition, event.Version)
 
-	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL, handler.apiDomainURL)
+	csvwFile, err := csvw.Generate(&m, header, downloadURL, observationsURL, handler.apiDomainURL)
 	if err != nil {
 		return nil, err
 	}
