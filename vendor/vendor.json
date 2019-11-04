@@ -141,16 +141,16 @@
 			"revisionTime": "2018-07-02T06:26:24Z"
 		},
 		{
-			"checksumSHA1": "qqaN4hllMTNueffB5bcz8xQnwX0=",
+			"checksumSHA1": "xZ65VJGAQtKSh9gCmPY+5K96zho=",
 			"path": "github.com/ONSdigital/go-ns/kafka",
-			"revision": "e0634c18621b26adafa7cad916d1d9db5b85015d",
-			"revisionTime": "2018-06-25T14:45:54Z"
+			"revision": "f144c4ec2e58b1c191107eb9500ef3093fae4042",
+			"revisionTime": "2019-11-04T12:12:06Z"
 		},
 		{
-			"checksumSHA1": "9ISFg1xnb4/WsxOIzhgAFe22LmU=",
+			"checksumSHA1": "Y8qXkDIHbiaN2BmyblxprBAwbp4=",
 			"path": "github.com/ONSdigital/go-ns/kafka/kafkatest",
-			"revision": "e0634c18621b26adafa7cad916d1d9db5b85015d",
-			"revisionTime": "2018-06-25T14:45:54Z"
+			"revision": "f144c4ec2e58b1c191107eb9500ef3093fae4042",
+			"revisionTime": "2019-11-04T12:12:06Z"
 		},
 		{
 			"checksumSHA1": "g9flYl+PBs6cYflFY3EpG6IcJGM=",
