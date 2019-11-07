@@ -68,6 +68,7 @@ func main() {
 
 	fileStore, err := file.NewStore(
 		cfg.AWSRegion,
+		cfg.S3BucketURL,
 		cfg.S3BucketName,
 		cfg.S3PrivateBucketName,
 		cfg.VaultPath,
