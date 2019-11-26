@@ -7,42 +7,19 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ONSdigital/dp-graph/graph"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/healthcheck"
-	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/ONSdigital/go-ns/rchttp"
-	"github.com/ONSdigital/go-ns/vault"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
-	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/ONSdigital/dp-dataset-exporter/initialise"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 )
-
-const (
-	serviceConsumer            = "kafka-consumer"
-	serviceCsvExportedProducer = "kafka-csv-exported-producer"
-	serviceErrorProducer       = "kafka-error-producer"
-	serviceFileStore           = "file-store"
-	serviceGraph               = "graph"
-	serviceHealthTicker        = "health-ticker"
-	serviceVault               = "vault"
-)
-
-var services = map[string]bool{
-	serviceConsumer:            false,
-	serviceCsvExportedProducer: false,
-	serviceErrorProducer:       false,
-	serviceFileStore:           false,
-	serviceGraph:               false,
-	serviceHealthTicker:        false,
-	serviceVault:               false,
-}
 
 func main() {
 	log.Namespace = "dp-dataset-exporter"
@@ -59,23 +36,28 @@ func main() {
 	// a channel used to signal when an exit is required
 	errorChannel := make(chan error)
 
+	var serviceList initialise.ExternalServiceList
+
 	kafkaBrokers := cfg.KafkaAddr
-	kafkaConsumer, err := kafka.NewSyncConsumer(
+	kafkaConsumer, err := serviceList.GetConsumer(kafkaBrokers, cfg)
+	logIfError(err)
+
+	kafkaProducer, err := serviceList.GetProducer(
 		kafkaBrokers,
-		cfg.FilterConsumerTopic,
-		cfg.FilterConsumerGroup,
-		kafka.OffsetNewest,
+		cfg.CSVExportedProducerTopic,
+		initialise.CSVExportedProducer,
 	)
-	updateInitialisation(err, services, serviceConsumer)
+	logIfError(err)
 
-	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, cfg.CSVExportedProducerTopic, 0)
-	updateInitialisation(err, services, serviceCsvExportedProducer)
+	kafkaErrorProducer, err := serviceList.GetProducer(
+		kafkaBrokers,
+		cfg.ErrorProducerTopic,
+		initialise.ErrorProducer,
+	)
+	logIfError(err)
 
-	kafkaErrorProducer, err := kafka.NewProducer(cfg.KafkaAddr, cfg.ErrorProducerTopic, 0)
-	updateInitialisation(err, services, serviceErrorProducer)
-
-	vaultClient, err := vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, 3)
-	updateInitialisation(err, services, serviceVault)
+	vaultClient, err := serviceList.GetVault(cfg, 3)
+	logIfError(err)
 
 	// when errors occur - we send a message on an error topic.
 	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer)
@@ -86,17 +68,11 @@ func main() {
 	)
 	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
 
-	observationStore, err := graph.New(context.Background(), graph.Subsets{Observation: true})
-	updateInitialisation(err, services, serviceGraph)
+	observationStore, err := serviceList.GetObservationStore()
+	logIfError(err)
 
-	fileStore, err := file.NewStore(
-		cfg.AWSRegion,
-		cfg.S3BucketName,
-		cfg.S3PrivateBucketName,
-		cfg.VaultPath,
-		vaultClient,
-	)
-	updateInitialisation(err, services, serviceFileStore)
+	fileStore, err := serviceList.GetFileStore(cfg, vaultClient)
+	logIfError(err)
 
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
@@ -129,49 +105,7 @@ func main() {
 		vaultClient,
 		datasetAPICli,
 	)
-	services[serviceHealthTicker] = true
-
-	// Gracefully shutdown the application closing any open resources
-	gracefulShutdown := func() {
-		log.Info("gracefully shutting down", log.Data{"graceful_shutdown_timeout": cfg.GracefulShutdownTimeout})
-		ctx, cancel := context.WithTimeout(context.Background(), cfg.GracefulShutdownTimeout)
-
-		if services[serviceConsumer] {
-			err = eventConsumer.Close(ctx)
-			logIfError(err)
-
-			err = kafkaConsumer.StopListeningToConsumer(ctx)
-			logIfError(err)
-
-			err = kafkaConsumer.Close(ctx)
-			logIfError(err)
-		}
-
-		if services[serviceCsvExportedProducer] {
-			err = kafkaProducer.Close(ctx)
-			logIfError(err)
-		}
-
-		if services[serviceErrorProducer] {
-			err = kafkaErrorProducer.Close(ctx)
-			logIfError(err)
-		}
-
-		if services[serviceGraph] {
-			err = observationStore.Close(ctx)
-			logIfError(err)
-		}
-
-		if services[serviceHealthTicker] {
-			err = healthChecker.Close(ctx)
-			logIfError(err)
-		}
-
-		log.Info("shutdown complete", log.Data{"ctx": ctx.Err()})
-
-		cancel()
-		os.Exit(1)
-	}
+	serviceList.HealthTicker = true
 
 	// Check that the healthChecker succeeds before testing the service token (GetDatasets)
 	// once both succeed, then we can set Consume off
@@ -185,7 +119,7 @@ func main() {
 			case <-time.After(time.Second * 2):
 				// FIXME Once HealthCheck has been added to kafka consumer groups, consumers
 				// and producers this extra check can then be removed `services[serviceConsumer]`
-				if healthOK && services[serviceConsumer] {
+				if healthOK && serviceList.Consumer {
 					if _, err = datasetAPICli.GetDatasets(context.Background()); err == nil {
 						eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler, healthAlertChan)
 						return
@@ -195,13 +129,56 @@ func main() {
 		}
 	}()
 
-	for {
-		select {
-		case <-signals:
-			log.Debug("os signal received", nil)
-			gracefulShutdown()
-		}
+	// block until a fatal error occurs
+	select {
+	case <-signals:
+		log.Debug("os signal received", nil)
 	}
+
+	log.Info("gracefully shutting down", log.Data{"graceful_shutdown_timeout": cfg.GracefulShutdownTimeout})
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.GracefulShutdownTimeout)
+
+	// Gracefully shutdown the application closing any open resources
+	go func() {
+		defer cancel()
+
+		if serviceList.Consumer {
+			log.Info("closing event consumer", nil)
+			logIfError(eventConsumer.Close(ctx))
+
+			log.Info("stop listening to consumer", nil)
+			logIfError(kafkaConsumer.StopListeningToConsumer(ctx))
+
+			log.Info("closing consumer", nil)
+			logIfError(kafkaConsumer.Close(ctx))
+		}
+
+		if serviceList.CSVExportedProducer {
+			log.Info("closing csv exporter producer", nil)
+			logIfError(kafkaProducer.Close(ctx))
+		}
+
+		if serviceList.ErrorProducer {
+			log.Info("closing error producer", nil)
+			logIfError(kafkaErrorProducer.Close(ctx))
+		}
+
+		if serviceList.ObservationStore {
+			log.Info("closing observation store", nil)
+			logIfError(observationStore.Close(ctx))
+		}
+
+		if serviceList.HealthTicker {
+			log.Info("closing healthchecker", nil)
+			logIfError(healthChecker.Close(ctx))
+		}
+	}()
+
+	// wait for shutdown success (via cancel) or failure (timeout)
+	<-ctx.Done()
+
+	log.Info("shutdown complete", log.Data{"ctx": ctx.Err()})
+	os.Exit(1)
 }
 
 func exitIfError(err error) {
@@ -215,13 +192,4 @@ func logIfError(err error) {
 	if err != nil {
 		log.Error(err, nil)
 	}
-}
-
-func updateInitialisation(err error, service map[string]bool, name string) {
-	if err != nil {
-		log.Error(err, nil)
-		return
-	}
-
-	service[name] = true
 }
