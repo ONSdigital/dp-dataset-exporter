@@ -3,6 +3,7 @@ package file
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net/url"
 	"path"
@@ -38,6 +39,7 @@ type VaultClient interface {
 type Store struct {
 	uploader       Uploader
 	cryptoUploader CryptoUploader
+	publicURL      string
 	publicBucket   string
 	privateBucket  string
 	vaultPath      string
@@ -47,10 +49,12 @@ type Store struct {
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
 func NewStore(
 	region,
+	publicURL,
 	publicBucket,
 	privateBucket,
 	vaultPath string,
-	vaultClient VaultClient) (*Store, error) {
+	vaultClient VaultClient,
+) (*Store, error) {
 
 	config := aws.NewConfig().WithRegion(region)
 
@@ -62,6 +66,7 @@ func NewStore(
 	return &Store{
 		uploader:       s3manager.NewUploader(session),
 		cryptoUploader: s3crypto.NewUploader(session, &s3crypto.Config{HasUserDefinedPSK: true}),
+		publicURL:      publicURL,
 		publicBucket:   publicBucket,
 		privateBucket:  privateBucket,
 		vaultPath:      vaultPath,
@@ -86,6 +91,9 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 		})
 		if err != nil {
 			return "", err
+		}
+		if store.publicURL != "" {
+			return fmt.Sprintf("%s/%s", store.publicURL, filename), nil
 		}
 	} else {
 		log.Info("uploading private file to S3", log.Data{

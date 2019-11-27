@@ -16,6 +16,7 @@ type Config struct {
 	FilterAPIURL                string        `envconfig:"FILTER_API_URL"`
 	AWSRegion                   string        `envconfig:"AWS_REGION"`
 	S3BucketName                string        `envconfig:"S3_BUCKET_NAME"`
+	S3BucketURL                 string        `envconfig:"S3_BUCKET_URL"`
 	S3PrivateBucketName         string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
 	CSVExportedProducerTopic    string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
 	DatasetAPIURL               string        `envconfig:"DATASET_API_URL"`
@@ -46,6 +47,7 @@ func Get() (*Config, error) {
 		FilterAPIURL:                "http://localhost:22100",
 		CSVExportedProducerTopic:    "common-output-created",
 		S3BucketName:                "csv-exported",
+		S3BucketURL:                 "",
 		S3PrivateBucketName:         "csv-exported",
 		AWSRegion:                   "eu-west-1",
 		DatasetAPIURL:               "http://localhost:22000",

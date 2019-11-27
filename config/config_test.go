@@ -16,11 +16,11 @@ func TestSpec(t *testing.T) {
 
 		Convey("When the config values are retrieved", func() {
 
-			Convey("There should be no error returned", func() {
+			Convey("There should be no error returned", func(c C) {
 				So(err, ShouldBeNil)
 			})
 
-			Convey("The values should be set to the expected defaults", func() {
+			Convey("The values should be set to the expected defaults", func(c C) {
 				So(cfg.BindAddr, ShouldEqual, ":22500")
 				So(cfg.KafkaAddr, ShouldResemble, []string{"localhost:9092"})
 				So(cfg.FilterConsumerTopic, ShouldEqual, "filter-job-submitted")
@@ -30,6 +30,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.DatasetAPIURL, ShouldEqual, "http://localhost:22000")
 				So(cfg.AWSRegion, ShouldEqual, "eu-west-1")
 				So(cfg.S3BucketName, ShouldEqual, "csv-exported")
+				So(cfg.S3BucketURL, ShouldEqual, "")
 				So(cfg.S3PrivateBucketName, ShouldEqual, "csv-exported")
 				So(cfg.GracefulShutdownTimeout, ShouldEqual, time.Second*10)
 				So(cfg.HealthCheckInterval, ShouldEqual, time.Minute)

@@ -50,6 +50,7 @@ func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Con
 func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.VaultClient) (fileStore *file.Store, err error) {
 	fileStore, err = file.NewStore(
 		cfg.AWSRegion,
+		cfg.S3BucketURL,
 		cfg.S3BucketName,
 		cfg.S3PrivateBucketName,
 		cfg.VaultPath,
