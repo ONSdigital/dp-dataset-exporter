@@ -129,6 +129,19 @@ func main() {
 		}
 	}()
 
+	go func() {
+		select {
+		case err := <-kafkaConsumer.Errors():
+			log.ErrorC("kafka consumer", err, nil)
+		case err := <-kafkaProducer.Errors():
+			log.ErrorC("kafka result producer", err, nil)
+		case err := <-kafkaErrorProducer.Errors():
+			log.ErrorC("kafka error producer", err, nil)
+		case err := <-errorChannel:
+			log.ErrorC("error channel", err, nil)
+		}
+	}()
+
 	// block until a fatal error occurs
 	select {
 	case <-signals:
