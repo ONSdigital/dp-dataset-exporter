@@ -131,7 +131,6 @@ func main() {
 	}()
 
 	go func() {
-		// a channel used to signal when an exit is required
 		var consumerErrors, exportedProducerErrors, errorProducerError chan (error)
 
 		if serviceList.Consumer {
@@ -154,7 +153,7 @@ func main() {
 
 		select {
 		case err := <-consumerErrors:
-			log.ErrorC("kafka consumer n", err, nil)
+			log.ErrorC("kafka consumer", err, nil)
 		case err := <-exportedProducerErrors:
 			log.ErrorC("kafka result producer", err, nil)
 		case err := <-errorProducerError:
