@@ -45,14 +45,14 @@ func main() {
 	kafkaProducer, err := serviceList.GetProducer(
 		kafkaBrokers,
 		cfg.CSVExportedProducerTopic,
-		initialise.CSVExportedProducer,
+		initialise.CSVExported,
 	)
 	logIfError(err)
 
 	kafkaErrorProducer, err := serviceList.GetProducer(
 		kafkaBrokers,
 		cfg.ErrorProducerTopic,
-		initialise.ErrorProducer,
+		initialise.Error,
 	)
 	logIfError(err)
 
@@ -121,6 +121,7 @@ func main() {
 				// and producers this extra check can then be removed `services[serviceConsumer]`
 				if healthOK && serviceList.Consumer {
 					if _, err = datasetAPICli.GetDatasets(context.Background()); err == nil {
+						serviceList.EventConsumer = true
 						eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler, healthAlertChan)
 						return
 					}
@@ -130,12 +131,33 @@ func main() {
 	}()
 
 	go func() {
+		// a channel used to signal when an exit is required
+		var consumerErrors, exportedProducerErrors, errorProducerError chan (error)
+
+		if serviceList.Consumer {
+			consumerErrors = kafkaConsumer.Errors()
+		} else {
+			consumerErrors = make(chan error, 1)
+		}
+
+		if serviceList.CSVExportedProducer {
+			exportedProducerErrors = kafkaProducer.Errors()
+		} else {
+			exportedProducerErrors = make(chan error, 1)
+		}
+
+		if serviceList.ErrorProducer {
+			errorProducerError = kafkaErrorProducer.Errors()
+		} else {
+			errorProducerError = make(chan error, 1)
+		}
+
 		select {
-		case err := <-kafkaConsumer.Errors():
-			log.ErrorC("kafka consumer", err, nil)
-		case err := <-kafkaProducer.Errors():
+		case err := <-consumerErrors:
+			log.ErrorC("kafka consumer n", err, nil)
+		case err := <-exportedProducerErrors:
 			log.ErrorC("kafka result producer", err, nil)
-		case err := <-kafkaErrorProducer.Errors():
+		case err := <-errorProducerError:
 			log.ErrorC("kafka error producer", err, nil)
 		case err := <-errorChannel:
 			log.ErrorC("error channel", err, nil)
@@ -155,10 +177,19 @@ func main() {
 	go func() {
 		defer cancel()
 
-		if serviceList.Consumer {
+		// Health Ticker/Checker should always be closed first as it relies on other
+		// services (clients) to exist - prevents DATA RACE
+		if serviceList.HealthTicker {
+			log.Info("closing healthchecker", nil)
+			logIfError(healthChecker.Close(ctx))
+		}
+
+		if serviceList.EventConsumer {
 			log.Info("closing event consumer", nil)
 			logIfError(eventConsumer.Close(ctx))
+		}
 
+		if serviceList.Consumer {
 			log.Info("stop listening to consumer", nil)
 			logIfError(kafkaConsumer.StopListeningToConsumer(ctx))
 
@@ -179,11 +210,6 @@ func main() {
 		if serviceList.ObservationStore {
 			log.Info("closing observation store", nil)
 			logIfError(observationStore.Close(ctx))
-		}
-
-		if serviceList.HealthTicker {
-			log.Info("closing healthchecker", nil)
-			logIfError(healthChecker.Close(ctx))
 		}
 	}()
 

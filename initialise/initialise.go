@@ -2,6 +2,7 @@ package initialise
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
@@ -15,20 +16,28 @@ type ExternalServiceList struct {
 	Consumer            bool
 	CSVExportedProducer bool
 	ErrorProducer       bool
+	EventConsumer       bool
 	FileStore           bool
 	ObservationStore    bool
 	HealthTicker        bool
 	Vault               bool
 }
 
+// KafkaProducerName represents a type for kafka producer name used by iota constants
+type KafkaProducerName int
+
+// Possible names of Kafa Producers
 const (
-	// CSVExportedProducer represents a name for
-	// the producer that writes to a csv exported topic
-	CSVExportedProducer = "csv-exported-producer"
-	// ErrorProducer represents a name for
-	// the producer that writes to an error topic
-	ErrorProducer = "error-producer"
+	CSVExported = iota
+	Error
 )
+
+var kafkaProducerNames = []string{"CSVExported", "Error"}
+
+// Values of the kafka producers names
+func (k KafkaProducerName) String() string {
+	return kafkaProducerNames[k]
+}
 
 // GetConsumer returns an initialised kafka consumer
 func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
@@ -38,10 +47,11 @@ func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Con
 		cfg.FilterConsumerGroup,
 		kafka.OffsetNewest,
 	)
-
-	if err == nil {
-		e.Consumer = true
+	if err != nil {
+		return
 	}
+
+	e.Consumer = true
 
 	return
 }
@@ -56,9 +66,11 @@ func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vaul
 		cfg.VaultPath,
 		vaultClient,
 	)
-	if err == nil {
-		e.FileStore = true
+	if err != nil {
+		return
 	}
+
+	e.FileStore = true
 
 	return
 }
@@ -66,23 +78,29 @@ func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vaul
 // GetObservationStore returns an initialised connection to observation store (graph database)
 func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB, err error) {
 	observationStore, err = graph.New(context.Background(), graph.Subsets{Observation: true})
-	if err == nil {
-		e.ObservationStore = true
+	if err != nil {
+		return
 	}
+
+	e.ObservationStore = true
 
 	return
 }
 
 // GetProducer returns a kafka producer
-func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic, name string) (kafkaProducer kafka.Producer, err error) {
+func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer kafka.Producer, err error) {
 	kafkaProducer, err = kafka.NewProducer(kafkaBrokers, topic, 0)
-	if err == nil {
-		switch {
-		case name == CSVExportedProducer:
-			e.CSVExportedProducer = true
-		case name == ErrorProducer:
-			e.ErrorProducer = true
-		}
+	if err != nil {
+		return
+	}
+
+	switch {
+	case name == CSVExported:
+		e.CSVExportedProducer = true
+	case name == Error:
+		e.ErrorProducer = true
+	default:
+		err = fmt.Errorf("Kafka producer name not recognised: '%s'. Valid names: %v", name.String(), kafkaProducerNames)
 	}
 
 	return
@@ -91,9 +109,11 @@ func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic, name str
 // GetVault returns a vault client
 func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.VaultClient, err error) {
 	client, err = vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, retries)
-	if err == nil {
-		e.Vault = true
+	if err != nil {
+		return
 	}
+
+	e.Vault = true
 
 	return
 }
