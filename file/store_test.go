@@ -12,8 +12,11 @@ import (
 )
 
 const (
+	csvFile             = "myfile.csv"
 	publicTestLocation  = "https://csv-exported/myfile.csv"
 	privateTestLocation = "s3://csv-exported/myfile.csv"
+	publicURLPrefix     = "https://s3urlpre"
+	publicURLPrefixed   = publicURLPrefix + "/" + csvFile
 )
 
 func TestPutFileErrorScenarios(t *testing.T) {
@@ -97,6 +100,17 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 				So(url, ShouldEqual, publicTestLocation)
 			})
 		})
+
+		// now add prefix to store, and retest
+		store.publicURL = publicURLPrefix
+		Convey("When PutFile is called for a published version and store has a prefix", func() {
+			url, err := store.PutFile(strings.NewReader(""), csvFile, true)
+
+			Convey("Then the prefixed location should be returned", func() {
+				So(err, ShouldBeNil)
+				So(url, ShouldEqual, publicURLPrefixed)
+			})
+		})
 	})
 
 	Convey("Given an unpublished file", t, func() {
@@ -129,6 +143,17 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 
 			Convey("Then the vault client is called without the path contained in the filename", func() {
 				So(vaultClientMock.WriteKeyCalls()[0].Path, ShouldEqual, store.vaultPath+"/"+path.Base(filename))
+			})
+
+			// now add prefix to store, and retest
+			store.publicURL = publicURLPrefix
+			Convey("When PutFile is called for an unpublished version and store has a prefix", func() {
+				url, err := store.PutFile(strings.NewReader(""), csvFile, false)
+
+				Convey("Then the prefixed location should not be returned", func() {
+					So(err, ShouldBeNil)
+					So(url, ShouldEqual, privateTestLocation)
+				})
 			})
 		})
 	})

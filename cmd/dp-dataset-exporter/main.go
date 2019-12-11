@@ -7,26 +7,26 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ONSdigital/dp-graph/graph"
 	"github.com/ONSdigital/go-ns/clients/dataset"
 	filterHealthCheck "github.com/ONSdigital/go-ns/clients/filter"
 	"github.com/ONSdigital/go-ns/healthcheck"
-	"github.com/ONSdigital/go-ns/kafka"
 	"github.com/ONSdigital/go-ns/log"
 	"github.com/ONSdigital/go-ns/rchttp"
-	"github.com/ONSdigital/go-ns/vault"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
-	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/ONSdigital/dp-dataset-exporter/initialise"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 )
 
 func main() {
 	log.Namespace = "dp-dataset-exporter"
 	log.Info("Starting dataset exporter", nil)
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	cfg, err := config.Get()
 	exitIfError(err)
@@ -36,23 +36,28 @@ func main() {
 	// a channel used to signal when an exit is required
 	errorChannel := make(chan error)
 
+	var serviceList initialise.ExternalServiceList
+
 	kafkaBrokers := cfg.KafkaAddr
-	kafkaConsumer, err := kafka.NewSyncConsumer(
+	kafkaConsumer, err := serviceList.GetConsumer(kafkaBrokers, cfg)
+	logIfError(err)
+
+	kafkaProducer, err := serviceList.GetProducer(
 		kafkaBrokers,
-		cfg.FilterConsumerTopic,
-		cfg.FilterConsumerGroup,
-		kafka.OffsetNewest,
+		cfg.CSVExportedProducerTopic,
+		initialise.CSVExported,
 	)
-	exitIfError(err)
+	logIfError(err)
 
-	kafkaProducer, err := kafka.NewProducer(kafkaBrokers, cfg.CSVExportedProducerTopic, 0)
-	exitIfError(err)
+	kafkaErrorProducer, err := serviceList.GetProducer(
+		kafkaBrokers,
+		cfg.ErrorProducerTopic,
+		initialise.Error,
+	)
+	logIfError(err)
 
-	kafkaErrorProducer, err := kafka.NewProducer(cfg.KafkaAddr, cfg.ErrorProducerTopic, 0)
-	exitIfError(err)
-
-	vaultClient, err := vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, 3)
-	exitIfError(err)
+	vaultClient, err := serviceList.GetVault(cfg, 3)
+	logIfError(err)
 
 	// when errors occur - we send a message on an error topic.
 	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer)
@@ -63,17 +68,11 @@ func main() {
 	)
 	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
 
-	observationStore, err := graph.New(context.Background(), graph.Subsets{Observation: true})
-	exitIfError(err)
+	observationStore, err := serviceList.GetObservationStore()
+	logIfError(err)
 
-	fileStore, err := file.NewStore(
-		cfg.AWSRegion,
-		cfg.S3BucketName,
-		cfg.S3PrivateBucketName,
-		cfg.VaultPath,
-		vaultClient,
-	)
-	exitIfError(err)
+	fileStore, err := serviceList.GetFileStore(cfg, vaultClient)
+	logIfError(err)
 
 	eventProducer := event.NewAvroProducer(kafkaProducer, schema.CSVExportedEvent)
 
@@ -106,28 +105,23 @@ func main() {
 		vaultClient,
 		datasetAPICli,
 	)
-
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+	serviceList.HealthTicker = true
 
 	// Check that the healthChecker succeeds before testing the service token (GetDatasets)
 	// once both succeed, then we can set Consume off
-	// else exit program (via errorChannel) if the above fails to happen within the StartupTimeout
-	ctxStartup, startupCancel := context.WithTimeout(context.Background(), cfg.StartupTimeout)
 	go func() {
-		defer startupCancel()
 		healthOK := false
 		var err error
 		log.Info("Checking service token", nil)
 		for {
 			select {
 			case healthOK = <-healthAlertChan:
-			case <-ctxStartup.Done():
-				errorChannel <- ctxStartup.Err()
-				return
 			case <-time.After(time.Second * 2):
-				if healthOK {
-					if _, err = datasetAPICli.GetDatasets(ctxStartup); err == nil {
+				// FIXME Once HealthCheck has been added to kafka consumer groups, consumers
+				// and producers this extra check can then be removed `services[serviceConsumer]`
+				if healthOK && serviceList.Consumer {
+					if _, err = datasetAPICli.GetDatasets(context.Background()); err == nil {
+						serviceList.EventConsumer = true
 						eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler, healthAlertChan)
 						return
 					}
@@ -136,47 +130,86 @@ func main() {
 		}
 	}()
 
+	go func() {
+		var consumerErrors, exportedProducerErrors, errorProducerError chan (error)
+
+		if serviceList.Consumer {
+			consumerErrors = kafkaConsumer.Errors()
+		} else {
+			consumerErrors = make(chan error, 1)
+		}
+
+		if serviceList.CSVExportedProducer {
+			exportedProducerErrors = kafkaProducer.Errors()
+		} else {
+			exportedProducerErrors = make(chan error, 1)
+		}
+
+		if serviceList.ErrorProducer {
+			errorProducerError = kafkaErrorProducer.Errors()
+		} else {
+			errorProducerError = make(chan error, 1)
+		}
+
+		select {
+		case err := <-consumerErrors:
+			log.ErrorC("kafka consumer", err, nil)
+		case err := <-exportedProducerErrors:
+			log.ErrorC("kafka result producer", err, nil)
+		case err := <-errorProducerError:
+			log.ErrorC("kafka error producer", err, nil)
+		case err := <-errorChannel:
+			log.ErrorC("error channel", err, nil)
+		}
+	}()
+
 	// block until a fatal error occurs
 	select {
-	case err := <-kafkaConsumer.Errors():
-		log.ErrorC("kafka consumer", err, nil)
-	case err := <-kafkaProducer.Errors():
-		log.ErrorC("kafka result producer", err, nil)
-	case err := <-kafkaErrorProducer.Errors():
-		log.ErrorC("kafka error producer", err, nil)
-	case err := <-errorChannel:
-		log.ErrorC("error channel", err, nil)
 	case <-signals:
 		log.Debug("os signal received", nil)
 	}
 
-	// shutdown within timeout
+	log.Info("gracefully shutting down", log.Data{"graceful_shutdown_timeout": cfg.GracefulShutdownTimeout})
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.GracefulShutdownTimeout)
 
+	// Gracefully shutdown the application closing any open resources
 	go func() {
 		defer cancel()
 
-		// gracefully dispose resources
-		err = eventConsumer.Close(ctx)
-		logIfError(err)
+		// Health Ticker/Checker should always be closed first as it relies on other
+		// services (clients) to exist - prevents DATA RACE
+		if serviceList.HealthTicker {
+			log.Info("closing healthchecker", nil)
+			logIfError(healthChecker.Close(ctx))
+		}
 
-		err = kafkaConsumer.StopListeningToConsumer(ctx)
-		logIfError(err)
+		if serviceList.EventConsumer {
+			log.Info("closing event consumer", nil)
+			logIfError(eventConsumer.Close(ctx))
+		}
 
-		err = kafkaConsumer.Close(ctx)
-		logIfError(err)
+		if serviceList.Consumer {
+			log.Info("stop listening to consumer", nil)
+			logIfError(kafkaConsumer.StopListeningToConsumer(ctx))
 
-		err = kafkaProducer.Close(ctx)
-		logIfError(err)
+			log.Info("closing consumer", nil)
+			logIfError(kafkaConsumer.Close(ctx))
+		}
 
-		err = kafkaErrorProducer.Close(ctx)
-		logIfError(err)
+		if serviceList.CSVExportedProducer {
+			log.Info("closing csv exporter producer", nil)
+			logIfError(kafkaProducer.Close(ctx))
+		}
 
-		err = observationStore.Close(ctx)
-		logIfError(err)
+		if serviceList.ErrorProducer {
+			log.Info("closing error producer", nil)
+			logIfError(kafkaErrorProducer.Close(ctx))
+		}
 
-		err = healthChecker.Close(ctx)
-		logIfError(err)
+		if serviceList.ObservationStore {
+			log.Info("closing observation store", nil)
+			logIfError(observationStore.Close(ctx))
+		}
 	}()
 
 	// wait for shutdown success (via cancel) or failure (timeout)
