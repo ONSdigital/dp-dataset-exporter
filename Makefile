@@ -6,6 +6,7 @@ BIN_DIR?=.
 
 export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
+export SERVICE_AUTH_TOKEN=fwjdqW8Qo8rcVoYVYkfb0PbLCVSovnXByyNEc4LQXiyG6RVoM82Gi1mK9QNgyI4c
 
 VAULT_ADDR?='http://127.0.0.1:8200'
 DATABASE_ADDRESS?=bolt://localhost:7687
