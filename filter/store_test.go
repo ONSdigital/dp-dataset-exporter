@@ -10,7 +10,7 @@ import (
 
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-graph/observation"
-	"github.com/ONSdigital/go-ns/common/commontest"
+	rchttp "github.com/ONSdigital/dp-rchttp"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -42,7 +42,7 @@ func TestStore_GetFilter(t *testing.T) {
 
 	Convey("Given a store with mocked HTTP responses", t, func() {
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusOK, Body: mockFilterBody}, nil
 			},
@@ -69,7 +69,7 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
 	Convey("Given a mock http client that returns a 500 error when getting filter output", t, func() {
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusInternalServerError, Body: nil}, nil
 			},
@@ -95,7 +95,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
 	Convey("Given a mock http client that returns a 404 error when getting filter output", t, func() {
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusBadGateway}, nil
 			},
@@ -122,7 +122,7 @@ func TestStore_PutCSVData(t *testing.T) {
 	Convey("Given a store with a mocked HTTP response", t, func() {
 
 		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
 			},
@@ -201,7 +201,7 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 			Size:    fileSize,
 		}
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusNotFound, Body: nil}, nil
 			},
@@ -232,7 +232,7 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 			Size:    fileSize,
 		}
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusInternalServerError, Body: nil}, nil
 			},
@@ -263,7 +263,7 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 			Size:    fileSize,
 		}
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusBadGateway, Body: nil}, nil
 			},
@@ -290,7 +290,7 @@ func TestStore_PutStateAsEmpty(t *testing.T) {
 
 		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
 			},
@@ -316,7 +316,7 @@ func TestStore_PutStateAsError(t *testing.T) {
 
 		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
 
-		mockHTTPClient := &commontest.RCHTTPClienterMock{
+		mockHTTPClient := &rchttp.ClienterMock{
 			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
 			},

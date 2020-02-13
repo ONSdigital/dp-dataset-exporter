@@ -4,6 +4,7 @@
 package filetest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"sync"
 )
@@ -12,19 +13,23 @@ var (
 	lockUploaderMockUpload sync.RWMutex
 )
 
-// UploaderMock is a mock implementation of Uploader.
+// Ensure, that UploaderMock does implement file.Uploader.
+// If this is not the case, regenerate this file with moq.
+var _ file.Uploader = &UploaderMock{}
+
+// UploaderMock is a mock implementation of file.Uploader.
 //
 //     func TestSomethingThatUsesUploader(t *testing.T) {
 //
-//         // make and configure a mocked Uploader
+//         // make and configure a mocked file.Uploader
 //         mockedUploader := &UploaderMock{
 //             UploadFunc: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-// 	               panic("TODO: mock out the Upload method")
+// 	               panic("mock out the Upload method")
 //             },
 //         }
 //
-//         // TODO: use mockedUploader in code that requires Uploader
-//         //       and then make assertions.
+//         // use mockedUploader in code that requires file.Uploader
+//         // and then make assertions.
 //
 //     }
 type UploaderMock struct {

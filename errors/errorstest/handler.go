@@ -4,6 +4,7 @@
 package errorstest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"sync"
 )
 
@@ -11,19 +12,23 @@ var (
 	lockHandlerMockHandle sync.RWMutex
 )
 
-// HandlerMock is a mock implementation of Handler.
+// Ensure, that HandlerMock does implement errors.Handler.
+// If this is not the case, regenerate this file with moq.
+var _ errors.Handler = &HandlerMock{}
+
+// HandlerMock is a mock implementation of errors.Handler.
 //
 //     func TestSomethingThatUsesHandler(t *testing.T) {
 //
-//         // make and configure a mocked Handler
+//         // make and configure a mocked errors.Handler
 //         mockedHandler := &HandlerMock{
 //             HandleFunc: func(filterID string, err error)  {
-// 	               panic("TODO: mock out the Handle method")
+// 	               panic("mock out the Handle method")
 //             },
 //         }
 //
-//         // TODO: use mockedHandler in code that requires Handler
-//         //       and then make assertions.
+//         // use mockedHandler in code that requires errors.Handler
+//         // and then make assertions.
 //
 //     }
 type HandlerMock struct {

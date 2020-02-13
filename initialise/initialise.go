@@ -7,8 +7,8 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-graph/graph"
-	"github.com/ONSdigital/go-ns/kafka"
-	"github.com/ONSdigital/go-ns/vault"
+	kafka "github.com/ONSdigital/dp-kafka"
+	vault "github.com/ONSdigital/dp-vault"
 )
 
 // ExternalServiceList represents a list of services
@@ -26,7 +26,7 @@ type ExternalServiceList struct {
 // KafkaProducerName represents a type for kafka producer name used by iota constants
 type KafkaProducerName int
 
-// Possible names of Kafa Producers
+// Possible names of Kafka Producers
 const (
 	CSVExported = iota
 	Error
@@ -41,11 +41,16 @@ func (k KafkaProducerName) String() string {
 
 // GetConsumer returns an initialised kafka consumer
 func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
-	kafkaConsumer, err = kafka.NewSyncConsumer(
+	ctx := context.Background()
+
+	*kafkaConsumer, err = kafka.NewConsumerGroup(
+		ctx,
 		kafkaBrokers,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
 		kafka.OffsetNewest,
+		true,
+		kafka.CreateConsumerGroupChannels(true),
 	)
 	if err != nil {
 		return
@@ -57,7 +62,7 @@ func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Con
 }
 
 // GetFileStore returns an initialised connection to file store
-func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.VaultClient) (fileStore *file.Store, err error) {
+func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
 	fileStore, err = file.NewStore(
 		cfg.AWSRegion,
 		cfg.S3BucketURL,
@@ -89,7 +94,16 @@ func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB,
 
 // GetProducer returns a kafka producer
 func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer kafka.Producer, err error) {
-	kafkaProducer, err = kafka.NewProducer(kafkaBrokers, topic, 0)
+
+	ctx := context.Background()
+
+	kafkaProducer, err = kafka.NewProducer(
+		ctx,
+		kafkaBrokers,
+		topic,
+		0,
+		kafka.CreateProducerChannels(),
+	)
 	if err != nil {
 		return
 	}
@@ -107,8 +121,8 @@ func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, n
 }
 
 // GetVault returns a vault client
-func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.VaultClient, err error) {
-	client, err = vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, retries)
+func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.Client, err error) {
+	client, err = vault.CreateClient(cfg.VaultToken, cfg.VaultAddress, retries)
 	if err != nil {
 		return
 	}

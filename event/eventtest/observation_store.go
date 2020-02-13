@@ -5,6 +5,7 @@ package eventtest
 
 import (
 	"context"
+	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-graph/observation"
 	"sync"
 )
@@ -13,19 +14,23 @@ var (
 	lockObservationStoreMockStreamCSVRows sync.RWMutex
 )
 
-// ObservationStoreMock is a mock implementation of ObservationStore.
+// Ensure, that ObservationStoreMock does implement event.ObservationStore.
+// If this is not the case, regenerate this file with moq.
+var _ event.ObservationStore = &ObservationStoreMock{}
+
+// ObservationStoreMock is a mock implementation of event.ObservationStore.
 //
 //     func TestSomethingThatUsesObservationStore(t *testing.T) {
 //
-//         // make and configure a mocked ObservationStore
+//         // make and configure a mocked event.ObservationStore
 //         mockedObservationStore := &ObservationStoreMock{
 //             StreamCSVRowsFunc: func(ctx context.Context, filter *observation.Filter, limit *int) (observation.StreamRowReader, error) {
-// 	               panic("TODO: mock out the StreamCSVRows method")
+// 	               panic("mock out the StreamCSVRows method")
 //             },
 //         }
 //
-//         // TODO: use mockedObservationStore in code that requires ObservationStore
-//         //       and then make assertions.
+//         // use mockedObservationStore in code that requires event.ObservationStore
+//         // and then make assertions.
 //
 //     }
 type ObservationStoreMock struct {

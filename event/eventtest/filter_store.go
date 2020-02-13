@@ -4,9 +4,9 @@
 package eventtest
 
 import (
-	"sync"
-
+	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-graph/observation"
+	"sync"
 )
 
 var (
@@ -16,28 +16,32 @@ var (
 	lockFilterStoreMockPutStateAsError sync.RWMutex
 )
 
-// FilterStoreMock is a mock implementation of FilterStore.
+// Ensure, that FilterStoreMock does implement event.FilterStore.
+// If this is not the case, regenerate this file with moq.
+var _ event.FilterStore = &FilterStoreMock{}
+
+// FilterStoreMock is a mock implementation of event.FilterStore.
 //
 //     func TestSomethingThatUsesFilterStore(t *testing.T) {
 //
-//         // make and configure a mocked FilterStore
+//         // make and configure a mocked event.FilterStore
 //         mockedFilterStore := &FilterStoreMock{
 //             GetFilterFunc: func(filterID string) (*observation.Filter, error) {
-// 	               panic("TODO: mock out the GetFilter method")
+// 	               panic("mock out the GetFilter method")
 //             },
 //             PutCSVDataFunc: func(filterID string, downloadItem observation.DownloadItem) error {
-// 	               panic("TODO: mock out the PutCSVData method")
+// 	               panic("mock out the PutCSVData method")
 //             },
 //             PutStateAsEmptyFunc: func(filterJobID string) error {
-// 	               panic("TODO: mock out the PutStateAsEmpty method")
+// 	               panic("mock out the PutStateAsEmpty method")
 //             },
 //             PutStateAsErrorFunc: func(filterJobID string) error {
-// 	               panic("TODO: mock out the PutStateAsError method")
+// 	               panic("mock out the PutStateAsError method")
 //             },
 //         }
 //
-//         // TODO: use mockedFilterStore in code that requires FilterStore
-//         //       and then make assertions.
+//         // use mockedFilterStore in code that requires event.FilterStore
+//         // and then make assertions.
 //
 //     }
 type FilterStoreMock struct {

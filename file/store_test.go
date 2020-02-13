@@ -1,4 +1,4 @@
-package file
+package file_test
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-dataset-exporter/file/filetest"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	. "github.com/smartystreets/goconvey/convey"
@@ -26,7 +27,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 			return nil, errors.New("uploader error")
 		}
 
-		store := &Store{uploader: uploaderMock}
+		store := &file.Store{Uploader: uploaderMock}
 
 		Convey("When PutFile is called for a published version", func() {
 			url, err := store.PutFile(strings.NewReader(""), "", true)
@@ -45,7 +46,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 			return errors.New("vault client error")
 		}
 
-		store := &Store{vaultClient: vaultClientMock}
+		store := &file.Store{VaultClient: vaultClientMock}
 
 		Convey("When PutFile is called for an unpublished version", func() {
 			url, err := store.PutFile(strings.NewReader(""), "", false)
@@ -69,7 +70,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 			return nil, errors.New("crypto uploader error")
 		}
 
-		store := &Store{vaultClient: vaultClientMock, cryptoUploader: cryptoUploaderMock}
+		store := &file.Store{VaultClient: vaultClientMock, CryptoUploader: cryptoUploaderMock}
 
 		Convey("When PutFile is called for an unpublished version", func() {
 			url, err := store.PutFile(strings.NewReader(""), "", false)
@@ -90,7 +91,7 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 			return &s3manager.UploadOutput{Location: publicTestLocation}, nil
 		}
 
-		store := &Store{uploader: uploaderMock}
+		store := &file.Store{Uploader: uploaderMock}
 
 		Convey("When PutFile is called for a published version", func() {
 			url, err := store.PutFile(strings.NewReader(""), "", true)
@@ -102,7 +103,7 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 		})
 
 		// now add prefix to store, and retest
-		store.publicURL = publicURLPrefix
+		store.PublicURL = publicURLPrefix
 		Convey("When PutFile is called for a published version and store has a prefix", func() {
 			url, err := store.PutFile(strings.NewReader(""), csvFile, true)
 
@@ -125,7 +126,7 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 			return &s3manager.UploadOutput{Location: privateTestLocation}, nil
 		}
 
-		store := &Store{vaultClient: vaultClientMock, cryptoUploader: cryptoUploaderMock}
+		store := &file.Store{VaultClient: vaultClientMock, CryptoUploader: cryptoUploaderMock}
 
 		Convey("When PutFile is called", func() {
 
@@ -142,11 +143,11 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 			})
 
 			Convey("Then the vault client is called without the path contained in the filename", func() {
-				So(vaultClientMock.WriteKeyCalls()[0].Path, ShouldEqual, store.vaultPath+"/"+path.Base(filename))
+				So(vaultClientMock.WriteKeyCalls()[0].Path, ShouldEqual, store.VaultPath+"/"+path.Base(filename))
 			})
 
 			// now add prefix to store, and retest
-			store.publicURL = publicURLPrefix
+			store.PublicURL = publicURLPrefix
 			Convey("When PutFile is called for an unpublished version and store has a prefix", func() {
 				url, err := store.PutFile(strings.NewReader(""), csvFile, false)
 

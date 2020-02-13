@@ -3,7 +3,7 @@ package csvw
 import (
 	"testing"
 
-	"github.com/ONSdigital/go-ns/clients/dataset"
+	"github.com/ONSdigital/dp-api-clients-go/dataset"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -16,13 +16,13 @@ func TestNew(t *testing.T) {
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
 			},
-			Model: dataset.Model{
+			DatasetDetails: dataset.DatasetDetails{
 				Title:            "title",
 				Description:      "description",
 				Theme:            "theme",
 				License:          "license",
 				ReleaseFrequency: "annual",
-				Contacts: []dataset.Contact{
+				Contacts: &[]dataset.Contact{
 					dataset.Contact{
 						Name:      "contact name",
 						Telephone: "1234",
@@ -55,9 +55,10 @@ func TestNew(t *testing.T) {
 				So(csvw.Frequency, ShouldEqual, m.ReleaseFrequency)
 				So(csvw.URL, ShouldEqual, fileURL)
 
-				So(csvw.Contact[0].Name, ShouldEqual, m.Contacts[0].Name)
-				So(csvw.Contact[0].Telephone, ShouldEqual, m.Contacts[0].Telephone)
-				So(csvw.Contact[0].Email, ShouldEqual, m.Contacts[0].Email)
+				mContacts := *m.Contacts
+				So(csvw.Contact[0].Name, ShouldEqual, mContacts[0].Name)
+				So(csvw.Contact[0].Telephone, ShouldEqual, mContacts[0].Telephone)
+				So(csvw.Contact[0].Email, ShouldEqual, mContacts[0].Email)
 
 				So(csvw.Publisher.Name, ShouldResemble, m.Publisher.Name)
 				So(csvw.Publisher.Type, ShouldResemble, m.Publisher.Type)
@@ -108,7 +109,7 @@ func TestAddNotes(t *testing.T) {
 					},
 				},
 			},
-			Model: dataset.Model{
+			DatasetDetails: dataset.DatasetDetails{
 				UsageNotes: &[]dataset.UsageNote{
 					dataset.UsageNote{
 						Note:  "use it this way",
@@ -268,7 +269,7 @@ func TestGenerate(t *testing.T) {
 					},
 				},
 			},
-			Model: dataset.Model{},
+			DatasetDetails: dataset.DatasetDetails{},
 		}
 
 		Convey("When the Generate csvw function is called", func() {
@@ -286,7 +287,7 @@ func TestGenerate(t *testing.T) {
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
 			},
-			Model: dataset.Model{},
+			DatasetDetails: dataset.DatasetDetails{},
 		}
 
 		Convey("When the Generate csvw function is called", func() {

@@ -2,10 +2,10 @@ package errors_test
 
 import (
 	errs "errors"
-	"github.com/ONSdigital/dp-dataset-exporter/errors"
-	"github.com/ONSdigital/dp-dataset-exporter/errors/errorstest"
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/ONSdigital/dp-dataset-exporter/errors"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestSpec(t *testing.T) {
@@ -13,13 +13,7 @@ func TestSpec(t *testing.T) {
 	Convey("Given an event handler with a mock message producer", t, func() {
 
 		mockOutputMessageChan := make(chan []byte, 1)
-		mockedMessageProducer := &errorstest.MessageProducerMock{
-			OutputFunc: func() chan []byte {
-				return mockOutputMessageChan
-			},
-		}
-
-		errorHandler := errors.NewKafkaHandler(mockedMessageProducer)
+		errorHandler := errors.NewKafkaHandler(mockOutputMessageChan)
 
 		Convey("When handle is called", func() {
 

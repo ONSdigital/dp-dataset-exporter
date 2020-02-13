@@ -4,6 +4,7 @@
 package filetest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"sync"
 )
 
@@ -11,19 +12,23 @@ var (
 	lockVaultClientMockWriteKey sync.RWMutex
 )
 
-// VaultClientMock is a mock implementation of VaultClient.
+// Ensure, that VaultClientMock does implement file.VaultClient.
+// If this is not the case, regenerate this file with moq.
+var _ file.VaultClient = &VaultClientMock{}
+
+// VaultClientMock is a mock implementation of file.VaultClient.
 //
 //     func TestSomethingThatUsesVaultClient(t *testing.T) {
 //
-//         // make and configure a mocked VaultClient
+//         // make and configure a mocked file.VaultClient
 //         mockedVaultClient := &VaultClientMock{
 //             WriteKeyFunc: func(path string, key string, value string) error {
-// 	               panic("TODO: mock out the WriteKey method")
+// 	               panic("mock out the WriteKey method")
 //             },
 //         }
 //
-//         // TODO: use mockedVaultClient in code that requires VaultClient
-//         //       and then make assertions.
+//         // use mockedVaultClient in code that requires file.VaultClient
+//         // and then make assertions.
 //
 //     }
 type VaultClientMock struct {

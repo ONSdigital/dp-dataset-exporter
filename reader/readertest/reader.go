@@ -4,6 +4,7 @@
 package readertest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/reader"
 	"sync"
 )
 
@@ -11,19 +12,23 @@ var (
 	lockWrappedReaderMockRead sync.RWMutex
 )
 
-// WrappedReaderMock is a mock implementation of WrappedReader.
+// Ensure, that WrappedReaderMock does implement reader.WrappedReader.
+// If this is not the case, regenerate this file with moq.
+var _ reader.WrappedReader = &WrappedReaderMock{}
+
+// WrappedReaderMock is a mock implementation of reader.WrappedReader.
 //
 //     func TestSomethingThatUsesWrappedReader(t *testing.T) {
 //
-//         // make and configure a mocked WrappedReader
+//         // make and configure a mocked reader.WrappedReader
 //         mockedWrappedReader := &WrappedReaderMock{
 //             ReadFunc: func(p []byte) (int, error) {
-// 	               panic("TODO: mock out the Read method")
+// 	               panic("mock out the Read method")
 //             },
 //         }
 //
-//         // TODO: use mockedWrappedReader in code that requires WrappedReader
-//         //       and then make assertions.
+//         // use mockedWrappedReader in code that requires reader.WrappedReader
+//         // and then make assertions.
 //
 //     }
 type WrappedReaderMock struct {

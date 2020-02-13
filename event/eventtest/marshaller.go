@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"sync"
 )
 
@@ -11,19 +12,23 @@ var (
 	lockMarshallerMockMarshal sync.RWMutex
 )
 
-// MarshallerMock is a mock implementation of Marshaller.
+// Ensure, that MarshallerMock does implement event.Marshaller.
+// If this is not the case, regenerate this file with moq.
+var _ event.Marshaller = &MarshallerMock{}
+
+// MarshallerMock is a mock implementation of event.Marshaller.
 //
 //     func TestSomethingThatUsesMarshaller(t *testing.T) {
 //
-//         // make and configure a mocked Marshaller
+//         // make and configure a mocked event.Marshaller
 //         mockedMarshaller := &MarshallerMock{
 //             MarshalFunc: func(s interface{}) ([]byte, error) {
-// 	               panic("TODO: mock out the Marshal method")
+// 	               panic("mock out the Marshal method")
 //             },
 //         }
 //
-//         // TODO: use mockedMarshaller in code that requires Marshaller
-//         //       and then make assertions.
+//         // use mockedMarshaller in code that requires event.Marshaller
+//         // and then make assertions.
 //
 //     }
 type MarshallerMock struct {

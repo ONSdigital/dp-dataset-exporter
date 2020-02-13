@@ -1,6 +1,7 @@
 package file
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/log.go/log"
 	"github.com/ONSdigital/s3crypto"
 )
 
@@ -37,13 +38,13 @@ type VaultClient interface {
 
 // Store provides file storage via S3.
 type Store struct {
-	uploader       Uploader
-	cryptoUploader CryptoUploader
-	publicURL      string
-	publicBucket   string
+	Uploader       Uploader
+	CryptoUploader CryptoUploader
+	PublicURL      string
+	PublicBucket   string
 	privateBucket  string
-	vaultPath      string
-	vaultClient    VaultClient
+	VaultPath      string
+	VaultClient    VaultClient
 }
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
@@ -64,55 +65,56 @@ func NewStore(
 	}
 
 	return &Store{
-		uploader:       s3manager.NewUploader(session),
-		cryptoUploader: s3crypto.NewUploader(session, &s3crypto.Config{HasUserDefinedPSK: true}),
-		publicURL:      publicURL,
-		publicBucket:   publicBucket,
+		Uploader:       s3manager.NewUploader(session),
+		CryptoUploader: s3crypto.NewUploader(session, &s3crypto.Config{HasUserDefinedPSK: true}),
+		PublicURL:      publicURL,
+		PublicBucket:   publicBucket,
 		privateBucket:  privateBucket,
-		vaultPath:      vaultPath,
-		vaultClient:    vaultClient,
+		VaultPath:      vaultPath,
+		VaultClient:    vaultClient,
 	}, nil
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
 func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (uploadedFileURL string, err error) {
+	ctx := context.Background()
 	var result *s3manager.UploadOutput
 
 	if isPublished {
-		log.Info("uploading public file to S3", log.Data{
-			"bucket": store.publicBucket,
+		log.Event(ctx, "uploading public file to S3", log.Data{
+			"bucket": store.PublicBucket,
 			"name":   filename,
 		})
 
-		result, err = store.uploader.Upload(&s3manager.UploadInput{
+		result, err = store.Uploader.Upload(&s3manager.UploadInput{
 			Body:   reader,
-			Bucket: &store.publicBucket,
+			Bucket: &store.PublicBucket,
 			Key:    &filename,
 		})
 		if err != nil {
 			return "", err
 		}
-		if store.publicURL != "" {
-			return fmt.Sprintf("%s/%s", store.publicURL, filename), nil
+		if store.PublicURL != "" {
+			return fmt.Sprintf("%s/%s", store.PublicURL, filename), nil
 		}
 	} else {
-		log.Info("uploading private file to S3", log.Data{
+		log.Event(ctx, "uploading private file to S3", log.Data{
 			"bucket": store.privateBucket,
 			"name":   filename,
 		})
 
 		psk := createPSK()
-		vaultPath := store.vaultPath + "/" + path.Base(filename)
+		vaultPath := store.VaultPath + "/" + path.Base(filename)
 		vaultKey := "key"
 
-		log.Info("writing key to vault", log.Data{
+		log.Event(ctx, "writing key to vault", log.Data{
 			"vault_path": vaultPath,
 		})
-		if err := store.vaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
+		if err := store.VaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
 			return "", err
 		}
 
-		result, err = store.cryptoUploader.UploadWithPSK(&s3manager.UploadInput{
+		result, err = store.CryptoUploader.UploadWithPSK(&s3manager.UploadInput{
 			Body:   reader,
 			Bucket: &store.privateBucket,
 			Key:    &filename,
@@ -121,7 +123,7 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			return "", err
 		}
 
-		log.Info("writing key to vault", log.Data{
+		log.Event(ctx, "writing key to vault", log.Data{
 			"result.Location": result.Location,
 			"vault_path":      vaultPath,
 		})

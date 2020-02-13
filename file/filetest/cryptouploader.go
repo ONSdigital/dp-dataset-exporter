@@ -4,6 +4,7 @@
 package filetest
 
 import (
+	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"sync"
 )
@@ -12,19 +13,23 @@ var (
 	lockCryptoUploaderMockUploadWithPSK sync.RWMutex
 )
 
-// CryptoUploaderMock is a mock implementation of CryptoUploader.
+// Ensure, that CryptoUploaderMock does implement file.CryptoUploader.
+// If this is not the case, regenerate this file with moq.
+var _ file.CryptoUploader = &CryptoUploaderMock{}
+
+// CryptoUploaderMock is a mock implementation of file.CryptoUploader.
 //
 //     func TestSomethingThatUsesCryptoUploader(t *testing.T) {
 //
-//         // make and configure a mocked CryptoUploader
+//         // make and configure a mocked file.CryptoUploader
 //         mockedCryptoUploader := &CryptoUploaderMock{
 //             UploadWithPSKFunc: func(input *s3manager.UploadInput, psk []byte) (*s3manager.UploadOutput, error) {
-// 	               panic("TODO: mock out the UploadWithPSK method")
+// 	               panic("mock out the UploadWithPSK method")
 //             },
 //         }
 //
-//         // TODO: use mockedCryptoUploader in code that requires CryptoUploader
-//         //       and then make assertions.
+//         // use mockedCryptoUploader in code that requires file.CryptoUploader
+//         // and then make assertions.
 //
 //     }
 type CryptoUploaderMock struct {

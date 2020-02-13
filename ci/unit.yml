@@ -6,11 +6,11 @@ image_resource:
   type: docker-image
   source:
     repository: golang
-    tag: 1.9.2
+    tag: 1.13.7
 
 inputs:
   - name: dp-dataset-exporter
-    path: go/src/github.com/ONSdigital/dp-dataset-exporter
+    path: dp-dataset-exporter
 
 run:
-  path: go/src/github.com/ONSdigital/dp-dataset-exporter/ci/scripts/unit.sh
+  path: dp-dataset-exporter/ci/scripts/unit.sh

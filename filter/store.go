@@ -12,14 +12,14 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-graph/observation"
-	"github.com/ONSdigital/go-ns/common"
-	"github.com/ONSdigital/go-ns/log"
+	rchttp "github.com/ONSdigital/dp-rchttp"
+	"github.com/ONSdigital/log.go/log"
 )
 
 // Store provides access to stored dimension data.
 type Store struct {
 	filterAPIURL string
-	httpClient   common.RCHTTPClienter
+	httpClient   rchttp.Clienter
 }
 
 // FilterOuput represents a structure used to update the filter api
@@ -32,6 +32,7 @@ type FilterOuput struct {
 	Published  bool                   `json:"published,omitempty"`
 }
 
+// Event represents a structure with type and time
 type Event struct {
 	Type string    `bson:"type,omitempty" json:"type"`
 	Time time.Time `bson:"time,omitempty" json:"time"`
@@ -47,7 +48,7 @@ var ErrFilterAPIError = errors.New("Internal error from the filter api")
 var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the filter api")
 
 // NewStore returns a new instance of a filter store.
-func NewStore(filterAPIURL string, httpClient common.RCHTTPClienter) *Store {
+func NewStore(filterAPIURL string, httpClient rchttp.Clienter) *Store {
 	return &Store{
 		filterAPIURL: filterAPIURL,
 		httpClient:   httpClient,
@@ -155,7 +156,7 @@ func (store *Store) makeRequest(method, url string, body io.Reader) ([]byte, err
 	case http.StatusInternalServerError:
 		return nil, ErrFilterAPIError
 	default:
-		log.Debug("unrecognised status code returned from the filter api",
+		log.Event(nil, "unrecognised status code returned from the filter api",
 			log.Data{
 				"status_code": response.StatusCode,
 			})
