@@ -23,6 +23,9 @@ github.com/ONSdigital/dp-observation-importer v0.0.0-20190530123707-54356cab6a79
 github.com/ONSdigital/dp-rchttp v0.0.0-20190919143000-bb5699e6fd59/go.mod h1:KkW68U3FPuivW4ogi9L8CPKNj9ZxGko4qcUY7KoAAkQ=
 github.com/ONSdigital/dp-rchttp v0.0.0-20200114090501-463a529590e8 h1:MWIHCr/ud5ur9elhfvKtSjMJInqf3iUY8F4J27qGQPA=
 github.com/ONSdigital/dp-rchttp v0.0.0-20200114090501-463a529590e8/go.mod h1:821jZtK0oBsV8hjIkNr8vhAWuv0FxJBPJuAHa2B70Gk=
+github.com/ONSdigital/dp-s3 v1.1.0 h1:5WjQhh9wo9LueGuqk0ekWfsiZAkzR/65dXLHArePUxo=
+github.com/ONSdigital/dp-s3 v1.1.1-0.20200214150819-0f1476b3a6d5 h1:+p+ecXP6FToGmNgaF2s9aPYp6YgfWq/5y6cLRy4RRTs=
+github.com/ONSdigital/dp-s3 v1.1.1-0.20200214150819-0f1476b3a6d5/go.mod h1:IxKr4v9eZ925jD8mv52cQolv+PCBLo2lciwIl4fQ4Fo=
 github.com/ONSdigital/dp-vault v1.0.0 h1:ksuzshSzJK1gBlDF+9CM3cAhhuzNflTTxEyIcxJni/s=
 github.com/ONSdigital/dp-vault v1.0.0/go.mod h1:eYVZQOdzE9OjK3hMAlgrkZWvsHDIKwCKbXsGBYjTSCk=
 github.com/ONSdigital/go-ns v0.0.0-20191104121206-f144c4ec2e58/go.mod h1:iWos35il+NjbvDEqwtB736pyHru0MPFE/LqcwkV1wDc=
@@ -44,8 +47,8 @@ github.com/Shopify/sarama v1.26.1/go.mod h1:NbSGBSSndYaIhRcBtY9V0U7AyH+x71bG668A
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/aws/aws-sdk-go v1.29.0 h1:UFxrMQhDyLak6kVtOcr4PZxNRQV0s7pY/vKAyzRvi8c=
-github.com/aws/aws-sdk-go v1.29.0/go.mod h1:1KvfttTE3SPKMpo8g2c6jL3ZKfXtFvKscTgahTma5Xg=
+github.com/aws/aws-sdk-go v1.29.2 h1:muUfu006FBFvEaDzt4Wq6Ng9E7ufedf8zrB4hmY65QA=
+github.com/aws/aws-sdk-go v1.29.2/go.mod h1:1KvfttTE3SPKMpo8g2c6jL3ZKfXtFvKscTgahTma5Xg=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bsm/sarama-cluster v2.1.15+incompatible h1:RkV6WiNRnqEEbp81druK8zYhmnIgdOjqSVi0+9Cnl2A=
 github.com/bsm/sarama-cluster v2.1.15+incompatible/go.mod h1:r7ao+4tTNXvWm+VRpRJchr2kQhqxgmAp2iEX5W96gMM=
@@ -259,6 +262,8 @@ google.golang.org/grpc v1.14.0/go.mod h1:yo6s7OP7yaDglbqo1J04qKzAhqBH6lvTonzMVmE
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.22.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d/go.mod h1:cuepJuh7vyXfUyUwEgHQXw849cJrilpS5NeIjOWESAw=
+gopkg.in/avro.v0 v0.0.0-20171217001914-a730b5802183 h1:PGIdqvwfpMUyUP+QAlAnKTSWQ671SmYjoou2/5j7HXk=
+gopkg.in/avro.v0 v0.0.0-20171217001914-a730b5802183/go.mod h1:FvqrFXt+jCsyQibeRv4xxEJBL5iG2DDW5aeJwzDiq4A=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=

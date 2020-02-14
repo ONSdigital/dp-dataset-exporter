@@ -65,7 +65,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 			return nil
 		}
 
-		cryptoUploaderMock := &filetest.CryptoUploaderMock{}
+		cryptoUploaderMock := &filetest.UploaderMock{}
 		cryptoUploaderMock.UploadWithPSKFunc = func(*s3manager.UploadInput, []byte) (*s3manager.UploadOutput, error) {
 			return nil, errors.New("crypto uploader error")
 		}
@@ -84,7 +84,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 	})
 }
 
-func TestPutFileSuccessSceanarios(t *testing.T) {
+func TestPutFileSuccessScenarios(t *testing.T) {
 	Convey("Given a store exists with a valid uploader", t, func() {
 		uploaderMock := &filetest.UploaderMock{}
 		uploaderMock.UploadFunc = func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
@@ -121,7 +121,7 @@ func TestPutFileSuccessSceanarios(t *testing.T) {
 			return nil
 		}
 
-		cryptoUploaderMock := &filetest.CryptoUploaderMock{}
+		cryptoUploaderMock := &filetest.UploaderMock{}
 		cryptoUploaderMock.UploadWithPSKFunc = func(*s3manager.UploadInput, []byte) (*s3manager.UploadOutput, error) {
 			return &s3manager.UploadOutput{Location: privateTestLocation}, nil
 		}
