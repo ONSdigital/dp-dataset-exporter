@@ -23,7 +23,8 @@ build:
 debug acceptance:
 	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) GRAPH_DRIVER_TYPE=neo4j GRAPH_ADDR="$(DATABASE_ADDRESS)" go run -race cmd/dp-dataset-exporter/main.go
 test:
-	go test -cover $(shell go list ./... | grep -v /vendor/)
+	# go test -cover $(shell go list ./... | grep -v /vendor/)
+	go test -cover -race ./...
 vault:
 	@echo "$(VAULT_POLICY)"
 	@echo "$(TOKEN_INFO)"

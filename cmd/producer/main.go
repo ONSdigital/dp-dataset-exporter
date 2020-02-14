@@ -32,6 +32,9 @@ func main() {
 		log.Event(ctx, "Could not create producer. Please, try to reconnect (initialise) later", log.Error(err))
 	}
 
+	// kafka error logging go-routines
+	kafkaProducer.LogErrors(ctx, "kafka producer")
+
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 
@@ -49,8 +52,8 @@ func main() {
 			os.Exit(1)
 		}
 
-		// Send bytes to Output channel, after calling InitialiseSarama just in case it is not initialised.
-		kafkaProducer.InitialiseSarama(ctx)
+		// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
+		kafkaProducer.Initialise(ctx)
 		kafkaProducer.Channels().Output <- bytes
 	}
 }

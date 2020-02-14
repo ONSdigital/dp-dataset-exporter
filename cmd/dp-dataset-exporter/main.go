@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	kafka "github.com/ONSdigital/dp-kafka"
 	rchttp "github.com/ONSdigital/dp-rchttp"
 	"github.com/ONSdigital/log.go/log"
 
@@ -41,7 +40,7 @@ func main() {
 
 	// Create kafka Consumer
 	kafkaConsumer, err := serviceList.GetConsumer(cfg.KafkaAddr, cfg)
-	handleError(ctx, err)
+	exitIfError(ctx, err)
 
 	// Create kafka Producer
 	kafkaProducer, err := serviceList.GetProducer(
@@ -49,7 +48,7 @@ func main() {
 		cfg.CSVExportedProducerTopic,
 		initialise.CSVExported,
 	)
-	handleError(ctx, err)
+	exitIfError(ctx, err)
 
 	// Create kafka ErrorProducer
 	kafkaErrorProducer, err := serviceList.GetProducer(
@@ -57,11 +56,11 @@ func main() {
 		cfg.ErrorProducerTopic,
 		initialise.Error,
 	)
-	handleError(ctx, err)
+	exitIfError(ctx, err)
 
 	// Create vault client
 	vaultClient, err := serviceList.GetVault(cfg, 3)
-	handleError(ctx, err)
+	logIfError(ctx, err)
 
 	// when errors occur - we send a message on an error topic.
 	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer.Channels().Output)
@@ -77,10 +76,10 @@ func main() {
 	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
 
 	observationStore, err := serviceList.GetObservationStore()
-	handleError(ctx, err)
+	logIfError(ctx, err)
 
 	fileStore, err := serviceList.GetFileStore(cfg, vaultClient)
-	handleError(ctx, err)
+	logIfError(ctx, err)
 
 	eventProducer := event.NewAvroProducer(kafkaProducer.Channels().Output, schema.CSVExportedEvent)
 
@@ -148,7 +147,7 @@ func main() {
 					// Consumer not created yet
 					continue
 				}
-				if err = kafkaConsumer.InitialiseSarama(ctx); err != nil {
+				if err = kafkaConsumer.Initialise(ctx); err != nil {
 					// Kafka client cannot be initialised
 					continue
 				}
@@ -166,10 +165,10 @@ func main() {
 		}
 	}()
 
-	// kafka error handling go-routines
-	logErrorsFromChan(ctx, kafkaConsumer.Channels().Errors, kafkaConsumer.Channels().Closer, "kafka consumer")
-	logErrorsFromChan(ctx, kafkaProducer.Channels().Errors, kafkaProducer.Channels().Closer, "kafka result producer")
-	logErrorsFromChan(ctx, kafkaErrorProducer.Channels().Errors, kafkaErrorProducer.Channels().Closer, "kafka error producer")
+	// kafka error logging go-routines
+	kafkaConsumer.LogErrors(ctx, "kafka consumer")
+	kafkaProducer.LogErrors(ctx, "kafka result producer")
+	kafkaErrorProducer.LogErrors(ctx, "kafka error producer")
 	go func() {
 		select {
 		case err := <-errorChannel:
@@ -199,30 +198,30 @@ func main() {
 
 		if serviceList.EventConsumer {
 			log.Event(ctx, "closing event consumer")
-			handleError(ctx, eventConsumer.Close(ctx))
+			logIfError(ctx, eventConsumer.Close(ctx))
 		}
 
 		if serviceList.Consumer {
 			log.Event(ctx, "stop listening to consumer")
-			handleError(ctx, kafkaConsumer.StopListeningToConsumer(ctx))
+			logIfError(ctx, kafkaConsumer.StopListeningToConsumer(ctx))
 
 			log.Event(ctx, "closing consumer")
-			handleError(ctx, kafkaConsumer.Close(ctx))
+			logIfError(ctx, kafkaConsumer.Close(ctx))
 		}
 
 		if serviceList.CSVExportedProducer {
 			log.Event(ctx, "closing csv exporter producer")
-			handleError(ctx, kafkaProducer.Close(ctx))
+			logIfError(ctx, kafkaProducer.Close(ctx))
 		}
 
 		if serviceList.ErrorProducer {
 			log.Event(ctx, "closing error producer")
-			handleError(ctx, kafkaErrorProducer.Close(ctx))
+			logIfError(ctx, kafkaErrorProducer.Close(ctx))
 		}
 
 		if serviceList.ObservationStore {
 			log.Event(ctx, "closing observation store")
-			handleError(ctx, observationStore.Close(ctx))
+			logIfError(ctx, observationStore.Close(ctx))
 		}
 	}()
 
@@ -233,35 +232,13 @@ func main() {
 	os.Exit(1)
 }
 
-// logErrorsFromChan creates a go-routine that waits on chErrors channel and logs any error received. It exists on chCloser channel event
-func logErrorsFromChan(ctx context.Context, chErrors chan error, chCloser chan struct{}, errMsg string) {
-	go func() {
-		for true {
-			select {
-			case err := <-chErrors:
-				log.Event(ctx, errMsg, log.Error(err))
-			case <-chCloser:
-				return
-			}
-		}
-	}()
-}
-
-// handleError exists on fatal errors and logs other errors without exiting
-func handleError(ctx context.Context, err error) {
-	if err == nil {
+func logIfError(ctx context.Context, err error) {
+	if err != nil {
+		log.Event(ctx, "error", log.Error(err))
 		return
 	}
-	switch err.(type) {
-	case *kafka.ErrNoChannel:
-		log.Event(ctx, "fatal error", log.Error(err))
-		os.Exit(1)
-	default:
-		log.Event(ctx, "error", log.Error(err))
-	}
 }
 
-// exitIfError logs and exits if there is an error
 func exitIfError(ctx context.Context, err error) {
 	if err != nil {
 		log.Event(ctx, "fatal error", log.Error(err))

@@ -15,9 +15,8 @@ github.com/ONSdigital/dp-healthcheck v0.0.0-20200131122546-9db6d3f0494e/go.mod h
 github.com/ONSdigital/dp-hierarchy-api v0.0.0-20190530123622-0be246287b59 h1:5heWNUnwY+m1o02A4nuvo6sjj647LV1oTSo6p2DBDis=
 github.com/ONSdigital/dp-hierarchy-api v0.0.0-20190530123622-0be246287b59/go.mod h1:1oE930hQ6vS/5KFL2aXBlHb1nPF78ZsFkE2eQ4CvrZg=
 github.com/ONSdigital/dp-kafka v1.0.0 h1:xFBX9Bu4oAEvgtEP+p49hFC1AKdjoWConEWbZkXloog=
-github.com/ONSdigital/dp-kafka v1.0.1-0.20200213151257-b61861706e70/go.mod h1:+QHNRdfwMRmZ7aYCvGjYTlw4v/KSp7iXyPm/ztqczbw=
-github.com/ONSdigital/dp-kafka v1.0.1-0.20200213163920-ba1caec7e3b4 h1:Dwz9c11l7cz92YdDwWiW1ynwzabCpqRUavGtSToOK0g=
-github.com/ONSdigital/dp-kafka v1.0.1-0.20200213163920-ba1caec7e3b4/go.mod h1:+QHNRdfwMRmZ7aYCvGjYTlw4v/KSp7iXyPm/ztqczbw=
+github.com/ONSdigital/dp-kafka v1.0.1-0.20200214102344-0515b1898ded h1:Z97jdHyYjKF2lhH+wXhCFRZPiB+t8iwtOvEIXfEYR6A=
+github.com/ONSdigital/dp-kafka v1.0.1-0.20200214102344-0515b1898ded/go.mod h1:+QHNRdfwMRmZ7aYCvGjYTlw4v/KSp7iXyPm/ztqczbw=
 github.com/ONSdigital/dp-mocking v0.0.0-20190905163309-fee2702ad1b9/go.mod h1:BcIRgitUju//qgNePRBmNjATarTtynAgc0yV29VpLEk=
 github.com/ONSdigital/dp-observation-importer v0.0.0-20190530123707-54356cab6a79 h1:pc396Dg9lbMYa7zQaOse5QCRahW2XWO3LnKiArNzTJQ=
 github.com/ONSdigital/dp-observation-importer v0.0.0-20190530123707-54356cab6a79/go.mod h1:Tqh5Z7U5mTlP/CTVSFU7EvBwjeP+o9ZU87cupxivdy0=
