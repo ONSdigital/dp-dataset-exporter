@@ -90,6 +90,7 @@ func main() {
 	// )
 	httpClient := rchttp.ClientWithTimeout(nil, time.Second*15)
 	// TODO Add service auth token?
+	// TODO use Filter from dp-api-clients-go?
 	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
 
 	observationStore, err := serviceList.GetObservationStore()
@@ -122,9 +123,11 @@ func main() {
 	}
 
 	// Add checkers to healthcheck
-	err = addCheckers(&hc, kafkaProducer, kafkaErrorProducer, kafkaConsumer, vaultClient,
+	err = registerCheckers(&hc,
+		kafkaProducer, kafkaErrorProducer, kafkaConsumer,
+		vaultClient,
+		datasetAPICli,
 		health.NewClient("FilterAPI", cfg.FilterAPIURL),
-		health.NewClient("Dataset API", cfg.DatasetAPIURL),
 		health.NewClient("DownloadService", cfg.DownloadServiceURL),
 		health.NewClient("Zebedee", cfg.ZebedeeURL),
 		fileStore.Uploader, fileStore.CryptoUploader)
@@ -287,57 +290,51 @@ func main() {
 	os.Exit(1)
 }
 
-// addCheckers adds the checkers for the provided clients to the healthcheck object
-func addCheckers(hc *healthcheck.HealthCheck, kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup, vaultClient *vault.Client,
-	filterAPICli, datasetAPICli, downloadServiceCli, zebedeeCli *health.Client, publicUploader, privateUploader file.Uploader) (err error) {
+// registerCheckers adds the checkers for the provided clients to the healthcheck object
+func registerCheckers(hc *healthcheck.HealthCheck,
+	kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup,
+	vaultClient *vault.Client,
+	datasetAPICli *dataset.Client,
+	filterAPICli, downloadServiceCli, zebedeeCli *health.Client,
+	publicUploader, privateUploader file.Uploader) (err error) {
 
-	err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Kafka Producer", log.Error(err))
 	}
 
-	err = hc.AddCheck("Kafka Error Producer", kafkaErrorProducer.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Kafka Error Producer", kafkaErrorProducer.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Kafka Error Producer", log.Error(err))
 	}
 
-	err = hc.AddCheck("Kafka Consumer", kafkaConsumer.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Kafka Consumer", kafkaConsumer.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Kafka Consumer", log.Error(err))
 	}
 
-	err = hc.AddCheck("Vault", vaultClient.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Vault", vaultClient.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Vault", log.Error(err))
 	}
 
-	err = hc.AddCheck("Filter API", filterAPICli.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Filter API", filterAPICli.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Filter API", log.Error(err))
 	}
 
-	err = hc.AddCheck("Dataset API", datasetAPICli.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Dataset API", datasetAPICli.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Dataset API", log.Error(err))
 	}
 
-	err = hc.AddCheck(fmt.Sprintf("S3 %s bucket", publicUploader.BucketName()), publicUploader.Checker)
-	if err != nil {
+	if err = hc.AddCheck(fmt.Sprintf("S3 %s bucket", publicUploader.BucketName()), publicUploader.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for public S3 bucket", log.Error(err))
 	}
 
-	err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker)
-	if err != nil {
+	if err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for private S3 bucket", log.Error(err))
 	}
 
-	err = hc.AddCheck("Download Service", downloadServiceCli.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Download Service", downloadServiceCli.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Download Service", log.Error(err))
 	}
 
-	err = hc.AddCheck("Zebedee", zebedeeCli.Checker)
-	if err != nil {
+	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
 		log.Event(nil, "Error Adding Check for Zebedee", log.Error(err))
 	}
 

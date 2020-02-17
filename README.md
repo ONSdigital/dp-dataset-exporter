@@ -54,11 +54,11 @@ environment variables, or with a link to a configuration guide.
 
 ### Healthcheck
 
- The `/healthcheck` endpoint returns the current status of the service. Dependent services are health checked on an interval defined by the `HEALTHCHECK_INTERVAL` environment variable.
+ The `/health` endpoint returns the current status of the service. Dependent services are health checked on an interval defined by the `HEALTHCHECK_INTERVAL` environment variable.
 
  On a development machine a request to the health check endpoint can be made by:
 
- `curl localhost:22500/healthcheck`
+ `curl localhost:22500/health`
 
 ### Contributing
 
