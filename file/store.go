@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	s3client "github.com/ONSdigital/dp-s3"
 	"github.com/ONSdigital/log.go/log"
 )
@@ -24,6 +25,8 @@ type Uploader interface {
 	Upload(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
 	UploadWithPSK(input *s3manager.UploadInput, psk []byte) (*s3manager.UploadOutput, error)
 	Session() *session.Session
+	BucketName() string
+	Checker(ctx context.Context, state *healthcheck.CheckState) error
 }
 
 // VaultClient is an interface to represent methods called to action upon vault
