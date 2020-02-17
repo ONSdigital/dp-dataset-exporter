@@ -7,6 +7,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-graph/graph"
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	kafka "github.com/ONSdigital/dp-kafka"
 	vault "github.com/ONSdigital/dp-vault"
 )
@@ -19,7 +20,7 @@ type ExternalServiceList struct {
 	EventConsumer       bool
 	FileStore           bool
 	ObservationStore    bool
-	HealthTicker        bool
+	HealthCheck         bool
 	Vault               bool
 }
 
@@ -39,13 +40,13 @@ func (k KafkaProducerName) String() string {
 	return kafkaProducerNames[k]
 }
 
-// GetConsumer returns an initialised kafka consumer
-func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
+// GetConsumer returns a kafka consumer, which might not be initialised
+func (e *ExternalServiceList) GetConsumer(cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
 	ctx := context.Background()
 
-	*kafkaConsumer, err = kafka.NewConsumerGroup(
+	k, err := kafka.NewConsumerGroup(
 		ctx,
-		kafkaBrokers,
+		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
 		kafka.OffsetNewest,
@@ -58,7 +59,7 @@ func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Con
 
 	e.Consumer = true
 
-	return
+	return &k, err
 }
 
 // GetFileStore returns an initialised connection to file store
@@ -92,12 +93,12 @@ func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB,
 	return
 }
 
-// GetProducer returns a kafka producer
-func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer kafka.Producer, err error) {
+// GetProducer returns a kafka producer, which might no be initialised
+func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
 
 	ctx := context.Background()
 
-	kafkaProducer, err = kafka.NewProducer(
+	k, err := kafka.NewProducer(
 		ctx,
 		kafkaBrokers,
 		topic,
@@ -117,7 +118,7 @@ func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, n
 		err = fmt.Errorf("Kafka producer name not recognised: '%s'. Valid names: %v", name.String(), kafkaProducerNames)
 	}
 
-	return
+	return &k, err
 }
 
 // GetVault returns a vault client
@@ -130,4 +131,19 @@ func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client 
 	e.Vault = true
 
 	return
+}
+
+// GetHealthCheck creates a healthcheck with versionInfo
+func (e *ExternalServiceList) GetHealthCheck(cfg *config.Config, buildTime, gitCommit, version string) (healthcheck.HealthCheck, error) {
+
+	// Create healthcheck object with versionInfo
+	versionInfo, err := healthcheck.NewVersionInfo(buildTime, gitCommit, version)
+	if err != nil {
+		return healthcheck.HealthCheck{}, err
+	}
+	hc := healthcheck.New(versionInfo, cfg.HealthCheckRecoveryInterval, cfg.HealthCheckInterval)
+
+	e.HealthCheck = true
+
+	return hc, nil
 }

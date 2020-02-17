@@ -8,7 +8,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	"github.com/ONSdigital/dp-kafka/kafka"
+	kafka "github.com/ONSdigital/dp-kafka"
 	"github.com/ONSdigital/log.go/log"
 )
 
@@ -29,7 +29,8 @@ func main() {
 	pChannels := kafka.CreateProducerChannels()
 	kafkaProducer, err := kafka.NewProducer(ctx, config.KafkaAddr, config.FilterConsumerTopic, 0, pChannels)
 	if err != nil {
-		log.Event(ctx, "Could not create producer. Please, try to reconnect (initialise) later", log.Error(err))
+		log.Event(ctx, "Fatal error trying to create kafka producer", log.Error(err), log.Data{"topic": config.FilterConsumerTopic})
+		os.Exit(1)
 	}
 
 	// kafka error logging go-routines

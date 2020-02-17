@@ -62,6 +62,7 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 				log.Event(nil, "closing event consumer loop")
 				return
 
+				// TODO stop consuming on error?
 				// case healthy := <-healthChangeChan:
 				// 	if !healthy {
 				// 		log.Event(nil, "poor health - pausing Consume")

@@ -10,6 +10,7 @@ import (
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
 	rchttp "github.com/ONSdigital/dp-rchttp"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/gorilla/mux"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
@@ -17,6 +18,16 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/initialise"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
+	"github.com/ONSdigital/go-ns/server"
+)
+
+var (
+	// BuildTime represents the time in which the service was built
+	BuildTime string
+	// GitCommit represents the commit (SHA-1) hash of the service that is running
+	GitCommit string
+	// Version represents the version of the service that is running
+	Version string
 )
 
 func main() {
@@ -39,7 +50,7 @@ func main() {
 	var serviceList initialise.ExternalServiceList
 
 	// Create kafka Consumer
-	kafkaConsumer, err := serviceList.GetConsumer(cfg.KafkaAddr, cfg)
+	kafkaConsumer, err := serviceList.GetConsumer(cfg)
 	exitIfError(ctx, err)
 
 	// Create kafka Producer
@@ -96,6 +107,29 @@ func main() {
 
 	// eventConsumer will Consume when the service is healthy - see goroutine below
 	eventConsumer := event.NewConsumer()
+
+	// Create healthcheck object with versionInfo
+	hc, err := serviceList.GetHealthCheck(cfg, BuildTime, GitCommit, Version)
+	if err != nil {
+		log.Event(ctx, "failed to create service version information", log.Error(err))
+		os.Exit(1)
+	}
+
+	// TODO add Checkers to hc
+	r := mux.NewRouter()
+	r.HandleFunc("/health", hc.Handler)
+
+	// Start healthcheck
+	hc.Start(ctx)
+
+	// Create and start http server for healthcheck
+	httpServer := server.New(cfg.BindAddr, r)
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil {
+			log.Event(ctx, "failed to start healthcheck HTTP server", log.Data{"config": cfg}, log.Error(err))
+			os.Exit(2)
+		}
+	}()
 
 	// healthAlertChan := make(chan bool, 1)
 	// healthcheckRequestChan := make(chan bool, 1)
@@ -157,7 +191,7 @@ func main() {
 					// GetDatasets failed
 					continue
 				}
-				// Success
+				// Kafka initialised and dataset client got datasets -> Start consuming
 				serviceList.EventConsumer = true
 				eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
 				return
@@ -166,9 +200,9 @@ func main() {
 	}()
 
 	// kafka error logging go-routines
-	kafkaConsumer.LogErrors(ctx, "kafka consumer")
-	kafkaProducer.LogErrors(ctx, "kafka result producer")
-	kafkaErrorProducer.LogErrors(ctx, "kafka error producer")
+	kafkaConsumer.Channels().LogErrors(ctx, "kafka consumer")
+	kafkaProducer.Channels().LogErrors(ctx, "kafka result producer")
+	kafkaErrorProducer.Channels().LogErrors(ctx, "kafka error producer")
 	go func() {
 		select {
 		case err := <-errorChannel:
@@ -189,12 +223,17 @@ func main() {
 	go func() {
 		defer cancel()
 
-		// Health Ticker/Checker should always be closed first as it relies on other
+		// Health Checker should always be closed first as it relies on other
 		// services (clients) to exist - prevents DATA RACE
-		// if serviceList.HealthTicker {
-		// 	log.Event(ctx, "closing healthchecker")
-		// 	handleError(ctx, healthChecker.Close(ctx))
-		// }
+		if serviceList.HealthCheck {
+			log.Event(ctx, "stopping healthchecker")
+			hc.Stop()
+		}
+
+		// TODO stop HTTP server
+		// log.Event(ctx, "stopping healthcheck HTTP server")
+		// err := httpServer.Server.Shutdown(ctx)
+		// logIfError(ctx, err)
 
 		if serviceList.EventConsumer {
 			log.Event(ctx, "closing event consumer")
