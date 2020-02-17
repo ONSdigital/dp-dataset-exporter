@@ -166,7 +166,7 @@ func main() {
 	// go func() {
 	// 	healthOK := false
 	// 	var err error
-	// 	log.Event(ctx, "Checking service token", nil)
+	// 	log.Event(ctx, "Checking service token")
 	// 	for {
 	// 		select {
 	// 		case healthOK = <-healthAlertChan:

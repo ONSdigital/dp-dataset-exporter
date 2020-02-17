@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// kafka error logging go-routines
-	kafkaProducer.LogErrors(ctx, "kafka producer")
+	kafkaProducer.Channels().LogErrors(ctx, "kafka producer")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {

@@ -4,13 +4,17 @@
 package filetest
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"sync"
 )
 
 var (
+	lockUploaderMockBucketName    sync.RWMutex
+	lockUploaderMockChecker       sync.RWMutex
 	lockUploaderMockSession       sync.RWMutex
 	lockUploaderMockUpload        sync.RWMutex
 	lockUploaderMockUploadWithPSK sync.RWMutex
@@ -26,6 +30,12 @@ var _ file.Uploader = &UploaderMock{}
 //
 //         // make and configure a mocked file.Uploader
 //         mockedUploader := &UploaderMock{
+//             BucketNameFunc: func() string {
+// 	               panic("mock out the BucketName method")
+//             },
+//             CheckerFunc: func(ctx context.Context, state *healthcheck.CheckState) error {
+// 	               panic("mock out the Checker method")
+//             },
 //             SessionFunc: func() *session.Session {
 // 	               panic("mock out the Session method")
 //             },
@@ -42,6 +52,12 @@ var _ file.Uploader = &UploaderMock{}
 //
 //     }
 type UploaderMock struct {
+	// BucketNameFunc mocks the BucketName method.
+	BucketNameFunc func() string
+
+	// CheckerFunc mocks the Checker method.
+	CheckerFunc func(ctx context.Context, state *healthcheck.CheckState) error
+
 	// SessionFunc mocks the Session method.
 	SessionFunc func() *session.Session
 
@@ -53,6 +69,16 @@ type UploaderMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// BucketName holds details about calls to the BucketName method.
+		BucketName []struct {
+		}
+		// Checker holds details about calls to the Checker method.
+		Checker []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// State is the state argument value.
+			State *healthcheck.CheckState
+		}
 		// Session holds details about calls to the Session method.
 		Session []struct {
 		}
@@ -71,6 +97,67 @@ type UploaderMock struct {
 			Psk []byte
 		}
 	}
+}
+
+// BucketName calls BucketNameFunc.
+func (mock *UploaderMock) BucketName() string {
+	if mock.BucketNameFunc == nil {
+		panic("UploaderMock.BucketNameFunc: method is nil but Uploader.BucketName was just called")
+	}
+	callInfo := struct {
+	}{}
+	lockUploaderMockBucketName.Lock()
+	mock.calls.BucketName = append(mock.calls.BucketName, callInfo)
+	lockUploaderMockBucketName.Unlock()
+	return mock.BucketNameFunc()
+}
+
+// BucketNameCalls gets all the calls that were made to BucketName.
+// Check the length with:
+//     len(mockedUploader.BucketNameCalls())
+func (mock *UploaderMock) BucketNameCalls() []struct {
+} {
+	var calls []struct {
+	}
+	lockUploaderMockBucketName.RLock()
+	calls = mock.calls.BucketName
+	lockUploaderMockBucketName.RUnlock()
+	return calls
+}
+
+// Checker calls CheckerFunc.
+func (mock *UploaderMock) Checker(ctx context.Context, state *healthcheck.CheckState) error {
+	if mock.CheckerFunc == nil {
+		panic("UploaderMock.CheckerFunc: method is nil but Uploader.Checker was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		State *healthcheck.CheckState
+	}{
+		Ctx:   ctx,
+		State: state,
+	}
+	lockUploaderMockChecker.Lock()
+	mock.calls.Checker = append(mock.calls.Checker, callInfo)
+	lockUploaderMockChecker.Unlock()
+	return mock.CheckerFunc(ctx, state)
+}
+
+// CheckerCalls gets all the calls that were made to Checker.
+// Check the length with:
+//     len(mockedUploader.CheckerCalls())
+func (mock *UploaderMock) CheckerCalls() []struct {
+	Ctx   context.Context
+	State *healthcheck.CheckState
+} {
+	var calls []struct {
+		Ctx   context.Context
+		State *healthcheck.CheckState
+	}
+	lockUploaderMockChecker.RLock()
+	calls = mock.calls.Checker
+	lockUploaderMockChecker.RUnlock()
+	return calls
 }
 
 // Session calls SessionFunc.

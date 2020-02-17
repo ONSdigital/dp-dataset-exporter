@@ -10,6 +10,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
+	kafka "github.com/ONSdigital/dp-kafka"
 	"github.com/ONSdigital/dp-kafka/kafkatest"
 	"github.com/ONSdigital/log.go/log"
 	. "github.com/smartystreets/goconvey/convey"
@@ -18,7 +19,15 @@ import (
 func TestConsume_UnmarshallError(t *testing.T) {
 	Convey("Given an event consumer with an invalid schema and a valid schema", t, func() {
 
-		mockConsumer := kafkatest.NewMessageConsumer()
+		// Create mock kafka consumer with upstream channel with 2 buffered messages
+		mockConsumer := kafkatest.NewMessageConsumerWithChannels(
+			kafka.ConsumerGroupChannels{
+				Upstream:     make(chan kafka.Message, 2),
+				Errors:       make(chan error),
+				Closer:       make(chan struct{}),
+				Closed:       make(chan struct{}),
+				UpstreamDone: make(chan bool, 1),
+			})
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -179,12 +188,12 @@ func waitForMessageToBeCommitted(message *kafkatest.Message) {
 	timeout := start.Add(time.Millisecond * 500)
 	for {
 		if message.Committed() {
-			log.Event(ctx, "message has been committed", nil)
+			log.Event(ctx, "message has been committed")
 			break
 		}
 
 		if time.Now().After(timeout) {
-			log.Event(ctx, "timeout hit", nil)
+			log.Event(ctx, "timeout hit")
 			break
 		}
 

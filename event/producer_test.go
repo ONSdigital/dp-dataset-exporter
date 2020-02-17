@@ -6,7 +6,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	// kafkatest "github.com/ONSdigital/dp-kafka"
+
 	"github.com/ONSdigital/log.go/log"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -15,9 +15,8 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 	Convey("Given an a mock message producer", t, func() {
 
-		// mock schema producer contains the output channel to capture messages sent.
+		// channel to capture the sent messages
 		outputChannel := make(chan []byte, 1)
-		// mockMessageProducer := kafkatest.NewMessageProducer(outputChannel, nil, nil)
 
 		avroBytes := []byte("hello world")
 

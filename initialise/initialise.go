@@ -44,7 +44,7 @@ func (k KafkaProducerName) String() string {
 func (e *ExternalServiceList) GetConsumer(cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
 	ctx := context.Background()
 
-	k, err := kafka.NewConsumerGroup(
+	kafkaConsumer, err = kafka.NewConsumerGroup(
 		ctx,
 		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
@@ -59,7 +59,7 @@ func (e *ExternalServiceList) GetConsumer(cfg *config.Config) (kafkaConsumer *ka
 
 	e.Consumer = true
 
-	return &k, err
+	return
 }
 
 // GetFileStore returns an initialised connection to file store
@@ -98,7 +98,7 @@ func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, n
 
 	ctx := context.Background()
 
-	k, err := kafka.NewProducer(
+	kafkaProducer, err = kafka.NewProducer(
 		ctx,
 		kafkaBrokers,
 		topic,
@@ -118,7 +118,7 @@ func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, n
 		err = fmt.Errorf("Kafka producer name not recognised: '%s'. Valid names: %v", name.String(), kafkaProducerNames)
 	}
 
-	return &k, err
+	return
 }
 
 // GetVault returns a vault client

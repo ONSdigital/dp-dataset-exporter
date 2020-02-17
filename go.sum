@@ -24,6 +24,8 @@ github.com/ONSdigital/dp-kafka v1.1.0 h1:NSzpj2EIElxE3KlzuYxDu6CmbuB5irIxyPZtKDS
 github.com/ONSdigital/dp-kafka v1.1.0/go.mod h1:gBGPGXmda79mbXj2etnGS488x+cbTfcWVYlZCfVg/kM=
 github.com/ONSdigital/dp-kafka v1.1.1-0.20200217120210-4d6e2428d46b h1:SR1y9AwiYEnN31TcCqjAN3B4+wL8PukOWbjGNt6O+3s=
 github.com/ONSdigital/dp-kafka v1.1.1-0.20200217120210-4d6e2428d46b/go.mod h1:gBGPGXmda79mbXj2etnGS488x+cbTfcWVYlZCfVg/kM=
+github.com/ONSdigital/dp-kafka v1.1.1-0.20200217161855-9682c0908506 h1:PKuZMRqYq+sY0jC5jVt9oGLrdDasPKFBLKwT9sPZK1Y=
+github.com/ONSdigital/dp-kafka v1.1.1-0.20200217161855-9682c0908506/go.mod h1:gBGPGXmda79mbXj2etnGS488x+cbTfcWVYlZCfVg/kM=
 github.com/ONSdigital/dp-mocking v0.0.0-20190905163309-fee2702ad1b9/go.mod h1:BcIRgitUju//qgNePRBmNjATarTtynAgc0yV29VpLEk=
 github.com/ONSdigital/dp-observation-importer v0.0.0-20190530123707-54356cab6a79 h1:pc396Dg9lbMYa7zQaOse5QCRahW2XWO3LnKiArNzTJQ=
 github.com/ONSdigital/dp-observation-importer v0.0.0-20190530123707-54356cab6a79/go.mod h1:Tqh5Z7U5mTlP/CTVSFU7EvBwjeP+o9ZU87cupxivdy0=
