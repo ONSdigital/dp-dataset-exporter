@@ -1,16 +1,16 @@
 package filter_test
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
 	"testing"
 
+	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/ONSdigital/dp-dataset-exporter/filter/filtertest"
 	"github.com/ONSdigital/dp-graph/observation"
-	rchttp "github.com/ONSdigital/dp-rchttp"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -38,17 +38,17 @@ var mockFilterData = &observation.Filter{
 func TestStore_GetFilter(t *testing.T) {
 
 	mockFilterJSON, _ := json.Marshal(mockFilterData)
-	mockFilterBody := iOReadCloser{bytes.NewReader(mockFilterJSON)}
+	validServiceToken := "validServiceAuthToken"
 
-	Convey("Given a store with mocked HTTP responses", t, func() {
+	Convey("Given a store with mocked filter client responses", t, func() {
 
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusOK, Body: mockFilterBody}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+				return mockFilterJSON, nil
 			},
 		}
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When GetFilter is called", func() {
 
@@ -61,21 +61,32 @@ func TestStore_GetFilter(t *testing.T) {
 				So(filter.DimensionFilters[0].Name, ShouldEqual, "Sex")
 				So(filter.DimensionFilters[0].Options, ShouldResemble, []string{"male"})
 			})
+
+			Convey("Filter client is called with the valid serviceAuthToken", func() {
+				So(len(mockFilterClient.GetOutputBytesCalls()), ShouldEqual, 1)
+				So(mockFilterClient.GetOutputBytesCalls()[0].FilterOutputID, ShouldEqual, filterOutputID)
+				So(mockFilterClient.GetOutputBytesCalls()[0].ServiceAuthToken, ShouldEqual, validServiceToken)
+			})
 		})
 	})
 }
 
 func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
-	Convey("Given a mock http client that returns a 500 error when getting filter output", t, func() {
+	Convey("Given a mock filter client that returns a 500 error when getting filter output", t, func() {
 
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusInternalServerError, Body: nil}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+				uri := fmt.Sprintf("%s/filter-outputs/%s", "myURL", filterOutputID)
+				return nil, &filterCli.ErrInvalidFilterAPIResponse{
+					ExpectedCode: http.StatusOK,
+					ActualCode:   http.StatusInternalServerError,
+					URI:          uri}
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When GetFilter is called", func() {
 
@@ -83,8 +94,6 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
-				So(err, ShouldNotBeNil)
-
 				So(err, ShouldEqual, filter.ErrFilterAPIError)
 			})
 		})
@@ -93,15 +102,20 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
 func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
-	Convey("Given a mock http client that returns a 404 error when getting filter output", t, func() {
+	Convey("Given a mock filter client that returns a StatusBadGateway error when getting filter output", t, func() {
 
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusBadGateway}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+				uri := fmt.Sprintf("%s/filter-outputs/%s", "myURL", filterOutputID)
+				return nil, &filterCli.ErrInvalidFilterAPIResponse{
+					ExpectedCode: http.StatusOK,
+					ActualCode:   http.StatusBadGateway,
+					URI:          uri}
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When GetFilter is called", func() {
 
@@ -110,8 +124,37 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
 				So(err, ShouldNotBeNil)
-
 				So(err, ShouldEqual, filter.ErrUnrecognisedAPIError)
+			})
+		})
+	})
+}
+
+func TestStore_GetFilter_FilterNotFound(t *testing.T) {
+
+	Convey("Given a mock filter client that returns a 404 error when getting filter output", t, func() {
+
+		mockFilterClient := &filtertest.ClientMock{
+			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+				uri := fmt.Sprintf("%s/filter-outputs/%s", "myURL", filterOutputID)
+				return nil, &filterCli.ErrInvalidFilterAPIResponse{
+					ExpectedCode: http.StatusOK,
+					ActualCode:   http.StatusNotFound,
+					URI:          uri}
+			},
+		}
+		validServiceToken := "validServiceAuthToken"
+
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
+
+		Convey("When GetFilter is called", func() {
+
+			actualFilter, err := filterStore.GetFilter(filterOutputID)
+
+			Convey("The expected error is returned", func() {
+				So(actualFilter, ShouldBeNil)
+				So(err, ShouldNotBeNil)
+				So(err, ShouldEqual, filter.ErrFilterJobNotFound)
 			})
 		})
 	})
@@ -119,16 +162,16 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
 func TestStore_PutCSVData(t *testing.T) {
 
-	Convey("Given a store with a mocked HTTP response", t, func() {
+	Convey("Given a store with a mocked filter client response", t, func() {
 
-		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+				return nil
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutCSVData is called with csv private link", func() {
 			csv := &observation.DownloadItem{
@@ -142,21 +185,18 @@ func TestStore_PutCSVData(t *testing.T) {
 			Convey("The expected body data is sent", func() {
 				So(err, ShouldBeNil)
 
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				// Validate filter output id
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
+				So(mockFilterClient.UpdateFilterOutputBytesCalls()[0].FilterJobID, ShouldEqual, filterOutputID)
 
-				httpReq := mockHTTPClient.DoCalls()[0].Req
-				buf := bytes.Buffer{}
-				_, _ = buf.ReadFrom(httpReq.Body)
-
-				actualFilter := &filter.FilterOuput{}
-				err := json.Unmarshal(buf.Bytes(), actualFilter)
+				// Validate filter output sent
+				actualFilter := &filter.FilterOutput{}
+				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
 				So(err, ShouldBeNil)
-
 				So(actualFilter.Downloads.CSV.HRef, ShouldEqual, fileHRef)
 				So(actualFilter.Downloads.CSV.Private, ShouldEqual, privateLink)
 				So(actualFilter.Downloads.CSV.Public, ShouldBeEmpty)
 				So(actualFilter.Downloads.CSV.Size, ShouldEqual, fileSize)
-				So(httpReq.URL.Path, ShouldEndWith, filterOutputID)
 			})
 		})
 
@@ -172,21 +212,18 @@ func TestStore_PutCSVData(t *testing.T) {
 			Convey("The expected body data is sent", func() {
 				So(err, ShouldBeNil)
 
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				// Validate filter output id
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
+				So(mockFilterClient.UpdateFilterOutputBytesCalls()[0].FilterJobID, ShouldEqual, filterOutputID)
 
-				httpReq := mockHTTPClient.DoCalls()[0].Req
-				buf := bytes.Buffer{}
-				_, _ = buf.ReadFrom(httpReq.Body)
-
-				actualFilter := &filter.FilterOuput{}
-				err := json.Unmarshal(buf.Bytes(), actualFilter)
+				// Validate filter output sent
+				actualFilter := &filter.FilterOutput{}
+				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
 				So(err, ShouldBeNil)
-
 				So(actualFilter.Downloads.CSV.HRef, ShouldEqual, fileHRef)
 				So(actualFilter.Downloads.CSV.Private, ShouldBeEmpty)
 				So(actualFilter.Downloads.CSV.Public, ShouldEqual, publicLink)
 				So(actualFilter.Downloads.CSV.Size, ShouldEqual, fileSize)
-				So(httpReq.URL.Path, ShouldEndWith, filterOutputID)
 			})
 		})
 	})
@@ -194,28 +231,32 @@ func TestStore_PutCSVData(t *testing.T) {
 
 func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 
-	Convey("Given a store with a mocked HTTP error response", t, func() {
+	Convey("Given a store with a mocked filter client with StatusNotFound error response", t, func() {
 		csv := &observation.DownloadItem{
 			HRef:    fileHRef,
 			Private: privateLink,
 			Size:    fileSize,
 		}
 
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusNotFound, Body: nil}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+				uri := fmt.Sprintf("%s/filter-outputs/%s", "myURL", filterJobID)
+				return &filterCli.ErrInvalidFilterAPIResponse{
+					ExpectedCode: http.StatusOK,
+					ActualCode:   http.StatusNotFound,
+					URI:          uri}
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutCSVData is called", func() {
 
 			err := filterStore.PutCSVData(filterOutputID, *csv)
 
 			Convey("The expected error is returned", func() {
-
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
 				So(err, ShouldNotBeNil)
 				So(err, ShouldEqual, filter.ErrFilterJobNotFound)
 			})
@@ -225,28 +266,32 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 
 func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 
-	Convey("Given a store with a mocked HTTP error response", t, func() {
+	Convey("Given a store with a mocked filter client with StatusInternalServerError error response", t, func() {
 		csv := &observation.DownloadItem{
 			HRef:    fileHRef,
 			Private: privateLink,
 			Size:    fileSize,
 		}
 
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusInternalServerError, Body: nil}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+				uri := fmt.Sprintf("%s/filter-outputs/%s", "myURL", filterJobID)
+				return &filterCli.ErrInvalidFilterAPIResponse{
+					ExpectedCode: http.StatusOK,
+					ActualCode:   http.StatusInternalServerError,
+					URI:          uri}
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutCSVData is called", func() {
 
 			err := filterStore.PutCSVData(filterOutputID, *csv)
 
 			Convey("The expected error is returned", func() {
-
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
 				So(err, ShouldNotBeNil)
 				So(err, ShouldEqual, filter.ErrFilterAPIError)
 			})
@@ -256,28 +301,32 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 
 func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 
-	Convey("Given a store with a mocked HTTP error response", t, func() {
+	Convey("Given a store with a mocked filter client with StatusBadGateway error response", t, func() {
 		csv := &observation.DownloadItem{
 			HRef:    fileHRef,
 			Private: privateLink,
 			Size:    fileSize,
 		}
 
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusBadGateway, Body: nil}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+				uri := fmt.Sprintf("%s/filter-outputs/%s", "myURL", filterJobID)
+				return &filterCli.ErrInvalidFilterAPIResponse{
+					ExpectedCode: http.StatusOK,
+					ActualCode:   http.StatusBadGateway,
+					URI:          uri}
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutCSVData is called", func() {
 
 			err := filterStore.PutCSVData(filterOutputID, *csv)
 
 			Convey("The expected error is returned", func() {
-
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
 				So(err, ShouldNotBeNil)
 				So(err, ShouldEqual, filter.ErrUnrecognisedAPIError)
 			})
@@ -286,59 +335,60 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 }
 
 func TestStore_PutStateAsEmpty(t *testing.T) {
-	Convey("Given a store with a mocked HTTP error response", t, func() {
+	Convey("Given a store with a mocked filter client response", t, func() {
 
-		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
-
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
+		mockFilterClient := &filtertest.ClientMock{
+			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+				return nil
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutStateAsEmpty is called", func() {
 
 			err := filterStore.PutStateAsEmpty(filterOutputID)
 
-			Convey("Then no error is returned", func() {
-
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+			Convey("Then no error is returned and filterOutput is set to 'completed' state", func() {
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
 				So(err, ShouldBeNil)
+
+				// Validate filter output sent
+				actualFilter := &filter.FilterOutput{}
+				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
+				So(err, ShouldBeNil)
+				So(actualFilter.State, ShouldEqual, "completed")
 			})
 		})
 	})
 }
 
 func TestStore_PutStateAsError(t *testing.T) {
-	Convey("Given a store with a mocked HTTP error response", t, func() {
-
-		mockResponseBody := iOReadCloser{bytes.NewReader([]byte(""))}
-
-		mockHTTPClient := &rchttp.ClienterMock{
-			DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusOK, Body: mockResponseBody}, nil
+	Convey("Given a store with a mocked filter client response", t, func() {
+		mockFilterClient := &filtertest.ClientMock{
+			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+				return nil
 			},
 		}
+		validServiceToken := "validServiceAuthToken"
 
-		filterStore := filter.NewStore(filterAPIURL, mockHTTPClient)
+		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutStateAsError is called", func() {
 
 			err := filterStore.PutStateAsError(filterOutputID)
 
-			Convey("Then no error is returned", func() {
-
-				So(len(mockHTTPClient.DoCalls()), ShouldEqual, 1)
+			Convey("Then no error is returned and the filterOutput is set to 'failed' state", func() {
+				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
 				So(err, ShouldBeNil)
+
+				// Validate filter output sent
+				actualFilter := &filter.FilterOutput{}
+				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
+				So(err, ShouldBeNil)
+				So(actualFilter.State, ShouldEqual, "failed")
 			})
 		})
 	})
 }
-
-type iOReadCloser struct {
-	io.Reader
-}
-
-func (iOReadCloser) Close() error { return nil }

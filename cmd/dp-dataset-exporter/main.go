@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
+	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
 	"github.com/ONSdigital/dp-api-clients-go/health"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	kafka "github.com/ONSdigital/dp-kafka"
-	rchttp "github.com/ONSdigital/dp-rchttp"
 	vault "github.com/ONSdigital/dp-vault"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/gorilla/mux"
@@ -82,16 +82,8 @@ func main() {
 	// when errors occur - we send a message on an error topic.
 	errorHandler := errors.NewKafkaHandler(kafkaErrorProducer.Channels().Output)
 
-	// TODO move this to dp-rchttp?
-	// context.WithValue(ctx)
-	// httpClient := rchttp.ClientWithServiceToken(
-	// 	rchttp.ClientWithTimeout(nil, time.Second*15),
-	// 	cfg.ServiceAuthToken,
-	// )
-	httpClient := rchttp.ClientWithTimeout(nil, time.Second*15)
-	// TODO Add service auth token?
-	// TODO use Filter from dp-api-clients-go?
-	filterStore := filter.NewStore(cfg.FilterAPIURL, httpClient)
+	filterAPIClient := filterCli.New(cfg.FilterAPIURL)
+	filterStore := filter.NewStore(filterAPIClient, cfg.ServiceAuthToken)
 
 	observationStore, err := serviceList.GetObservationStore()
 	logIfError(ctx, err)
@@ -127,7 +119,7 @@ func main() {
 		kafkaProducer, kafkaErrorProducer, kafkaConsumer,
 		vaultClient,
 		datasetAPICli,
-		health.NewClient("FilterAPI", cfg.FilterAPIURL),
+		filterAPIClient,
 		health.NewClient("DownloadService", cfg.DownloadServiceURL),
 		health.NewClient("Zebedee", cfg.ZebedeeURL),
 		fileStore.Uploader, fileStore.CryptoUploader)
@@ -295,7 +287,8 @@ func registerCheckers(hc *healthcheck.HealthCheck,
 	kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup,
 	vaultClient *vault.Client,
 	datasetAPICli *dataset.Client,
-	filterAPICli, downloadServiceCli, zebedeeCli *health.Client,
+	filterAPICli *filterCli.Client,
+	downloadServiceCli, zebedeeCli *health.Client,
 	publicUploader, privateUploader file.Uploader) (err error) {
 
 	if err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker); err != nil {

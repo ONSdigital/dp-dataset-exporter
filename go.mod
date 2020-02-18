@@ -3,7 +3,7 @@ module github.com/ONSdigital/dp-dataset-exporter
 go 1.13
 
 require (
-	github.com/ONSdigital/dp-api-clients-go v1.2.0
+	github.com/ONSdigital/dp-api-clients-go v1.2.1-0.20200218153853-05006bd4c62e
 	github.com/ONSdigital/dp-graph v1.0.0
 	github.com/ONSdigital/dp-healthcheck v0.0.0-20200131122546-9db6d3f0494e
 	github.com/ONSdigital/dp-kafka v1.1.1-0.20200217161855-9682c0908506
