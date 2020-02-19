@@ -15,7 +15,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 	Convey("Given an a mock message producer", t, func() {
 
-		// channel to capture the sent messages
+		// channel to capture messages sent.
 		outputChannel := make(chan []byte, 1)
 
 		avroBytes := []byte("hello world")

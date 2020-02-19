@@ -38,7 +38,7 @@ func NewConsumer() *Consumer {
 }
 
 // Consume converts messages to event instances, and pass the event to the provided handler.
-func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler /*, healthChangeChan chan bool*/) {
+func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler) {
 
 	go func() {
 		defer close(consumer.closed)
@@ -61,14 +61,6 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 			case <-consumer.closing:
 				log.Event(nil, "closing event consumer loop")
 				return
-
-				// TODO stop consuming on error?
-				// case healthy := <-healthChangeChan:
-				// 	if !healthy {
-				// 		log.Event(nil, "poor health - pausing Consume")
-				// 		<-healthChangeChan
-				// 		log.Event(nil, "good health - resuming Consume")
-				// }
 			}
 		}
 	}()
