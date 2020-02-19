@@ -142,46 +142,6 @@ func main() {
 		}
 	}()
 
-	// healthAlertChan := make(chan bool, 1)
-	// healthcheckRequestChan := make(chan bool, 1)
-	// healthChecker := healthcheck.NewServerWithAlerts(
-	// 	cfg.BindAddr,
-	// 	cfg.HealthCheckInterval, cfg.HealthCheckRecoveryInterval,
-	// 	errorChannel,
-	// 	healthAlertChan, healthcheckRequestChan,
-	// 	filterHealthCheck.New(cfg.FilterAPIURL, "", ""),
-	// 	observationStore,
-	// 	vaultClient,
-	// 	datasetAPICli,
-	// )
-	// serviceList.HealthTicker = true
-
-	// // Check that the healthChecker succeeds before testing the service token (GetDatasets)
-	// // once both succeed, then we can set Consume off
-	// go func() {
-	// 	healthOK := false
-	// 	var err error
-	// 	log.Event(ctx, "Checking service token")
-	// 	for {
-	// 		select {
-	// 		case healthOK = <-healthAlertChan:
-	// 		case <-time.After(time.Second * 2):
-	// 			// FIXME Once HealthCheck has been added to kafka consumer groups, consumers
-	// 			// and producers this extra check can then be removed `services[serviceConsumer]`
-	// 			if healthOK && serviceList.Consumer {
-	// 				// func (c *Client) GetDatasets(ctx context.Context, userAuthToken, serviceAuthToken, collectionID string) (m List, err error) {
-	// 				userAuthToken := "" // TODO do we have userAuthToken?
-	// 				collectionID := ""  // TODO where do we get collectionID?
-	// 				if _, err = datasetAPICli.GetDatasets(context.Background(), userAuthToken, cfg.ServiceAuthToken, collectionID); err == nil {
-	// 					serviceList.EventConsumer = true
-	// 					eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler, healthAlertChan)
-	// 					return
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }()
-
 	// Check that the healthChecker succeeds before testing the service token (GetDatasets)
 	// once both succeed, then we can set Consume off
 	go func() {
@@ -196,9 +156,7 @@ func main() {
 					// Kafka client cannot be initialised
 					continue
 				}
-				userAuthToken := "" // TODO do we have userAuthToken?
-				collectionID := ""  // TODO where do we get collectionID?
-				if _, err = datasetAPICli.GetDatasets(ctx, userAuthToken, cfg.ServiceAuthToken, collectionID); err != nil {
+				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, ""); err != nil {
 					// GetDatasets failed
 					continue
 				}
@@ -241,10 +199,8 @@ func main() {
 			hc.Stop()
 		}
 
-		// TODO stop HTTP server
-		// log.Event(ctx, "stopping healthcheck HTTP server")
-		// err := httpServer.Server.Shutdown(ctx)
-		// logIfError(ctx, err)
+		log.Event(ctx, "shutting down http server")
+		logIfError(ctx, httpServer.Shutdown(ctx))
 
 		if serviceList.EventConsumer {
 			log.Event(ctx, "closing event consumer")
