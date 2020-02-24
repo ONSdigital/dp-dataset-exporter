@@ -79,7 +79,7 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 	var result *s3manager.UploadOutput
 
 	if isPublished {
-		log.Event(ctx, "uploading public file to S3", log.Data{
+		log.Event(ctx, "uploading public file to S3", log.INFO, log.Data{
 			"bucket": store.PublicBucket,
 			"name":   filename,
 		})
@@ -96,7 +96,7 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			return fmt.Sprintf("%s/%s", store.PublicURL, filename), nil
 		}
 	} else {
-		log.Event(ctx, "uploading private file to S3", log.Data{
+		log.Event(ctx, "uploading private file to S3", log.INFO, log.Data{
 			"bucket": store.privateBucket,
 			"name":   filename,
 		})
@@ -105,7 +105,7 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 		vaultPath := store.VaultPath + "/" + path.Base(filename)
 		vaultKey := "key"
 
-		log.Event(ctx, "writing key to vault", log.Data{
+		log.Event(ctx, "writing key to vault", log.INFO, log.Data{
 			"vault_path": vaultPath,
 		})
 		if err := store.VaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
@@ -121,7 +121,7 @@ func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool)
 			return "", err
 		}
 
-		log.Event(ctx, "writing key to vault", log.Data{
+		log.Event(ctx, "writing key to vault", log.INFO, log.Data{
 			"result.Location": result.Location,
 			"vault_path":      vaultPath,
 		})

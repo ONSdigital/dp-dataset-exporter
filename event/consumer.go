@@ -43,23 +43,23 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 	go func() {
 		defer close(consumer.closed)
 
-		log.Event(nil, "starting to consume messages")
+		log.Event(nil, "starting to consume messages", log.INFO)
 		for {
 			select {
 			case message := <-messageConsumer.Channels().Upstream:
 
 				err := processMessage(message, handler, errorHandler)
 				if err != nil {
-					log.Event(nil, "failed to process message", log.Data{"err": err})
+					log.Event(nil, "failed to process message", log.INFO, log.Data{"err": err})
 				} else {
 					logData := log.Data{"message_offset": message.Offset()}
-					log.Event(nil, "event processed - committing message", logData)
+					log.Event(nil, "event processed - committing message", log.INFO, logData)
 					messageConsumer.CommitAndRelease(message)
-					log.Event(nil, "message committed", logData)
+					log.Event(nil, "message committed", log.INFO, logData)
 				}
 
 			case <-consumer.closing:
-				log.Event(nil, "closing event consumer loop")
+				log.Event(nil, "closing event consumer loop", log.INFO)
 				return
 			}
 		}
@@ -78,10 +78,10 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 
 	select {
 	case <-consumer.closed:
-		log.Event(ctx, "successfully closed event consumer")
+		log.Event(ctx, "successfully closed event consumer", log.INFO)
 		return nil
 	case <-ctx.Done():
-		log.Event(ctx, "shutdown context time exceeded, skipping graceful shutdown of event consumer")
+		log.Event(ctx, "shutdown context time exceeded, skipping graceful shutdown of event consumer", log.INFO)
 		return errs.New("Shutdown context timed out")
 	}
 }
@@ -96,20 +96,20 @@ func processMessage(message kafka.Message, handler Handler, errorHandler errors.
 	event, err := unmarshal(message)
 	if err != nil {
 		logData["message_error"] = "failed to unmarshal event"
-		log.Event(ctx, "error processing message", logData, log.Error(err))
+		log.Event(ctx, "error processing message", log.ERROR, logData, log.Error(err))
 		// return nil here to commit message because this message will never succeed
 		return nil
 	}
 
 	logData["event"] = event
 
-	log.Event(ctx, "event received", logData)
+	log.Event(ctx, "event received", log.INFO, logData)
 
 	err = handler.Handle(ctx, event)
 	if err != nil {
 		errorHandler.Handle(event.FilterID, err)
 		logData["message_error"] = "failed to handle event"
-		log.Event(ctx, "Handle error", logData, log.Error(err))
+		log.Event(ctx, "Handle error", log.ERROR, logData, log.Error(err))
 	}
 
 	return err

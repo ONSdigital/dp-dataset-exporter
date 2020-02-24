@@ -135,7 +135,7 @@ func handleInvalidFilterAPIResponse(err error) error {
 		case http.StatusInternalServerError:
 			return ErrFilterAPIError
 		default:
-			log.Event(nil, "unrecognised status code returned from the filter api",
+			log.Event(nil, "unrecognised status code returned from the filter api", log.INFO,
 				log.Data{
 					"status_code": statusErr.Code(),
 				})

@@ -115,21 +115,21 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	if err != nil {
 		return nil, err
 	}
-	log.Event(ctx, "header split for CSVW generation", log.Data{"header": header, "column_offset": strconv.Itoa(offset)})
+	log.Event(ctx, "header split for CSVW generation", log.INFO, log.Data{"header": header, "column_offset": strconv.Itoa(offset)})
 
 	csvw := New(metadata, downloadURL)
 
 	var list []Column
 	obs := newObservationColumn(h[0], metadata.UnitOfMeasure)
 	list = append(list, obs)
-	log.Event(ctx, "added observation column to CSVW", log.Data{"column": obs})
+	log.Event(ctx, "added observation column to CSVW", log.INFO, log.Data{"column": obs})
 
 	//add data markings columns
 	if offset != 0 {
 		for i := 1; i <= offset; i++ {
 			c := newColumn(h[i], "")
 			list = append(list, c)
-			log.Event(ctx, "added observation metadata column to CSVW", log.Data{"column": c})
+			log.Event(ctx, "added observation metadata column to CSVW", log.INFO, log.Data{"column": c})
 		}
 	}
 
@@ -139,7 +139,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	//add dimension columns
 	for i := 0; i < len(h); i = i + 2 {
 		c, l := newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
-		log.Event(ctx, "added pair of dimension columns to CSVW", log.Data{"code_column": c, "label_column": l})
+		log.Event(ctx, "added pair of dimension columns to CSVW", log.INFO, log.Data{"code_column": c, "label_column": l})
 		list = append(list, c, l)
 	}
 
@@ -153,7 +153,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 		C:     list,
 	}
 
-	log.Event(ctx, "all columns added to CSVW", log.Data{"number_of_columns": strconv.Itoa(len(list))})
+	log.Event(ctx, "all columns added to CSVW", log.INFO, log.Data{"number_of_columns": strconv.Itoa(len(list))})
 	csvw.AddNotes(metadata, downloadURL)
 
 	b, err := json.Marshal(csvw)
@@ -226,7 +226,7 @@ func newObservationColumn(title, name string) Column {
 
 	c["datatype"] = "string"
 
-	log.Event(ctx, "adding observations column", log.Data{"column": c})
+	log.Event(ctx, "adding observations column", log.INFO, log.Data{"column": c})
 	return c
 }
 

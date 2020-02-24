@@ -188,12 +188,12 @@ func waitForMessageToBeCommitted(message *kafkatest.Message) {
 	timeout := start.Add(time.Millisecond * 500)
 	for {
 		if message.Committed() {
-			log.Event(ctx, "message has been committed")
+			log.Event(ctx, "message has been committed", log.INFO)
 			break
 		}
 
 		if time.Now().After(timeout) {
-			log.Event(ctx, "timeout hit")
+			log.Event(ctx, "timeout hit", log.INFO)
 			break
 		}
 

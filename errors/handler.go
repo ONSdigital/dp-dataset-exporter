@@ -31,7 +31,7 @@ func NewKafkaHandler(messageProducer chan []byte) *KafkaHandler {
 func (handler *KafkaHandler) Handle(filterID string, err error) {
 	ctx := context.Background()
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
-	log.Event(ctx, "an error occurred while processing a filter job", data)
+	log.Event(ctx, "an error occurred while processing a filter job", log.INFO, data)
 
 	error := Event{
 		FilterID:    filterID,
@@ -42,7 +42,7 @@ func (handler *KafkaHandler) Handle(filterID string, err error) {
 
 	errMsg, err := EventSchema.Marshal(error)
 	if err != nil {
-		log.Event(ctx, "failed to marshall error to event-reporter", data, log.Error(err))
+		log.Event(ctx, "failed to marshall error to event-reporter", data, log.ERROR, log.Error(err))
 		return
 	}
 	handler.messageProducer <- errMsg
