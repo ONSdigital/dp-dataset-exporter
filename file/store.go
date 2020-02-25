@@ -60,7 +60,7 @@ func NewStore(
 		return nil, err
 	}
 
-	cryptoUploader := s3client.NewUploaderWithSession(region, privateBucket, true, uploader.Session())
+	cryptoUploader := s3client.NewUploaderWithSession(privateBucket, true, uploader.Session())
 
 	return &Store{
 		Uploader:       uploader,

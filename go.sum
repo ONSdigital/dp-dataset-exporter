@@ -22,8 +22,8 @@ github.com/ONSdigital/dp-observation-importer v0.0.0-20190530123707-54356cab6a79
 github.com/ONSdigital/dp-rchttp v0.0.0-20190919143000-bb5699e6fd59/go.mod h1:KkW68U3FPuivW4ogi9L8CPKNj9ZxGko4qcUY7KoAAkQ=
 github.com/ONSdigital/dp-rchttp v0.0.0-20200114090501-463a529590e8 h1:MWIHCr/ud5ur9elhfvKtSjMJInqf3iUY8F4J27qGQPA=
 github.com/ONSdigital/dp-rchttp v0.0.0-20200114090501-463a529590e8/go.mod h1:821jZtK0oBsV8hjIkNr8vhAWuv0FxJBPJuAHa2B70Gk=
-github.com/ONSdigital/dp-s3 v1.1.1-0.20200217111618-cfba33b89bf9 h1:JRvsSpyvVQ1zuga7w8Q8m214pX+2d4fbuh7Z+Pp982E=
-github.com/ONSdigital/dp-s3 v1.1.1-0.20200217111618-cfba33b89bf9/go.mod h1:IxKr4v9eZ925jD8mv52cQolv+PCBLo2lciwIl4fQ4Fo=
+github.com/ONSdigital/dp-s3 v1.3.0 h1:9NsfMJ9YkmgovEMQZ4CHJeq7A/9GRA7zyZjt9R13630=
+github.com/ONSdigital/dp-s3 v1.3.0/go.mod h1:5bZUUdWajH/La/YOYhFOdr8opzmJQEdgfm5bK2mzsgI=
 github.com/ONSdigital/dp-vault v1.0.0 h1:ksuzshSzJK1gBlDF+9CM3cAhhuzNflTTxEyIcxJni/s=
 github.com/ONSdigital/dp-vault v1.0.0/go.mod h1:eYVZQOdzE9OjK3hMAlgrkZWvsHDIKwCKbXsGBYjTSCk=
 github.com/ONSdigital/go-ns v0.0.0-20191104121206-f144c4ec2e58 h1:XHnzoC7TxueLAfkBpblPiwaIxjngGv1VNVZhvE4jY6w=
