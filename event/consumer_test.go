@@ -37,8 +37,8 @@ func TestConsume_UnmarshallError(t *testing.T) {
 
 		expectedEvent := getExampleEvent()
 
-		mockConsumer.Channels().Upstream <- kafkatest.NewMessage([]byte("invalid schema"))
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		mockConsumer.Channels().Upstream <- kafkatest.NewMessage([]byte("invalid schema"), 1)
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 		mockConsumer.Channels().Upstream <- message
 
 		consumer := event.NewConsumer()
@@ -70,7 +70,7 @@ func TestConsume(t *testing.T) {
 		}
 
 		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 
 		mockConsumer.Channels().Upstream <- message
 
@@ -116,7 +116,7 @@ func TestConsume_HandlerError(t *testing.T) {
 
 		expectedEvent := getExampleEvent()
 
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 		mockConsumer.Channels().Upstream <- message
 
 		consumer := event.NewConsumer()
@@ -151,7 +151,7 @@ func TestClose(t *testing.T) {
 		}
 
 		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 
 		mockConsumer.Channels().Upstream <- message
 
