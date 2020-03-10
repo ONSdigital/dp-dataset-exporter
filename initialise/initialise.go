@@ -41,9 +41,7 @@ func (k KafkaProducerName) String() string {
 }
 
 // GetConsumer returns a kafka consumer, which might not be initialised
-func (e *ExternalServiceList) GetConsumer(cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
-	ctx := context.Background()
-
+func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
 	kafkaConsumer, err = kafka.NewConsumerGroup(
 		ctx,
 		cfg.KafkaAddr,
@@ -82,8 +80,8 @@ func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vaul
 }
 
 // GetObservationStore returns an initialised connection to observation store (graph database)
-func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB, err error) {
-	observationStore, err = graph.New(context.Background(), graph.Subsets{Observation: true})
+func (e *ExternalServiceList) GetObservationStore(ctx context.Context) (observationStore *graph.DB, err error) {
+	observationStore, err = graph.New(ctx, graph.Subsets{Observation: true})
 	if err != nil {
 		return
 	}
@@ -94,10 +92,7 @@ func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB,
 }
 
 // GetProducer returns a kafka producer, which might no be initialised
-func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
-
-	ctx := context.Background()
-
+func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
 	kafkaProducer, err = kafka.NewProducer(
 		ctx,
 		kafkaBrokers,

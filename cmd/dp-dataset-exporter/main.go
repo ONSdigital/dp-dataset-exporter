@@ -56,11 +56,12 @@ func main() {
 	var serviceList initialise.ExternalServiceList
 
 	// Create kafka Consumer
-	kafkaConsumer, err := serviceList.GetConsumer(cfg)
+	kafkaConsumer, err := serviceList.GetConsumer(ctx, cfg)
 	exitIfError(ctx, err)
 
 	// Create kafka Producer
 	kafkaProducer, err := serviceList.GetProducer(
+		ctx,
 		cfg.KafkaAddr,
 		cfg.CSVExportedProducerTopic,
 		initialise.CSVExported,
@@ -69,6 +70,7 @@ func main() {
 
 	// Create kafka ErrorProducer
 	kafkaErrorProducer, err := serviceList.GetProducer(
+		ctx,
 		cfg.KafkaAddr,
 		cfg.ErrorProducerTopic,
 		initialise.Error,
@@ -85,7 +87,7 @@ func main() {
 	filterAPIClient := filterCli.New(cfg.FilterAPIURL)
 	filterStore := filter.NewStore(filterAPIClient, cfg.ServiceAuthToken)
 
-	observationStore, err := serviceList.GetObservationStore()
+	observationStore, err := serviceList.GetObservationStore(ctx)
 	logIfError(ctx, err)
 
 	fileStore, err := serviceList.GetFileStore(cfg, vaultClient)
@@ -127,20 +129,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	r := mux.NewRouter()
-	r.HandleFunc("/health", hc.Handler)
-
-	// Start healthcheck
-	hc.Start(ctx)
-
-	// Create and start http server for healthcheck
-	httpServer := server.New(cfg.BindAddr, r)
-	go func() {
-		if err := httpServer.ListenAndServe(); err != nil {
-			log.Event(ctx, "failed to start healthcheck HTTP server", log.FATAL, log.Data{"config": cfg}, log.Error(err))
-			os.Exit(2)
-		}
-	}()
+	httpServer := startHealthCheck(ctx, &hc, cfg.BindAddr)
 
 	// Check that the healthChecker succeeds before testing the service token (GetDatasets)
 	// once both succeed, then we can set Consume off
@@ -173,10 +162,13 @@ func main() {
 	kafkaConsumer.Channels().LogErrors(ctx, "kafka consumer")
 	kafkaProducer.Channels().LogErrors(ctx, "kafka result producer")
 	kafkaErrorProducer.Channels().LogErrors(ctx, "kafka error producer")
+	// error logging go-routine for errorChannel and httpServerDoneChannels
 	go func() {
-		select {
-		case err := <-errorChannel:
-			log.Event(ctx, "error channel", log.ERROR, log.Error(err))
+		for {
+			select {
+			case err := <-errorChannel:
+				log.Event(ctx, "error channel", log.ERROR, log.Error(err))
+			}
 		}
 	}()
 
@@ -187,7 +179,7 @@ func main() {
 	}
 
 	log.Event(ctx, "gracefully shutting down", log.INFO, log.Data{"graceful_shutdown_timeout": cfg.GracefulShutdownTimeout})
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.GracefulShutdownTimeout)
+	shutdownCtx, cancel := context.WithTimeout(ctx, cfg.GracefulShutdownTimeout)
 
 	// Gracefully shutdown the application closing any open resources
 	go func() {
@@ -196,47 +188,68 @@ func main() {
 		// Health Checker should always be closed first as it relies on other
 		// services (clients) to exist - prevents DATA RACE
 		if serviceList.HealthCheck {
-			log.Event(ctx, "stopping healthchecker", log.INFO)
+			log.Event(shutdownCtx, "stopping healthchecker", log.INFO)
 			hc.Stop()
 		}
 
-		log.Event(ctx, "shutting down http server", log.INFO)
-		logIfError(ctx, httpServer.Shutdown(ctx))
-
-		if serviceList.EventConsumer {
-			log.Event(ctx, "closing event consumer", log.INFO)
-			logIfError(ctx, eventConsumer.Close(ctx))
-		}
+		log.Event(shutdownCtx, "shutting down http server", log.INFO)
+		logIfError(shutdownCtx, httpServer.Shutdown(shutdownCtx))
 
 		if serviceList.Consumer {
-			log.Event(ctx, "stop listening to consumer", log.INFO)
-			logIfError(ctx, kafkaConsumer.StopListeningToConsumer(ctx))
-
-			log.Event(ctx, "closing consumer", log.INFO)
-			logIfError(ctx, kafkaConsumer.Close(ctx))
+			log.Event(shutdownCtx, "stop listening to consumer", log.INFO)
+			logIfError(shutdownCtx, kafkaConsumer.StopListeningToConsumer(shutdownCtx))
 		}
 
 		if serviceList.CSVExportedProducer {
-			log.Event(ctx, "closing csv exporter producer", log.INFO)
-			logIfError(ctx, kafkaProducer.Close(ctx))
+			log.Event(shutdownCtx, "closing csv exporter producer", log.INFO)
+			logIfError(shutdownCtx, kafkaProducer.Close(shutdownCtx))
 		}
 
 		if serviceList.ErrorProducer {
-			log.Event(ctx, "closing error producer", log.INFO)
-			logIfError(ctx, kafkaErrorProducer.Close(ctx))
+			log.Event(shutdownCtx, "closing error producer", log.INFO)
+			logIfError(shutdownCtx, kafkaErrorProducer.Close(shutdownCtx))
+		}
+
+		if serviceList.EventConsumer {
+			log.Event(shutdownCtx, "closing event consumer", log.INFO)
+			logIfError(shutdownCtx, eventConsumer.Close(shutdownCtx))
+		}
+
+		if serviceList.Consumer {
+			log.Event(shutdownCtx, "closing consumer", log.INFO)
+			logIfError(shutdownCtx, kafkaConsumer.Close(shutdownCtx))
 		}
 
 		if serviceList.ObservationStore {
-			log.Event(ctx, "closing observation store", log.INFO)
-			logIfError(ctx, observationStore.Close(ctx))
+			log.Event(shutdownCtx, "closing observation store", log.INFO)
+			logIfError(shutdownCtx, observationStore.Close(shutdownCtx))
 		}
+
 	}()
 
 	// wait for shutdown success (via cancel) or failure (timeout)
-	<-ctx.Done()
+	<-shutdownCtx.Done()
 
-	log.Event(ctx, "shutdown complete", log.INFO, log.Data{"ctx": ctx.Err()})
-	os.Exit(1)
+	log.Event(shutdownCtx, "shutdown complete", log.INFO, log.Data{"ctx": shutdownCtx.Err()})
+	os.Exit(0)
+}
+
+// startHealthCheck sets up the Handler, starts the healthcheck and the http server that serves healthcheck endpoint
+func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr string) *server.Server {
+
+	router := mux.NewRouter()
+	router.Path("/health").HandlerFunc(hc.Handler)
+	hc.Start(ctx)
+
+	httpServer := server.New(bindAddr, router)
+	httpServer.HandleOSSignals = false
+
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil {
+			log.Event(context.Background(), "", log.ERROR, log.Error(err))
+		}
+	}()
+	return httpServer
 }
 
 // registerCheckers adds the checkers for the provided clients to the healthcheck object

@@ -1,6 +1,7 @@
 package file_test
 
 import (
+	"context"
 	"errors"
 	"path"
 	"strings"
@@ -21,6 +22,8 @@ const (
 )
 
 func TestPutFileErrorScenarios(t *testing.T) {
+	ctx := context.Background()
+
 	Convey("Given a store with an uploader that returns an error", t, func() {
 		uploaderMock := &filetest.UploaderMock{}
 		uploaderMock.UploadFunc = func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
@@ -30,7 +33,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 		store := &file.Store{Uploader: uploaderMock}
 
 		Convey("When PutFile is called for a published version", func() {
-			url, err := store.PutFile(strings.NewReader(""), "", true)
+			url, err := store.PutFile(ctx, strings.NewReader(""), "", true)
 
 			Convey("Then the correct error is returned", func() {
 				So(err, ShouldNotBeNil)
@@ -49,7 +52,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 		store := &file.Store{VaultClient: vaultClientMock}
 
 		Convey("When PutFile is called for an unpublished version", func() {
-			url, err := store.PutFile(strings.NewReader(""), "", false)
+			url, err := store.PutFile(ctx, strings.NewReader(""), "", false)
 
 			Convey("Then the correct error is returned", func() {
 				So(err, ShouldNotBeNil)
@@ -73,7 +76,7 @@ func TestPutFileErrorScenarios(t *testing.T) {
 		store := &file.Store{VaultClient: vaultClientMock, CryptoUploader: cryptoUploaderMock}
 
 		Convey("When PutFile is called for an unpublished version", func() {
-			url, err := store.PutFile(strings.NewReader(""), "", false)
+			url, err := store.PutFile(ctx, strings.NewReader(""), "", false)
 
 			Convey("Then the correct error is returned", func() {
 				So(err, ShouldNotBeNil)
@@ -85,6 +88,8 @@ func TestPutFileErrorScenarios(t *testing.T) {
 }
 
 func TestPutFileSuccessScenarios(t *testing.T) {
+	ctx := context.Background()
+
 	Convey("Given a store exists with a valid uploader", t, func() {
 		uploaderMock := &filetest.UploaderMock{}
 		uploaderMock.UploadFunc = func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
@@ -94,7 +99,7 @@ func TestPutFileSuccessScenarios(t *testing.T) {
 		store := &file.Store{Uploader: uploaderMock}
 
 		Convey("When PutFile is called for a published version", func() {
-			url, err := store.PutFile(strings.NewReader(""), "", true)
+			url, err := store.PutFile(ctx, strings.NewReader(""), "", true)
 
 			Convey("Then the file location should be returned", func() {
 				So(err, ShouldBeNil)
@@ -105,7 +110,7 @@ func TestPutFileSuccessScenarios(t *testing.T) {
 		// now add prefix to store, and retest
 		store.PublicURL = publicURLPrefix
 		Convey("When PutFile is called for a published version and store has a prefix", func() {
-			url, err := store.PutFile(strings.NewReader(""), csvFile, true)
+			url, err := store.PutFile(ctx, strings.NewReader(""), csvFile, true)
 
 			Convey("Then the prefixed location should be returned", func() {
 				So(err, ShouldBeNil)
@@ -131,7 +136,7 @@ func TestPutFileSuccessScenarios(t *testing.T) {
 		Convey("When PutFile is called", func() {
 
 			filename := "datasets/123.csv"
-			url, err := store.PutFile(strings.NewReader(""), filename, false)
+			url, err := store.PutFile(ctx, strings.NewReader(""), filename, false)
 
 			Convey("Then the correct location is returned", func() {
 				So(err, ShouldBeNil)
@@ -149,7 +154,7 @@ func TestPutFileSuccessScenarios(t *testing.T) {
 			// now add prefix to store, and retest
 			store.PublicURL = publicURLPrefix
 			Convey("When PutFile is called for an unpublished version and store has a prefix", func() {
-				url, err := store.PutFile(strings.NewReader(""), csvFile, false)
+				url, err := store.PutFile(ctx, strings.NewReader(""), csvFile, false)
 
 				Convey("Then the prefixed location should not be returned", func() {
 					So(err, ShouldBeNil)

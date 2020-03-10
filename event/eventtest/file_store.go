@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"io"
 	"sync"
@@ -23,7 +24,7 @@ var _ event.FileStore = &FileStoreMock{}
 //
 //         // make and configure a mocked event.FileStore
 //         mockedFileStore := &FileStoreMock{
-//             PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
+//             PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 // 	               panic("mock out the PutFile method")
 //             },
 //         }
@@ -34,12 +35,14 @@ var _ event.FileStore = &FileStoreMock{}
 //     }
 type FileStoreMock struct {
 	// PutFileFunc mocks the PutFile method.
-	PutFileFunc func(reader io.Reader, filename string, isPublished bool) (string, error)
+	PutFileFunc func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// PutFile holds details about calls to the PutFile method.
 		PutFile []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// Reader is the reader argument value.
 			Reader io.Reader
 			// Filename is the filename argument value.
@@ -51,15 +54,17 @@ type FileStoreMock struct {
 }
 
 // PutFile calls PutFileFunc.
-func (mock *FileStoreMock) PutFile(reader io.Reader, filename string, isPublished bool) (string, error) {
+func (mock *FileStoreMock) PutFile(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 	if mock.PutFileFunc == nil {
 		panic("FileStoreMock.PutFileFunc: method is nil but FileStore.PutFile was just called")
 	}
 	callInfo := struct {
+		Ctx         context.Context
 		Reader      io.Reader
 		Filename    string
 		IsPublished bool
 	}{
+		Ctx:         ctx,
 		Reader:      reader,
 		Filename:    filename,
 		IsPublished: isPublished,
@@ -67,18 +72,20 @@ func (mock *FileStoreMock) PutFile(reader io.Reader, filename string, isPublishe
 	lockFileStoreMockPutFile.Lock()
 	mock.calls.PutFile = append(mock.calls.PutFile, callInfo)
 	lockFileStoreMockPutFile.Unlock()
-	return mock.PutFileFunc(reader, filename, isPublished)
+	return mock.PutFileFunc(ctx, reader, filename, isPublished)
 }
 
 // PutFileCalls gets all the calls that were made to PutFile.
 // Check the length with:
 //     len(mockedFileStore.PutFileCalls())
 func (mock *FileStoreMock) PutFileCalls() []struct {
+	Ctx         context.Context
 	Reader      io.Reader
 	Filename    string
 	IsPublished bool
 } {
 	var calls []struct {
+		Ctx         context.Context
 		Reader      io.Reader
 		Filename    string
 		IsPublished bool

@@ -23,7 +23,6 @@ type Client interface {
 
 // Store provides access to stored dimension data using the filter dp-api-client
 type Store struct {
-	// *filterCli.Client
 	Client
 	serviceAuthToken string
 }

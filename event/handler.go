@@ -93,7 +93,7 @@ type ObservationStore interface {
 
 // FileStore provides storage for filtered output files.
 type FileStore interface {
-	PutFile(reader io.Reader, filename string, isPublished bool) (url string, err error)
+	PutFile(ctx context.Context, reader io.Reader, filename string, isPublished bool) (url string, err error)
 }
 
 // Producer handles producing output events.
@@ -204,7 +204,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(reader, filename, isPublished)
+	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filter.InstanceID,
@@ -275,7 +275,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 		event.Version,
 	)
 
-	metadataDownload, err := handler.generateMetadata(event, filename, header, downloadURL, isPublished)
+	metadataDownload, err := handler.generateMetadata(ctx, event, filename, header, downloadURL, isPublished)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +330,7 @@ func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename s
 
 	log.Event(ctx, "header extracted from csv", log.INFO, log.Data{"header": header})
 
-	url, err := handler.fileStore.PutFile(hReader, filename, isPublished)
+	url, err := handler.fileStore.PutFile(ctx, hReader, filename, isPublished)
 	if err != nil {
 		return nil, "", "", 0, err
 	}
@@ -348,7 +348,7 @@ func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename s
 	return download, url, header, rReader.ObservationsCount(), nil
 }
 
-func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, header, downloadURL string, isPublished bool) (*dataset.Download, error) {
+func (handler *ExportHandler) generateMetadata(ctx context.Context, event *FilterSubmitted, s3path, header, downloadURL string, isPublished bool) (*dataset.Download, error) {
 
 	m, err := handler.datasetAPICli.GetVersionMetadata(context.Background(), "", handler.serviceAuthToken, "", event.DatasetID, event.Edition, event.Version)
 	if err != nil {
@@ -364,7 +364,7 @@ func (handler *ExportHandler) generateMetadata(event *FilterSubmitted, s3path, h
 
 	r := bytes.NewReader(csvwFile)
 
-	url, err := handler.fileStore.PutFile(r, s3path+metadataExtension, isPublished)
+	url, err := handler.fileStore.PutFile(ctx, r, s3path+metadataExtension, isPublished)
 	if err != nil {
 		return nil, err
 	}

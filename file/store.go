@@ -74,8 +74,7 @@ func NewStore(
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
-func (store *Store) PutFile(reader io.Reader, filename string, isPublished bool) (uploadedFileURL string, err error) {
-	ctx := context.Background()
+func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename string, isPublished bool) (uploadedFileURL string, err error) {
 	var result *s3manager.UploadOutput
 
 	if isPublished {

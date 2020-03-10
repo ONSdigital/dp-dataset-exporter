@@ -202,7 +202,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return "", expectedError
 			},
 		}
@@ -259,7 +259,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filter string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filter string, isPublished bool) (string, error) {
 				return "", observation.ErrNoResultsFound
 			},
 		}
@@ -317,7 +317,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filter string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filter string, isPublished bool) (string, error) {
 				return "", observation.ErrNoInstanceFound
 			},
 		}
@@ -374,7 +374,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return "", expectedError
 			},
 		}
@@ -434,7 +434,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return fileHRef, nil
 			},
 		}
@@ -498,7 +498,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return fileHRef, nil
 			},
 		}
@@ -609,7 +609,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 		}
 
 		mockedFileStore := &eventtest.FileStoreMock{
-			PutFileFunc: func(reader io.Reader, filename string, isPublished bool) (string, error) {
+			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return fileHRef, nil
 			},
 		}
@@ -764,7 +764,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
+		fileStockMock.PutFileFunc = func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "", mockErr
 		}
 
@@ -821,7 +821,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
+		fileStockMock.PutFileFunc = func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "/url", nil
 		}
 
@@ -938,7 +938,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return csvRowReaderMock, nil
 		}
 
-		fileStockMock.PutFileFunc = func(reader io.Reader, filename string, isPublished bool) (string, error) {
+		fileStockMock.PutFileFunc = func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "/url", nil
 		}
 
