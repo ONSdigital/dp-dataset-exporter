@@ -1,6 +1,7 @@
 package event_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/ONSdigital/dp-dataset-exporter/event"
@@ -53,7 +54,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 			err := eventProducer.CSVExported(event)
 
 			Convey("The expected event is available on the output channel", func() {
-				log.Event(nil, "error is:", log.INFO, log.Data{"error": err})
+				log.Event(context.Background(), "error is:", log.INFO, log.Data{"error": err})
 				So(err, ShouldBeNil)
 
 				messageBytes := <-outputChannel

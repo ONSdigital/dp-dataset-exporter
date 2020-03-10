@@ -23,16 +23,21 @@ type Handler interface {
 	Handle(ctx context.Context, filterSubmittedEvent *FilterSubmitted) error
 }
 
+type closeEvent struct {
+	close bool
+	ctx   context.Context
+}
+
 // Consumer consumes event messages.
 type Consumer struct {
-	closing chan bool
+	closing chan closeEvent
 	closed  chan bool
 }
 
 // NewConsumer returns a new consumer instance.
 func NewConsumer() *Consumer {
 	return &Consumer{
-		closing: make(chan bool),
+		closing: make(chan closeEvent),
 		closed:  make(chan bool),
 	}
 }
@@ -43,23 +48,24 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 	go func() {
 		defer close(consumer.closed)
 
-		log.Event(nil, "starting to consume messages", log.INFO)
 		for {
 			select {
 			case message := <-messageConsumer.Channels().Upstream:
-
+				// This context will be obtained from the kafka message in the future
+				ctx := context.Background()
 				err := processMessage(message, handler, errorHandler)
 				if err != nil {
-					log.Event(nil, "failed to process message", log.INFO, log.Data{"err": err})
+					log.Event(ctx, "failed to process message", log.INFO, log.Data{"err": err})
 				} else {
 					logData := log.Data{"message_offset": message.Offset()}
-					log.Event(nil, "event processed - committing message", log.INFO, logData)
+					log.Event(ctx, "event processed - committing message", log.INFO, logData)
 					messageConsumer.CommitAndRelease(message)
-					log.Event(nil, "message committed", log.INFO, logData)
+					log.Event(ctx, "message committed", log.INFO, logData)
 				}
 
-			case <-consumer.closing:
-				log.Event(nil, "closing event consumer loop", log.INFO)
+			case event := <-consumer.closing:
+				log.Event(event.ctx, "closing event consumer loop", log.INFO)
+				close(consumer.closing)
 				return
 			}
 		}
@@ -74,7 +80,7 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 		ctx = context.Background()
 	}
 
-	close(consumer.closing)
+	consumer.closing <- closeEvent{close: true, ctx: ctx}
 
 	select {
 	case <-consumer.closed:

@@ -115,7 +115,7 @@ func main() {
 	}
 
 	// Add checkers to healthcheck
-	err = registerCheckers(&hc,
+	err = registerCheckers(ctx, &hc,
 		kafkaProducer, kafkaErrorProducer, kafkaConsumer,
 		vaultClient,
 		datasetAPICli,
@@ -162,6 +162,7 @@ func main() {
 				}
 				// Kafka initialised and dataset client got datasets -> Start consuming
 				serviceList.EventConsumer = true
+				log.Event(ctx, "starting to consume messages", log.INFO)
 				eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
 				return
 			}
@@ -239,7 +240,7 @@ func main() {
 }
 
 // registerCheckers adds the checkers for the provided clients to the healthcheck object
-func registerCheckers(hc *healthcheck.HealthCheck,
+func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 	kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup,
 	vaultClient *vault.Client,
 	datasetAPICli *dataset.Client,
@@ -248,43 +249,43 @@ func registerCheckers(hc *healthcheck.HealthCheck,
 	publicUploader, privateUploader file.Uploader) (err error) {
 
 	if err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Kafka Producer", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Kafka Producer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Kafka Error Producer", kafkaErrorProducer.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Kafka Error Producer", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Kafka Error Producer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Kafka Consumer", kafkaConsumer.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Kafka Consumer", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Kafka Consumer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Vault", vaultClient.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Vault", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Vault", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Filter API", filterAPICli.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Filter API", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Filter API", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Dataset API", datasetAPICli.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Dataset API", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Dataset API", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s bucket", publicUploader.BucketName()), publicUploader.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for public S3 bucket", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for public S3 bucket", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for private S3 bucket", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for private S3 bucket", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Download Service", downloadServiceCli.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Download Service", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Download Service", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
-		log.Event(nil, "Error Adding Check for Zebedee", log.ERROR, log.Error(err))
+		log.Event(ctx, "Error Adding Check for Zebedee", log.ERROR, log.Error(err))
 	}
 
 	return
