@@ -21,13 +21,14 @@ func TestConsume_UnmarshallError(t *testing.T) {
 
 		// Create mock kafka consumer with upstream channel with 2 buffered messages
 		mockConsumer := kafkatest.NewMessageConsumerWithChannels(
-			kafka.ConsumerGroupChannels{
+			&kafka.ConsumerGroupChannels{
 				Upstream:     make(chan kafka.Message, 2),
 				Errors:       make(chan error),
+				Init:         make(chan struct{}),
 				Closer:       make(chan struct{}),
 				Closed:       make(chan struct{}),
 				UpstreamDone: make(chan bool, 1),
-			})
+			}, true)
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -61,7 +62,7 @@ func TestConsume(t *testing.T) {
 
 	Convey("Given an event consumer with a valid schema", t, func() {
 
-		mockConsumer := kafkatest.NewMessageConsumer()
+		mockConsumer := kafkatest.NewMessageConsumer(true)
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -88,7 +89,7 @@ func TestConsume(t *testing.T) {
 			})
 
 			Convey("The message is committed", func() {
-				So(message.Committed(), ShouldEqual, true)
+				So(len(message.CommitCalls()), ShouldEqual, 1)
 			})
 		})
 	})
@@ -100,7 +101,7 @@ func TestConsume_HandlerError(t *testing.T) {
 
 		expectedError := errors.New("Something bad happened in the event handler.")
 
-		mockConsumer := kafkatest.NewMessageConsumer()
+		mockConsumer := kafkatest.NewMessageConsumer(true)
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -132,7 +133,7 @@ func TestConsume_HandlerError(t *testing.T) {
 			})
 
 			Convey("and the message is not committed - to be retried", func() {
-				So(message.Committed(), ShouldEqual, false)
+				So(len(message.CommitCalls()), ShouldEqual, 0)
 			})
 		})
 	})
@@ -142,7 +143,7 @@ func TestClose(t *testing.T) {
 
 	Convey("Given a consumer", t, func() {
 
-		mockConsumer := kafkatest.NewMessageConsumer()
+		mockConsumer := kafkatest.NewMessageConsumer(true)
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -187,7 +188,7 @@ func waitForMessageToBeCommitted(message *kafkatest.Message) {
 	start := time.Now()
 	timeout := start.Add(time.Millisecond * 500)
 	for {
-		if message.Committed() {
+		if len(message.CommitCalls()) > 0 {
 			log.Event(ctx, "message has been committed", log.INFO)
 			break
 		}
