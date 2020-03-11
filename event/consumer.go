@@ -24,8 +24,7 @@ type Handler interface {
 }
 
 type closeEvent struct {
-	close bool
-	ctx   context.Context
+	ctx context.Context
 }
 
 // Consumer consumes event messages.
@@ -80,7 +79,7 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 		ctx = context.Background()
 	}
 
-	consumer.closing <- closeEvent{close: true, ctx: ctx}
+	consumer.closing <- closeEvent{ctx: ctx}
 
 	select {
 	case <-consumer.closed:

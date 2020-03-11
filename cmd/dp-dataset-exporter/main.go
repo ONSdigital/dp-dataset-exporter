@@ -55,11 +55,11 @@ func main() {
 	// serviceList keeps track of what dependency services have been initialised
 	var serviceList initialise.ExternalServiceList
 
-	// Create kafka Consumer
+	// Create kafka Consumer - exit on channel validation error. Non-initialised consumers will not error at creation time.
 	kafkaConsumer, err := serviceList.GetConsumer(ctx, cfg)
 	exitIfError(ctx, err)
 
-	// Create kafka Producer
+	// Create kafka Producer - exit on channel validation error. Non-initialised producers will not error at creation time.
 	kafkaProducer, err := serviceList.GetProducer(
 		ctx,
 		cfg.KafkaAddr,
@@ -68,7 +68,7 @@ func main() {
 	)
 	exitIfError(ctx, err)
 
-	// Create kafka ErrorProducer
+	// Create kafka ErrorProducer - exit on channel validation error. Non-initialised producers will not error at creation time.
 	kafkaErrorProducer, err := serviceList.GetProducer(
 		ctx,
 		cfg.KafkaAddr,
