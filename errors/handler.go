@@ -12,7 +12,7 @@ var _ Handler = (*KafkaHandler)(nil)
 
 // Handler is a generic interface for handling errors
 type Handler interface {
-	Handle(filterID string, err error)
+	Handle(ctx context.Context, filterID string, err error)
 }
 
 // KafkaHandler provides an error handler that writes to the kafka error topic
@@ -28,8 +28,7 @@ func NewKafkaHandler(messageProducer chan []byte) *KafkaHandler {
 }
 
 // Handle logs the error to the error handler via a kafka message
-func (handler *KafkaHandler) Handle(filterID string, err error) {
-	ctx := context.Background()
+func (handler *KafkaHandler) Handle(ctx context.Context, filterID string, err error) {
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
 	log.Event(ctx, "an error occurred while processing a filter job", log.INFO, data)
 

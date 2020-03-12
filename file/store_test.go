@@ -21,8 +21,9 @@ const (
 	publicURLPrefixed   = publicURLPrefix + "/" + csvFile
 )
 
+var ctx = context.Background()
+
 func TestPutFileErrorScenarios(t *testing.T) {
-	ctx := context.Background()
 
 	Convey("Given a store with an uploader that returns an error", t, func() {
 		uploaderMock := &filetest.UploaderMock{}
@@ -88,7 +89,6 @@ func TestPutFileErrorScenarios(t *testing.T) {
 }
 
 func TestPutFileSuccessScenarios(t *testing.T) {
-	ctx := context.Background()
 
 	Convey("Given a store exists with a valid uploader", t, func() {
 		uploaderMock := &filetest.UploaderMock{}

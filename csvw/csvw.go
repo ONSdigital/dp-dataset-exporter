@@ -105,8 +105,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 }
 
 //Generate the CSVW structured metadata file to describe a CSV
-func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
-	ctx := context.Background()
+func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
 	if len(metadata.Dimensions) == 0 {
 		return nil, errMissingDimensions
 	}
@@ -120,7 +119,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	csvw := New(metadata, downloadURL)
 
 	var list []Column
-	obs := newObservationColumn(h[0], metadata.UnitOfMeasure)
+	obs := newObservationColumn(ctx, h[0], metadata.UnitOfMeasure)
 	list = append(list, obs)
 	log.Event(ctx, "added observation column to CSVW", log.INFO, log.Data{"column": obs})
 
@@ -220,8 +219,7 @@ func splitHeader(header string) ([]string, int, error) {
 	return h, offset, err
 }
 
-func newObservationColumn(title, name string) Column {
-	ctx := context.Background()
+func newObservationColumn(ctx context.Context, title, name string) Column {
 	c := newColumn(title, name)
 
 	c["datatype"] = "string"

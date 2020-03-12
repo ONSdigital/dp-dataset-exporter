@@ -58,7 +58,7 @@ func NewStore(cli Client, serviceAuthToken string) *Store {
 }
 
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
-func (store *Store) PutCSVData(filterJobID string, csv observation.DownloadItem) error {
+func (store *Store) PutCSVData(ctx context.Context, filterJobID string, csv observation.DownloadItem) error {
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
 	putBody := FilterOutput{
@@ -71,43 +71,43 @@ func (store *Store) PutCSVData(filterJobID string, csv observation.DownloadItem)
 			},
 		},
 	}
-	return store.updateFilterOutput(filterJobID, &putBody)
+	return store.updateFilterOutput(ctx, filterJobID, &putBody)
 }
 
 // PutStateAsEmpty sets the filter output as empty
-func (store *Store) PutStateAsEmpty(filterJobID string) error {
+func (store *Store) PutStateAsEmpty(ctx context.Context, filterJobID string) error {
 	putBody := FilterOutput{
 		State: "completed",
 	}
 
-	return store.updateFilterOutput(filterJobID, &putBody)
+	return store.updateFilterOutput(ctx, filterJobID, &putBody)
 }
 
 // PutStateAsError set the filter output as an error, we shouldn't state the type of error as
 // this will be displayed to the public
-func (store *Store) PutStateAsError(filterJobID string) error {
+func (store *Store) PutStateAsError(ctx context.Context, filterJobID string) error {
 	putBody := FilterOutput{
 		State: "failed",
 	}
 
-	return store.updateFilterOutput(filterJobID, &putBody)
+	return store.updateFilterOutput(ctx, filterJobID, &putBody)
 }
 
-func (store *Store) updateFilterOutput(filterJobID string, filter *FilterOutput) error {
+func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, filter *FilterOutput) error {
 
 	payload, err := json.Marshal(filter)
 	if err != nil {
 		return err
 	}
 
-	err = store.UpdateFilterOutputBytes(context.Background(), "", store.serviceAuthToken, "", filterJobID, payload)
+	err = store.UpdateFilterOutputBytes(ctx, "", store.serviceAuthToken, "", filterJobID, payload)
 	return handleInvalidFilterAPIResponse(err)
 }
 
 // GetFilter returns filter data from the filter API for the given ID
-func (store *Store) GetFilter(filterOutputID string) (filter *observation.Filter, err error) {
+func (store *Store) GetFilter(ctx context.Context, filterOutputID string) (filter *observation.Filter, err error) {
 
-	bytes, err := store.GetOutputBytes(context.Background(), "", store.serviceAuthToken, "", "", filterOutputID)
+	bytes, err := store.GetOutputBytes(ctx, "", store.serviceAuthToken, "", "", filterOutputID)
 	if err != nil {
 		return nil, handleInvalidFilterAPIResponse(err)
 	}

@@ -35,8 +35,9 @@ var mockFilterData = &observation.Filter{
 	DimensionFilters: mockDimensionListData,
 }
 
-func TestStore_GetFilter(t *testing.T) {
+var ctx = context.Background()
 
+func TestStore_GetFilter(t *testing.T) {
 	mockFilterJSON, _ := json.Marshal(mockFilterData)
 	validServiceToken := "validServiceAuthToken"
 
@@ -52,7 +53,7 @@ func TestStore_GetFilter(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			filter, err := filterStore.GetFilter(filterOutputID)
+			filter, err := filterStore.GetFilter(ctx, filterOutputID)
 
 			Convey("The expected filter data is returned", func() {
 				So(err, ShouldBeNil)
@@ -72,7 +73,6 @@ func TestStore_GetFilter(t *testing.T) {
 }
 
 func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
-
 	Convey("Given a mock filter client that returns a 500 error when getting filter output", t, func() {
 
 		mockFilterClient := &filtertest.ClientMock{
@@ -90,7 +90,7 @@ func TestStore_GetFilter_DimensionListCallError(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			actualFilter, err := filterStore.GetFilter(filterOutputID)
+			actualFilter, err := filterStore.GetFilter(ctx, filterOutputID)
 
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
@@ -119,7 +119,7 @@ func TestStore_GetFilter_FilterCallError(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			actualFilter, err := filterStore.GetFilter(filterOutputID)
+			actualFilter, err := filterStore.GetFilter(ctx, filterOutputID)
 
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
@@ -149,7 +149,7 @@ func TestStore_GetFilter_FilterNotFound(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			actualFilter, err := filterStore.GetFilter(filterOutputID)
+			actualFilter, err := filterStore.GetFilter(ctx, filterOutputID)
 
 			Convey("The expected error is returned", func() {
 				So(actualFilter, ShouldBeNil)
@@ -180,7 +180,7 @@ func TestStore_PutCSVData(t *testing.T) {
 				Size:    fileSize,
 			}
 
-			err := filterStore.PutCSVData(filterOutputID, *csv)
+			err := filterStore.PutCSVData(ctx, filterOutputID, *csv)
 
 			Convey("The expected body data is sent", func() {
 				So(err, ShouldBeNil)
@@ -207,7 +207,7 @@ func TestStore_PutCSVData(t *testing.T) {
 				Size:   fileSize,
 			}
 
-			err := filterStore.PutCSVData(filterOutputID, *csv)
+			err := filterStore.PutCSVData(ctx, filterOutputID, *csv)
 
 			Convey("The expected body data is sent", func() {
 				So(err, ShouldBeNil)
@@ -253,7 +253,7 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterOutputID, *csv)
+			err := filterStore.PutCSVData(ctx, filterOutputID, *csv)
 
 			Convey("The expected error is returned", func() {
 				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
@@ -288,7 +288,7 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterOutputID, *csv)
+			err := filterStore.PutCSVData(ctx, filterOutputID, *csv)
 
 			Convey("The expected error is returned", func() {
 				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
@@ -323,7 +323,7 @@ func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 
 		Convey("When PutCSVData is called", func() {
 
-			err := filterStore.PutCSVData(filterOutputID, *csv)
+			err := filterStore.PutCSVData(ctx, filterOutputID, *csv)
 
 			Convey("The expected error is returned", func() {
 				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
@@ -348,7 +348,7 @@ func TestStore_PutStateAsEmpty(t *testing.T) {
 
 		Convey("When PutStateAsEmpty is called", func() {
 
-			err := filterStore.PutStateAsEmpty(filterOutputID)
+			err := filterStore.PutStateAsEmpty(ctx, filterOutputID)
 
 			Convey("Then no error is returned and filterOutput is set to 'completed' state", func() {
 				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)
@@ -377,7 +377,7 @@ func TestStore_PutStateAsError(t *testing.T) {
 
 		Convey("When PutStateAsError is called", func() {
 
-			err := filterStore.PutStateAsError(filterOutputID)
+			err := filterStore.PutStateAsError(ctx, filterOutputID)
 
 			Convey("Then no error is returned and the filterOutput is set to 'failed' state", func() {
 				So(len(mockFilterClient.UpdateFilterOutputBytesCalls()), ShouldEqual, 1)

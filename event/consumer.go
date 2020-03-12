@@ -52,7 +52,7 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 			case message := <-messageConsumer.Channels().Upstream:
 				// This context will be obtained from the kafka message in the future
 				ctx := context.Background()
-				err := processMessage(message, handler, errorHandler)
+				err := processMessage(ctx, message, handler, errorHandler)
 				if err != nil {
 					log.Event(ctx, "failed to process message", log.INFO, log.Data{"err": err})
 				} else {
@@ -91,10 +91,7 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 	}
 }
 
-func processMessage(message kafka.Message, handler Handler, errorHandler errors.Handler) error {
-
-	// TODO need better context passing
-	ctx := context.Background()
+func processMessage(ctx context.Context, message kafka.Message, handler Handler, errorHandler errors.Handler) error {
 
 	logData := log.Data{"message_offset": message.Offset()}
 
@@ -112,7 +109,7 @@ func processMessage(message kafka.Message, handler Handler, errorHandler errors.
 
 	err = handler.Handle(ctx, event)
 	if err != nil {
-		errorHandler.Handle(event.FilterID, err)
+		errorHandler.Handle(ctx, event.FilterID, err)
 		logData["message_error"] = "failed to handle event"
 		log.Event(ctx, "Handle error", log.ERROR, logData, log.Error(err))
 	}

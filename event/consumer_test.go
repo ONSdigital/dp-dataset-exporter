@@ -16,6 +16,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+var ctx = context.Background()
+
 func TestConsume_UnmarshallError(t *testing.T) {
 	Convey("Given an event consumer with an invalid schema and a valid schema", t, func() {
 
@@ -110,7 +112,7 @@ func TestConsume_HandlerError(t *testing.T) {
 		}
 
 		mockErrorHandler := &errorstest.HandlerMock{
-			HandleFunc: func(instanceID string, err error) {
+			HandleFunc: func(ctx context.Context, instanceID string, err error) {
 				// do nothing, just going to inspect the call.
 			},
 		}
@@ -140,7 +142,6 @@ func TestConsume_HandlerError(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-
 	Convey("Given a consumer", t, func() {
 
 		mockConsumer := kafkatest.NewMessageConsumer(true)
@@ -160,7 +161,7 @@ func TestClose(t *testing.T) {
 		consumer.Consume(mockConsumer, mockEventHandler, nil)
 		Convey("When close is called", func() {
 
-			err := consumer.Close(context.Background())
+			err := consumer.Close(ctx)
 
 			Convey("Then no errors are returned", func() {
 				So(err, ShouldBeNil)
@@ -184,7 +185,6 @@ func getExampleEvent() *event.FilterSubmitted {
 }
 
 func waitForMessageToBeCommitted(message *kafkatest.Message) {
-	ctx := context.Background()
 	start := time.Now()
 	timeout := start.Add(time.Millisecond * 500)
 	for {

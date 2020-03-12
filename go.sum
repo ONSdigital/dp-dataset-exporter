@@ -1,8 +1,8 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/ONSdigital/dp-api-clients-go v1.1.0/go.mod h1:9lqor0I7caCnRWr04gU/r7x5dqxgoODob8L48q+cE4E=
-github.com/ONSdigital/dp-api-clients-go v1.7.0 h1:VuxxVEzjAsBrhHmrrMQuoWcz6XLvH1JANm1lYDMUTk8=
-github.com/ONSdigital/dp-api-clients-go v1.7.0/go.mod h1:SM0b/NXDWndJ9EulmAGdfDY4DxPxK+pNsP8eZlIWiqM=
+github.com/ONSdigital/dp-api-clients-go v1.8.0 h1:Vzts5n09LeaeH63yrOKNh79kN8ucGY3lgrTMdzQBtKo=
+github.com/ONSdigital/dp-api-clients-go v1.8.0/go.mod h1:SM0b/NXDWndJ9EulmAGdfDY4DxPxK+pNsP8eZlIWiqM=
 github.com/ONSdigital/dp-code-list-api v0.0.0-20191210144507-f59b8560081b h1:28pjE/we9FyEO+QbFY4IVet8rgKXLKJ/cUgiQ840TNY=
 github.com/ONSdigital/dp-code-list-api v0.0.0-20191210144507-f59b8560081b/go.mod h1:7IPu9DP8bkoj8axKeyblssZeS1zak6iGqGKotwFYTNE=
 github.com/ONSdigital/dp-dimension-importer v0.0.0-20190530123722-f43044c4fddb h1:+cca7nzFG0XQPyh0kE9U6w3Tk4OLIvzAZA1HmQHTpO8=

@@ -4,6 +4,7 @@
 package errorstest
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"sync"
 )
@@ -22,7 +23,7 @@ var _ errors.Handler = &HandlerMock{}
 //
 //         // make and configure a mocked errors.Handler
 //         mockedHandler := &HandlerMock{
-//             HandleFunc: func(filterID string, err error)  {
+//             HandleFunc: func(ctx context.Context, filterID string, err error)  {
 // 	               panic("mock out the Handle method")
 //             },
 //         }
@@ -33,12 +34,14 @@ var _ errors.Handler = &HandlerMock{}
 //     }
 type HandlerMock struct {
 	// HandleFunc mocks the Handle method.
-	HandleFunc func(filterID string, err error)
+	HandleFunc func(ctx context.Context, filterID string, err error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Handle holds details about calls to the Handle method.
 		Handle []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// FilterID is the filterID argument value.
 			FilterID string
 			// Err is the err argument value.
@@ -48,31 +51,35 @@ type HandlerMock struct {
 }
 
 // Handle calls HandleFunc.
-func (mock *HandlerMock) Handle(filterID string, err error) {
+func (mock *HandlerMock) Handle(ctx context.Context, filterID string, err error) {
 	if mock.HandleFunc == nil {
 		panic("HandlerMock.HandleFunc: method is nil but Handler.Handle was just called")
 	}
 	callInfo := struct {
+		Ctx      context.Context
 		FilterID string
 		Err      error
 	}{
+		Ctx:      ctx,
 		FilterID: filterID,
 		Err:      err,
 	}
 	lockHandlerMockHandle.Lock()
 	mock.calls.Handle = append(mock.calls.Handle, callInfo)
 	lockHandlerMockHandle.Unlock()
-	mock.HandleFunc(filterID, err)
+	mock.HandleFunc(ctx, filterID, err)
 }
 
 // HandleCalls gets all the calls that were made to Handle.
 // Check the length with:
 //     len(mockedHandler.HandleCalls())
 func (mock *HandlerMock) HandleCalls() []struct {
+	Ctx      context.Context
 	FilterID string
 	Err      error
 } {
 	var calls []struct {
+		Ctx      context.Context
 		FilterID string
 		Err      error
 	}

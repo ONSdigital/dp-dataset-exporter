@@ -1,6 +1,7 @@
 package csvw
 
 import (
+	"context"
 	"testing"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
@@ -9,6 +10,8 @@ import (
 
 var fileURL = "ons/file.csv"
 var apiURL = "api.example.com"
+
+var ctx = context.Background()
 
 func TestNew(t *testing.T) {
 	Convey("Given a complete metadata struct", t, func() {
@@ -251,6 +254,7 @@ func TestSplitHeader(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
+
 	header := "V4_2, a, b, c, d"
 	Convey("Given metadata that includes a dimension", t, func() {
 		m := &dataset.Metadata{
@@ -273,7 +277,7 @@ func TestGenerate(t *testing.T) {
 		}
 
 		Convey("When the Generate csvw function is called", func() {
-			data, err := Generate(m, header, fileURL, fileURL, apiURL)
+			data, err := Generate(ctx, m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
 				So(data, ShouldHaveLength, 382)
@@ -291,7 +295,7 @@ func TestGenerate(t *testing.T) {
 		}
 
 		Convey("When the Generate csvw function is called", func() {
-			data, err := Generate(m, header, fileURL, fileURL, apiURL)
+			data, err := Generate(ctx, m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
 				So(data, ShouldHaveLength, 0)

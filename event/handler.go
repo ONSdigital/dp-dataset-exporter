@@ -80,10 +80,10 @@ func NewExportHandler(
 
 // FilterStore provides existing filter data.
 type FilterStore interface {
-	GetFilter(filterID string) (*observation.Filter, error)
-	PutCSVData(filterID string, downloadItem observation.DownloadItem) error
-	PutStateAsEmpty(filterJobID string) error
-	PutStateAsError(filterJobID string) error
+	GetFilter(ctx context.Context, filterID string) (*observation.Filter, error)
+	PutCSVData(ctx context.Context, filterID string, downloadItem observation.DownloadItem) error
+	PutStateAsEmpty(ctx context.Context, filterJobID string) error
+	PutStateAsError(ctx context.Context, filterJobID string) error
 }
 
 // ObservationStore provides filtered observation data in CSV rows.
@@ -108,7 +108,7 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 
 	if event.FilterID != "" {
 
-		isPublished, err := handler.isFilterOutputPublished(event)
+		isPublished, err := handler.isFilterOutputPublished(ctx, event)
 		if err != nil {
 			return err
 		}
@@ -116,7 +116,7 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 		logData = log.Data{"filter_id": event.FilterID, "published": isPublished}
 
 		log.Event(ctx, "filter job identified", log.INFO, logData)
-		csvExported, err = handler.filterJob(event, isPublished)
+		csvExported, err = handler.filterJob(ctx, event, isPublished)
 		if err != nil {
 			log.Event(ctx, "error handling filter job", log.ERROR, logData, log.Error(err))
 			return err
@@ -148,8 +148,8 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 	return nil
 }
 
-func (handler *ExportHandler) isFilterOutputPublished(event *FilterSubmitted) (bool, error) {
-	filter, err := handler.filterStore.GetFilter(event.FilterID)
+func (handler *ExportHandler) isFilterOutputPublished(ctx context.Context, event *FilterSubmitted) (bool, error) {
+	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return false, err
 	}
@@ -177,24 +177,22 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 	return instance.State == publishedState, nil
 }
 
-func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
-
-	ctx := context.Background()
+func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
-	filter, err := handler.filterStore.GetFilter(event.FilterID)
+	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return nil, err
 	}
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), filter, nil)
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
-		closeErr := reader.Close(context.Background())
+		closeErr := reader.Close(ctx)
 		if closeErr != nil {
 			log.Event(ctx, "error closing reader", log.ERROR, log.Error(closeErr))
 		}
@@ -209,7 +207,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filter.InstanceID,
 				"filter": filter})
-			updateErr := handler.filterStore.PutStateAsEmpty(filter.FilterID)
+			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filter.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
@@ -217,7 +215,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
 			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filter.InstanceID,
 				"filter": filter}, log.Error(err))
-			updateErr := handler.filterStore.PutStateAsError(filter.FilterID)
+			updateErr := handler.filterStore.PutStateAsError(ctx, filter.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
@@ -239,7 +237,7 @@ func (handler *ExportHandler) filterJob(event *FilterSubmitted, isPublished bool
 	}
 
 	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(filter.FilterID, csv)
+	err = handler.filterStore.PutCSVData(ctx, filter.FilterID, csv)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
@@ -263,7 +261,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 
 	filename := handler.fullDatasetFilePrefix + fileID + ".csv"
 
-	csvDownload, csvS3URL, header, rowCount, err := handler.generateFullCSV(event, filename, isPublished)
+	csvDownload, csvS3URL, header, rowCount, err := handler.generateFullCSV(ctx, event, filename, isPublished)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +278,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 		return nil, err
 	}
 
-	if err := handler.updateVersionLinks(event, isPublished, csvDownload, metadataDownload, downloadURL); err != nil {
+	if err := handler.updateVersionLinks(ctx, event, isPublished, csvDownload, metadataDownload, downloadURL); err != nil {
 		return nil, err
 	}
 
@@ -303,18 +301,15 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 	}, nil
 }
 
-func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
-
-	ctx := context.Background()
-
-	csvRowReader, err := handler.observationStore.StreamCSVRows(context.Background(), &observation.Filter{InstanceID: event.InstanceID}, nil)
+func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, &observation.Filter{InstanceID: event.InstanceID}, nil)
 	if err != nil {
 		return nil, "", "", 0, err
 	}
 
 	rReader := observation.NewReader(csvRowReader)
 	defer func() (*dataset.Download, string, string, int32, error) {
-		closeErr := rReader.Close(context.Background())
+		closeErr := rReader.Close(ctx)
 		if closeErr != nil {
 			log.Event(ctx, "error closing observation reader", log.ERROR, log.Error(closeErr))
 		}
@@ -350,14 +345,14 @@ func (handler *ExportHandler) generateFullCSV(event *FilterSubmitted, filename s
 
 func (handler *ExportHandler) generateMetadata(ctx context.Context, event *FilterSubmitted, s3path, header, downloadURL string, isPublished bool) (*dataset.Download, error) {
 
-	m, err := handler.datasetAPICli.GetVersionMetadata(context.Background(), "", handler.serviceAuthToken, "", event.DatasetID, event.Edition, event.Version)
+	m, err := handler.datasetAPICli.GetVersionMetadata(ctx, "", handler.serviceAuthToken, "", event.DatasetID, event.Edition, event.Version)
 	if err != nil {
 		return nil, err
 	}
 
 	aboutURL := handler.datasetAPICli.GetMetadataURL(event.DatasetID, event.Edition, event.Version)
 
-	csvwFile, err := csvw.Generate(&m, header, downloadURL, aboutURL, handler.apiDomainURL)
+	csvwFile, err := csvw.Generate(ctx, &m, header, downloadURL, aboutURL, handler.apiDomainURL)
 	if err != nil {
 		return nil, err
 	}
@@ -382,10 +377,7 @@ func (handler *ExportHandler) generateMetadata(ctx context.Context, event *Filte
 	return download, nil
 }
 
-func (handler *ExportHandler) updateVersionLinks(event *FilterSubmitted, isPublished bool, csv, md *dataset.Download, downloadURL string) error {
-
-	ctx := context.Background()
-
+func (handler *ExportHandler) updateVersionLinks(ctx context.Context, event *FilterSubmitted, isPublished bool, csv, md *dataset.Download, downloadURL string) error {
 	csv.URL = downloadURL
 	md.URL = downloadURL + metadataExtension
 
@@ -403,7 +395,7 @@ func (handler *ExportHandler) updateVersionLinks(event *FilterSubmitted, isPubli
 	}
 
 	err := handler.datasetAPICli.PutVersion(
-		context.Background(), "", handler.serviceAuthToken, "", event.DatasetID, event.Edition, event.Version, v)
+		ctx, "", handler.serviceAuthToken, "", event.DatasetID, event.Edition, event.Version, v)
 	if err != nil {
 		return errors.Wrap(err, "error while attempting update version downloads")
 	}

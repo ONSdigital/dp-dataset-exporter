@@ -1,6 +1,7 @@
 package errors_test
 
 import (
+	"context"
 	errs "errors"
 	"testing"
 
@@ -8,8 +9,9 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestSpec(t *testing.T) {
+var ctx = context.Background()
 
+func TestSpec(t *testing.T) {
 	Convey("Given an event handler with a mock message producer", t, func() {
 
 		mockOutputMessageChan := make(chan []byte, 1)
@@ -20,7 +22,7 @@ func TestSpec(t *testing.T) {
 			filterID := "234"
 			expectedError := errs.New("the error text")
 
-			errorHandler.Handle(filterID, expectedError)
+			errorHandler.Handle(ctx, filterID, expectedError)
 
 			Convey("The error is sent to the message producer with the expected data", func() {
 
