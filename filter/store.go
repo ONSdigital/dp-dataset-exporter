@@ -101,7 +101,7 @@ func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, 
 	}
 
 	err = store.UpdateFilterOutputBytes(ctx, "", store.serviceAuthToken, "", filterJobID, payload)
-	return handleInvalidFilterAPIResponse(err)
+	return handleInvalidFilterAPIResponse(ctx, err)
 }
 
 // GetFilter returns filter data from the filter API for the given ID
@@ -109,7 +109,7 @@ func (store *Store) GetFilter(ctx context.Context, filterOutputID string) (filte
 
 	bytes, err := store.GetOutputBytes(ctx, "", store.serviceAuthToken, "", "", filterOutputID)
 	if err != nil {
-		return nil, handleInvalidFilterAPIResponse(err)
+		return nil, handleInvalidFilterAPIResponse(ctx, err)
 	}
 
 	if err = json.Unmarshal(bytes, &filter); err != nil {
@@ -123,7 +123,7 @@ func (store *Store) GetFilter(ctx context.Context, filterOutputID string) (filte
 // - StatusNotFound -> ErrFilterJobNotFound
 // - StatusInternalServerError -> ErrFilterAPIError
 // - Any other status -> ErrUnrecognisedAPIError
-func handleInvalidFilterAPIResponse(err error) error {
+func handleInvalidFilterAPIResponse(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}
@@ -134,7 +134,7 @@ func handleInvalidFilterAPIResponse(err error) error {
 		case http.StatusInternalServerError:
 			return ErrFilterAPIError
 		default:
-			log.Event(nil, "unrecognised status code returned from the filter api", log.INFO,
+			log.Event(ctx, "unrecognised status code returned from the filter api", log.INFO,
 				log.Data{
 					"status_code": statusErr.Code(),
 				})
