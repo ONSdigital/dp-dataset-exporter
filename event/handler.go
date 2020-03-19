@@ -244,7 +244,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	rowCount := reader.ObservationsCount()
 
-	log.Event(ctx, "CSV export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
+	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
 	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL, RowCount: rowCount}, nil
 }
 

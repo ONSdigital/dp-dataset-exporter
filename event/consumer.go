@@ -111,7 +111,7 @@ func processMessage(ctx context.Context, message kafka.Message, handler Handler,
 	if err != nil {
 		errorHandler.Handle(ctx, event.FilterID, err)
 		logData["message_error"] = "failed to handle event"
-		log.Event(ctx, "Handle error", log.ERROR, logData, log.Error(err))
+		log.Event(ctx, "handle error", log.ERROR, logData, log.Error(err))
 	}
 
 	return err

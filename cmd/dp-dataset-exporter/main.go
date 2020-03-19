@@ -40,7 +40,7 @@ var (
 func main() {
 	ctx := context.Background()
 	log.Namespace = "dp-dataset-exporter"
-	log.Event(ctx, "Starting dataset exporter", log.INFO)
+	log.Event(ctx, "starting dataset exporter", log.INFO)
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
@@ -266,52 +266,52 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 
 	if err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Kafka Producer", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for kafka producer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Kafka Error Producer", kafkaErrorProducer.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Kafka Error Producer", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for kafka error producer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Kafka Consumer", kafkaConsumer.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Kafka Consumer", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for kafka consumer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Vault", vaultClient.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Vault", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for vault", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Filter API", filterAPICli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Filter API", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for filter api", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Dataset API", datasetAPICli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Dataset API", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for dataset api", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s bucket", publicUploader.BucketName()), publicUploader.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for public S3 bucket", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for public s3 bucket", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for private S3 bucket", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for private s3 bucket", log.ERROR, log.Error(err))
 	}
 
-	if err = hc.AddCheck("Download Service", downloadServiceCli.Checker); err != nil {
+	if err = hc.AddCheck("download service", downloadServiceCli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Download Service", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for download service", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "Error Adding Check for Zebedee", log.ERROR, log.Error(err))
+		log.Event(ctx, "error adding check for zebedee", log.ERROR, log.Error(err))
 	}
 
 	if hasErrors {

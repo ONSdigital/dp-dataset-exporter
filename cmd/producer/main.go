@@ -29,7 +29,7 @@ func main() {
 	pChannels := kafka.CreateProducerChannels()
 	kafkaProducer, err := kafka.NewProducer(ctx, config.KafkaAddr, config.FilterConsumerTopic, 0, pChannels)
 	if err != nil {
-		log.Event(ctx, "Fatal error trying to create kafka producer", log.FATAL, log.Error(err), log.Data{"topic": config.FilterConsumerTopic})
+		log.Event(ctx, "fatal error trying to create kafka producer", log.FATAL, log.Error(err), log.Data{"topic": config.FilterConsumerTopic})
 		os.Exit(1)
 	}
 
@@ -41,7 +41,7 @@ func main() {
 
 		filterID := scanner.Text()
 
-		log.Event(ctx, "Sending filter output event", log.INFO, log.Data{"filter_ouput_id": filterID})
+		log.Event(ctx, "sending filter output event", log.INFO, log.Data{"filter_ouput_id": filterID})
 
 		event := event.FilterSubmitted{
 			FilterID: filterID,
@@ -49,7 +49,7 @@ func main() {
 
 		bytes, err := schema.FilterSubmittedEvent.Marshal(event)
 		if err != nil {
-			log.Event(ctx, "FilterSubmittedEvent error", log.FATAL, log.Error(err))
+			log.Event(ctx, "filter submitted event error", log.FATAL, log.Error(err))
 			os.Exit(1)
 		}
 
