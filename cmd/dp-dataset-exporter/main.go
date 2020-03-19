@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	errs "errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -261,47 +262,62 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 	downloadServiceCli, zebedeeCli *health.Client,
 	publicUploader, privateUploader file.Uploader) (err error) {
 
+	hasErrors := false
+
 	if err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Kafka Producer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Kafka Error Producer", kafkaErrorProducer.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Kafka Error Producer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Kafka Consumer", kafkaConsumer.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Kafka Consumer", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Vault", vaultClient.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Vault", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Filter API", filterAPICli.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Filter API", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Dataset API", datasetAPICli.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Dataset API", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s bucket", publicUploader.BucketName()), publicUploader.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for public S3 bucket", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for private S3 bucket", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Download Service", downloadServiceCli.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Download Service", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
+		hasErrors = true
 		log.Event(ctx, "Error Adding Check for Zebedee", log.ERROR, log.Error(err))
 	}
 
-	return
+	if hasErrors {
+		return errs.New("Error(s) registering checkers for healthcheck")
+	}
+	return nil
 }
 
 func logIfError(ctx context.Context, err error) {

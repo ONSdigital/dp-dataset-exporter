@@ -75,9 +75,9 @@ var metadata = dataset.Metadata{
 				URL: "/url",
 			},
 		},
-		Dimensions: []dataset.Dimension{
-			dataset.Dimension{},
-			dataset.Dimension{},
+		Dimensions: []dataset.VersionDimension{
+			dataset.VersionDimension{},
+			dataset.VersionDimension{},
 		},
 	},
 	DatasetDetails: dataset.DatasetDetails{

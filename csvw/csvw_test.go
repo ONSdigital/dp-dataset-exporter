@@ -260,8 +260,8 @@ func TestGenerate(t *testing.T) {
 		m := &dataset.Metadata{
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
-				Dimensions: []dataset.Dimension{
-					dataset.Dimension{
+				Dimensions: []dataset.VersionDimension{
+					dataset.VersionDimension{
 						Name: "geography",
 						Links: dataset.Links{
 							Self: dataset.Link{
