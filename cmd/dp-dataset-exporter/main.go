@@ -123,7 +123,7 @@ func main() {
 		vaultClient,
 		datasetAPICli,
 		filterAPIClient,
-		health.NewClient("DownloadService", cfg.DownloadServiceURL),
+		health.NewClient("DownloadService", cfg.DownloadServiceInternalURL),
 		health.NewClient("Zebedee", cfg.ZebedeeURL),
 		fileStore.Uploader, fileStore.CryptoUploader)
 	if err != nil {
