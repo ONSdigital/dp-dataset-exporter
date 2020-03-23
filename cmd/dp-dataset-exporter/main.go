@@ -123,7 +123,6 @@ func main() {
 		vaultClient,
 		datasetAPICli,
 		filterAPIClient,
-		health.NewClient("DownloadService", cfg.DownloadServiceURL),
 		health.NewClient("Zebedee", cfg.ZebedeeURL),
 		fileStore.Uploader, fileStore.CryptoUploader)
 	if err != nil {
@@ -259,7 +258,7 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 	vaultClient *vault.Client,
 	datasetAPICli *dataset.Client,
 	filterAPICli *filterCli.Client,
-	downloadServiceCli, zebedeeCli *health.Client,
+	zebedeeCli *health.Client,
 	publicUploader, privateUploader file.Uploader) (err error) {
 
 	hasErrors := false
@@ -302,11 +301,6 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker); err != nil {
 		hasErrors = true
 		log.Event(ctx, "error adding check for private s3 bucket", log.ERROR, log.Error(err))
-	}
-
-	if err = hc.AddCheck("download service", downloadServiceCli.Checker); err != nil {
-		hasErrors = true
-		log.Event(ctx, "error adding check for download service", log.ERROR, log.Error(err))
 	}
 
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
