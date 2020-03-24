@@ -34,7 +34,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.S3PrivateBucketName, ShouldEqual, "csv-exported")
 				So(cfg.GracefulShutdownTimeout, ShouldEqual, time.Second*10)
 				So(cfg.HealthCheckInterval, ShouldEqual, 10*time.Second)
-				So(cfg.HealthCheckRecoveryInterval, ShouldEqual, time.Minute)
+				So(cfg.HealthCheckCriticalTimeout, ShouldEqual, time.Minute)
 				So(cfg.VaultAddress, ShouldEqual, "http://localhost:8200")
 				So(cfg.VaultPath, ShouldEqual, "secret/shared/psk")
 				So(cfg.VaultToken, ShouldEqual, "")
