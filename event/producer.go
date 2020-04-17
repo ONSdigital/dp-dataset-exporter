@@ -8,13 +8,8 @@ import (
 
 // AvroProducer of output events.
 type AvroProducer struct {
-	messageProducer MessageProducer
+	messageProducer chan []byte
 	marshaller      Marshaller
-}
-
-// MessageProducer dependency that writes messages.
-type MessageProducer interface {
-	Output() chan []byte
 }
 
 // Marshaller marshals events into messages.
@@ -23,7 +18,7 @@ type Marshaller interface {
 }
 
 // NewAvroProducer returns a new instance of AvroProducer.
-func NewAvroProducer(messageProducer MessageProducer, marshaller Marshaller) *AvroProducer {
+func NewAvroProducer(messageProducer chan []byte, marshaller Marshaller) *AvroProducer {
 	return &AvroProducer{
 		messageProducer: messageProducer,
 		marshaller:      marshaller,
@@ -40,7 +35,7 @@ func (producer *AvroProducer) CSVExported(event *CSVExported) error {
 		return err
 	}
 
-	producer.messageProducer.Output() <- bytes
+	producer.messageProducer <- bytes
 
 	return nil
 }

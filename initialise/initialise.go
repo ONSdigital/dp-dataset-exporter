@@ -7,8 +7,9 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-graph/graph"
-	"github.com/ONSdigital/go-ns/kafka"
-	"github.com/ONSdigital/go-ns/vault"
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
+	kafka "github.com/ONSdigital/dp-kafka"
+	vault "github.com/ONSdigital/dp-vault"
 )
 
 // ExternalServiceList represents a list of services
@@ -19,14 +20,14 @@ type ExternalServiceList struct {
 	EventConsumer       bool
 	FileStore           bool
 	ObservationStore    bool
-	HealthTicker        bool
+	HealthCheck         bool
 	Vault               bool
 }
 
 // KafkaProducerName represents a type for kafka producer name used by iota constants
 type KafkaProducerName int
 
-// Possible names of Kafa Producers
+// Possible names of Kafka Producers
 const (
 	CSVExported = iota
 	Error
@@ -39,13 +40,16 @@ func (k KafkaProducerName) String() string {
 	return kafkaProducerNames[k]
 }
 
-// GetConsumer returns an initialised kafka consumer
-func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
-	kafkaConsumer, err = kafka.NewSyncConsumer(
-		kafkaBrokers,
+// GetConsumer returns a kafka consumer, which might not be initialised
+func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
+	kafkaConsumer, err = kafka.NewConsumerGroup(
+		ctx,
+		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
 		kafka.OffsetNewest,
+		true,
+		kafka.CreateConsumerGroupChannels(true),
 	)
 	if err != nil {
 		return
@@ -57,7 +61,7 @@ func (e *ExternalServiceList) GetConsumer(kafkaBrokers []string, cfg *config.Con
 }
 
 // GetFileStore returns an initialised connection to file store
-func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.VaultClient) (fileStore *file.Store, err error) {
+func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
 	fileStore, err = file.NewStore(
 		cfg.AWSRegion,
 		cfg.S3BucketURL,
@@ -76,8 +80,8 @@ func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vaul
 }
 
 // GetObservationStore returns an initialised connection to observation store (graph database)
-func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB, err error) {
-	observationStore, err = graph.New(context.Background(), graph.Subsets{Observation: true})
+func (e *ExternalServiceList) GetObservationStore(ctx context.Context) (observationStore *graph.DB, err error) {
+	observationStore, err = graph.New(ctx, graph.Subsets{Observation: true})
 	if err != nil {
 		return
 	}
@@ -87,9 +91,15 @@ func (e *ExternalServiceList) GetObservationStore() (observationStore *graph.DB,
 	return
 }
 
-// GetProducer returns a kafka producer
-func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer kafka.Producer, err error) {
-	kafkaProducer, err = kafka.NewProducer(kafkaBrokers, topic, 0)
+// GetProducer returns a kafka producer, which might no be initialised
+func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
+	kafkaProducer, err = kafka.NewProducer(
+		ctx,
+		kafkaBrokers,
+		topic,
+		0,
+		kafka.CreateProducerChannels(),
+	)
 	if err != nil {
 		return
 	}
@@ -107,8 +117,8 @@ func (e *ExternalServiceList) GetProducer(kafkaBrokers []string, topic string, n
 }
 
 // GetVault returns a vault client
-func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.VaultClient, err error) {
-	client, err = vault.CreateVaultClient(cfg.VaultToken, cfg.VaultAddress, retries)
+func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.Client, err error) {
+	client, err = vault.CreateClient(cfg.VaultToken, cfg.VaultAddress, retries)
 	if err != nil {
 		return
 	}
@@ -116,4 +126,19 @@ func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client 
 	e.Vault = true
 
 	return
+}
+
+// GetHealthCheck creates a healthcheck with versionInfo
+func (e *ExternalServiceList) GetHealthCheck(cfg *config.Config, buildTime, gitCommit, version string) (healthcheck.HealthCheck, error) {
+
+	// Create healthcheck object with versionInfo
+	versionInfo, err := healthcheck.NewVersionInfo(buildTime, gitCommit, version)
+	if err != nil {
+		return healthcheck.HealthCheck{}, err
+	}
+	hc := healthcheck.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
+
+	e.HealthCheck = true
+
+	return hc, nil
 }

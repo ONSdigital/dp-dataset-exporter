@@ -6,8 +6,8 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	"github.com/ONSdigital/go-ns/kafka/kafkatest"
-	"github.com/ONSdigital/go-ns/log"
+
+	"github.com/ONSdigital/log.go/log"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -15,9 +15,8 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 	Convey("Given an a mock message producer", t, func() {
 
-		// mock schema producer contains the output channel to capture messages sent.
+		// channel to capture messages sent.
 		outputChannel := make(chan []byte, 1)
-		mockMessageProducer := kafkatest.NewMessageProducer(outputChannel, nil, nil)
 
 		avroBytes := []byte("hello world")
 
@@ -27,7 +26,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 			},
 		}
 
-		eventProducer := event.NewAvroProducer(mockMessageProducer, marshallerMock)
+		eventProducer := event.NewAvroProducer(outputChannel, marshallerMock)
 
 		Convey("when CSVExported is called with a nil event", func() {
 			err := eventProducer.CSVExported(nil)
@@ -54,7 +53,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 			err := eventProducer.CSVExported(event)
 
 			Convey("The expected event is available on the output channel", func() {
-				log.Debug("error is:", log.Data{"error": err})
+				log.Event(ctx, "error is:", log.INFO, log.Data{"error": err})
 				So(err, ShouldBeNil)
 
 				messageBytes := <-outputChannel

@@ -1,6 +1,7 @@
 package csvw
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ONSdigital/go-ns/clients/dataset"
-	"github.com/ONSdigital/go-ns/log"
+	"github.com/ONSdigital/dp-api-clients-go/dataset"
+	"github.com/ONSdigital/log.go/log"
 )
 
 //CSVW provides a structure for describing a CSV through a JSON metadata file.
@@ -82,12 +83,14 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 		URL:         csvURL,
 	}
 
-	for _, c := range m.Contacts {
-		csvw.Contact = append(csvw.Contact, Contact{
-			Name:      c.Name,
-			Telephone: c.Telephone,
-			Email:     c.Email,
-		})
+	if m.Contacts != nil {
+		for _, c := range *m.Contacts {
+			csvw.Contact = append(csvw.Contact, Contact{
+				Name:      c.Name,
+				Telephone: c.Telephone,
+				Email:     c.Email,
+			})
+		}
 	}
 
 	if m.Publisher != nil {
@@ -102,7 +105,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 }
 
 //Generate the CSVW structured metadata file to describe a CSV
-func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
+func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
 	if len(metadata.Dimensions) == 0 {
 		return nil, errMissingDimensions
 	}
@@ -111,21 +114,21 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	if err != nil {
 		return nil, err
 	}
-	log.Info("header split for CSVW generation", log.Data{"header": header, "column_offset": strconv.Itoa(offset)})
+	log.Event(ctx, "header split for csvw generation", log.INFO, log.Data{"header": header, "column_offset": strconv.Itoa(offset)})
 
 	csvw := New(metadata, downloadURL)
 
 	var list []Column
-	obs := newObservationColumn(h[0], metadata.UnitOfMeasure)
+	obs := newObservationColumn(ctx, h[0], metadata.UnitOfMeasure)
 	list = append(list, obs)
-	log.Info("added observation column to CSVW", log.Data{"column": obs})
+	log.Event(ctx, "added observation column to csvw", log.INFO, log.Data{"column": obs})
 
 	//add data markings columns
 	if offset != 0 {
 		for i := 1; i <= offset; i++ {
 			c := newColumn(h[i], "")
 			list = append(list, c)
-			log.Info("added observation metadata column to CSVW", log.Data{"column": c})
+			log.Event(ctx, "added observation metadata column to csvw", log.INFO, log.Data{"column": c})
 		}
 	}
 
@@ -135,7 +138,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 	//add dimension columns
 	for i := 0; i < len(h); i = i + 2 {
 		c, l := newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
-		log.Info("added pair of dimension columns to CSVW", log.Data{"code_column": c, "label_column": l})
+		log.Event(ctx, "added pair of dimension columns to csvw", log.INFO, log.Data{"code_column": c, "label_column": l})
 		list = append(list, c, l)
 	}
 
@@ -149,7 +152,7 @@ func Generate(metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDoma
 		C:     list,
 	}
 
-	log.Info("all columns added to CSVW", log.Data{"number_of_columns": strconv.Itoa(len(list))})
+	log.Event(ctx, "all columns added to csvw", log.INFO, log.Data{"number_of_columns": strconv.Itoa(len(list))})
 	csvw.AddNotes(metadata, downloadURL)
 
 	b, err := json.Marshal(csvw)
@@ -216,21 +219,21 @@ func splitHeader(header string) ([]string, int, error) {
 	return h, offset, err
 }
 
-func newObservationColumn(title, name string) Column {
+func newObservationColumn(ctx context.Context, title, name string) Column {
 	c := newColumn(title, name)
 
 	c["datatype"] = "string"
 
-	log.Info("adding observations column", log.Data{"column": c})
+	log.Event(ctx, "adding observations column", log.INFO, log.Data{"column": c})
 	return c
 }
 
-func newCodeAndLabelColumns(i int, apiDomain string, header []string, dims []dataset.Dimension) (Column, Column) {
+func newCodeAndLabelColumns(i int, apiDomain string, header []string, dims []dataset.VersionDimension) (Column, Column) {
 	codeHeader := header[i]
 	dimHeader := header[i+1]
 	dimHeader = strings.ToLower(dimHeader)
 
-	var dim dataset.Dimension
+	var dim dataset.VersionDimension
 
 	for _, d := range dims {
 		if d.Name == dimHeader {

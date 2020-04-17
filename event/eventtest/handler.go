@@ -13,19 +13,23 @@ var (
 	lockHandlerMockHandle sync.RWMutex
 )
 
-// HandlerMock is a mock implementation of Handler.
+// Ensure, that HandlerMock does implement event.Handler.
+// If this is not the case, regenerate this file with moq.
+var _ event.Handler = &HandlerMock{}
+
+// HandlerMock is a mock implementation of event.Handler.
 //
 //     func TestSomethingThatUsesHandler(t *testing.T) {
 //
-//         // make and configure a mocked Handler
+//         // make and configure a mocked event.Handler
 //         mockedHandler := &HandlerMock{
 //             HandleFunc: func(ctx context.Context, filterSubmittedEvent *event.FilterSubmitted) error {
-// 	               panic("TODO: mock out the Handle method")
+// 	               panic("mock out the Handle method")
 //             },
 //         }
 //
-//         // TODO: use mockedHandler in code that requires Handler
-//         //       and then make assertions.
+//         // use mockedHandler in code that requires event.Handler
+//         // and then make assertions.
 //
 //     }
 type HandlerMock struct {
