@@ -1,32 +1,28 @@
 package errors_test
 
 import (
+	"context"
 	errs "errors"
-	"github.com/ONSdigital/dp-dataset-exporter/errors"
-	"github.com/ONSdigital/dp-dataset-exporter/errors/errorstest"
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/ONSdigital/dp-dataset-exporter/errors"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestSpec(t *testing.T) {
+var ctx = context.Background()
 
+func TestSpec(t *testing.T) {
 	Convey("Given an event handler with a mock message producer", t, func() {
 
 		mockOutputMessageChan := make(chan []byte, 1)
-		mockedMessageProducer := &errorstest.MessageProducerMock{
-			OutputFunc: func() chan []byte {
-				return mockOutputMessageChan
-			},
-		}
-
-		errorHandler := errors.NewKafkaHandler(mockedMessageProducer)
+		errorHandler := errors.NewKafkaHandler(mockOutputMessageChan)
 
 		Convey("When handle is called", func() {
 
 			filterID := "234"
 			expectedError := errs.New("the error text")
 
-			errorHandler.Handle(filterID, expectedError)
+			errorHandler.Handle(ctx, filterID, expectedError)
 
 			Convey("The error is sent to the message producer with the expected data", func() {
 

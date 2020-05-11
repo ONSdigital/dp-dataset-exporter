@@ -16,18 +16,18 @@ var (
 // If this is not the case, regenerate this file with moq.
 var _ event.Marshaller = &MarshallerMock{}
 
-// MarshallerMock is a mock implementation of Marshaller.
+// MarshallerMock is a mock implementation of event.Marshaller.
 //
 //     func TestSomethingThatUsesMarshaller(t *testing.T) {
 //
-//         // make and configure a mocked Marshaller
+//         // make and configure a mocked event.Marshaller
 //         mockedMarshaller := &MarshallerMock{
 //             MarshalFunc: func(s interface{}) ([]byte, error) {
 // 	               panic("mock out the Marshal method")
 //             },
 //         }
 //
-//         // use mockedMarshaller in code that requires Marshaller
+//         // use mockedMarshaller in code that requires event.Marshaller
 //         // and then make assertions.
 //
 //     }

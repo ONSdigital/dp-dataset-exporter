@@ -16,18 +16,18 @@ var (
 // If this is not the case, regenerate this file with moq.
 var _ reader.WrappedReader = &WrappedReaderMock{}
 
-// WrappedReaderMock is a mock implementation of WrappedReader.
+// WrappedReaderMock is a mock implementation of reader.WrappedReader.
 //
 //     func TestSomethingThatUsesWrappedReader(t *testing.T) {
 //
-//         // make and configure a mocked WrappedReader
+//         // make and configure a mocked reader.WrappedReader
 //         mockedWrappedReader := &WrappedReaderMock{
 //             ReadFunc: func(p []byte) (int, error) {
 // 	               panic("mock out the Read method")
 //             },
 //         }
 //
-//         // use mockedWrappedReader in code that requires WrappedReader
+//         // use mockedWrappedReader in code that requires reader.WrappedReader
 //         // and then make assertions.
 //
 //     }

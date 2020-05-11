@@ -11,6 +11,13 @@ export GRAPH_DRIVER_TYPE?=neptune
 export GRAPH_ADDR?=ws://localhost:8182/gremlin
 
 VAULT_ADDR?=http://127.0.0.1:8200
+BUILD_TIME=$(shell date +%s)
+GIT_COMMIT=$(shell git rev-parse HEAD)
+VERSION ?= $(shell git tag --points-at HEAD | grep ^v | head -n 1)
+LDFLAGS=-ldflags "-w -s -X 'main.Version=${VERSION}' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)'"
+
+VAULT_ADDR?='http://127.0.0.1:8200'
+DATABASE_ADDRESS?=bolt://localhost:7687
 
 # The following variables are used to generate a vault token for the app. The reason for declaring variables, is that
 # its difficult to move the token code in a Makefile action. Doing so makes the Makefile more difficult to
@@ -23,11 +30,12 @@ generate:
 	go generate ./...
 build:
 	@mkdir -p $(BUILD_ARCH)/$(BIN_DIR)
-	go build -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
+	go build $(LDFLAGS) -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
+
 debug acceptance:
-	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run -race cmd/dp-dataset-exporter/main.go
+	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run $(LDFLAGS) -race cmd/dp-dataset-exporter/main.go
 test:
-	go test -count=1 -cover $(shell go list ./... | grep -v /vendor/)
+	go test -cover -race ./...
 vault:
 	@echo "$(VAULT_POLICY)"
 	@echo "$(TOKEN_INFO)"

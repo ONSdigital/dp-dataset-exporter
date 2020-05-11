@@ -51,7 +51,7 @@ job "dp-dataset-exporter" {
         tags = ["publishing"]
         check {
           type     = "http"
-          path     = "/healthcheck"
+          path     = "/health"
           interval = "10s"
           timeout  = "2s"
         }

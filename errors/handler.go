@@ -1,41 +1,36 @@
 package errors
 
 import (
-	"github.com/ONSdigital/go-ns/log"
+	"context"
+
+	"github.com/ONSdigital/log.go/log"
 )
 
 //go:generate moq -out errorstest/handler.go -pkg errorstest . Handler
-//go:generate moq -out errorstest/message_producer.go -pkg errorstest . MessageProducer
 
 var _ Handler = (*KafkaHandler)(nil)
 
 // Handler is a generic interface for handling errors
 type Handler interface {
-	Handle(filterID string, err error)
+	Handle(ctx context.Context, filterID string, err error)
 }
 
 // KafkaHandler provides an error handler that writes to the kafka error topic
 type KafkaHandler struct {
-	messageProducer MessageProducer
+	messageProducer chan []byte
 }
 
 //NewKafkaHandler returns a new KafkaHandler that sends error messages
-func NewKafkaHandler(messageProducer MessageProducer) *KafkaHandler {
+func NewKafkaHandler(messageProducer chan []byte) *KafkaHandler {
 	return &KafkaHandler{
 		messageProducer: messageProducer,
 	}
 }
 
-//MessageProducer deoedency that writes messages to channels
-type MessageProducer interface {
-	Output() chan []byte
-}
-
 // Handle logs the error to the error handler via a kafka message
-func (handler *KafkaHandler) Handle(filterID string, err error) {
-
+func (handler *KafkaHandler) Handle(ctx context.Context, filterID string, err error) {
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
-	log.Info("an error occured while processing a filter job", data)
+	log.Event(ctx, "an error occurred while processing a filter job", log.INFO, data)
 
 	error := Event{
 		FilterID:    filterID,
@@ -46,8 +41,8 @@ func (handler *KafkaHandler) Handle(filterID string, err error) {
 
 	errMsg, err := EventSchema.Marshal(error)
 	if err != nil {
-		log.ErrorC("failed to marshall error to event-reporter", err, data)
+		log.Event(ctx, "failed to marshall error to event-reporter", data, log.ERROR, log.Error(err))
 		return
 	}
-	handler.messageProducer.Output() <- errMsg
+	handler.messageProducer <- errMsg
 }

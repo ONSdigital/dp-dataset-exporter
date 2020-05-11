@@ -1,14 +1,17 @@
 package csvw
 
 import (
+	"context"
 	"testing"
 
-	"github.com/ONSdigital/go-ns/clients/dataset"
+	"github.com/ONSdigital/dp-api-clients-go/dataset"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 var fileURL = "ons/file.csv"
 var apiURL = "api.example.com"
+
+var ctx = context.Background()
 
 func TestNew(t *testing.T) {
 	Convey("Given a complete metadata struct", t, func() {
@@ -16,13 +19,13 @@ func TestNew(t *testing.T) {
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
 			},
-			Model: dataset.Model{
+			DatasetDetails: dataset.DatasetDetails{
 				Title:            "title",
 				Description:      "description",
 				Theme:            "theme",
 				License:          "license",
 				ReleaseFrequency: "annual",
-				Contacts: []dataset.Contact{
+				Contacts: &[]dataset.Contact{
 					dataset.Contact{
 						Name:      "contact name",
 						Telephone: "1234",
@@ -55,9 +58,10 @@ func TestNew(t *testing.T) {
 				So(csvw.Frequency, ShouldEqual, m.ReleaseFrequency)
 				So(csvw.URL, ShouldEqual, fileURL)
 
-				So(csvw.Contact[0].Name, ShouldEqual, m.Contacts[0].Name)
-				So(csvw.Contact[0].Telephone, ShouldEqual, m.Contacts[0].Telephone)
-				So(csvw.Contact[0].Email, ShouldEqual, m.Contacts[0].Email)
+				mContacts := *m.Contacts
+				So(csvw.Contact[0].Name, ShouldEqual, mContacts[0].Name)
+				So(csvw.Contact[0].Telephone, ShouldEqual, mContacts[0].Telephone)
+				So(csvw.Contact[0].Email, ShouldEqual, mContacts[0].Email)
 
 				So(csvw.Publisher.Name, ShouldResemble, m.Publisher.Name)
 				So(csvw.Publisher.Type, ShouldResemble, m.Publisher.Type)
@@ -108,7 +112,7 @@ func TestAddNotes(t *testing.T) {
 					},
 				},
 			},
-			Model: dataset.Model{
+			DatasetDetails: dataset.DatasetDetails{
 				UsageNotes: &[]dataset.UsageNote{
 					dataset.UsageNote{
 						Note:  "use it this way",
@@ -250,13 +254,14 @@ func TestSplitHeader(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
+
 	header := "V4_2, a, b, c, d"
 	Convey("Given metadata that includes a dimension", t, func() {
 		m := &dataset.Metadata{
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
-				Dimensions: []dataset.Dimension{
-					dataset.Dimension{
+				Dimensions: []dataset.VersionDimension{
+					dataset.VersionDimension{
 						Name: "geography",
 						Links: dataset.Links{
 							Self: dataset.Link{
@@ -268,11 +273,11 @@ func TestGenerate(t *testing.T) {
 					},
 				},
 			},
-			Model: dataset.Model{},
+			DatasetDetails: dataset.DatasetDetails{},
 		}
 
 		Convey("When the Generate csvw function is called", func() {
-			data, err := Generate(m, header, fileURL, fileURL, apiURL)
+			data, err := Generate(ctx, m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
 				So(data, ShouldHaveLength, 382)
@@ -286,11 +291,11 @@ func TestGenerate(t *testing.T) {
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
 			},
-			Model: dataset.Model{},
+			DatasetDetails: dataset.DatasetDetails{},
 		}
 
 		Convey("When the Generate csvw function is called", func() {
-			data, err := Generate(m, header, fileURL, fileURL, apiURL)
+			data, err := Generate(ctx, m, header, fileURL, fileURL, apiURL)
 
 			Convey("Then results should be returned with no errors", func() {
 				So(data, ShouldHaveLength, 0)

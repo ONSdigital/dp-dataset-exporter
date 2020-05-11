@@ -10,17 +10,27 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	"github.com/ONSdigital/go-ns/kafka"
-	"github.com/ONSdigital/go-ns/kafka/kafkatest"
-	"github.com/ONSdigital/go-ns/log"
+	kafka "github.com/ONSdigital/dp-kafka"
+	"github.com/ONSdigital/dp-kafka/kafkatest"
+	"github.com/ONSdigital/log.go/log"
 	. "github.com/smartystreets/goconvey/convey"
 )
+
+var ctx = context.Background()
 
 func TestConsume_UnmarshallError(t *testing.T) {
 	Convey("Given an event consumer with an invalid schema and a valid schema", t, func() {
 
-		messages := make(chan kafka.Message, 2)
-		mockConsumer := kafkatest.NewMessageConsumer(messages)
+		// Create mock kafka consumer with upstream channel with 2 buffered messages
+		mockConsumer := kafkatest.NewMessageConsumerWithChannels(
+			&kafka.ConsumerGroupChannels{
+				Upstream:     make(chan kafka.Message, 2),
+				Errors:       make(chan error),
+				Init:         make(chan struct{}),
+				Closer:       make(chan struct{}),
+				Closed:       make(chan struct{}),
+				UpstreamDone: make(chan bool, 1),
+			}, true)
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -30,14 +40,14 @@ func TestConsume_UnmarshallError(t *testing.T) {
 
 		expectedEvent := getExampleEvent()
 
-		messages <- kafkatest.NewMessage([]byte("invalid schema"))
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
-		messages <- message
+		mockConsumer.Channels().Upstream <- kafkatest.NewMessage([]byte("invalid schema"), 1)
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		mockConsumer.Channels().Upstream <- message
 
 		consumer := event.NewConsumer()
 
 		Convey("When consume messages is called", func() {
-			consumer.Consume(mockConsumer, mockEventHandler, nil, nil)
+			consumer.Consume(mockConsumer, mockEventHandler, nil)
 			waitForMessageToBeCommitted(message)
 
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
@@ -54,8 +64,8 @@ func TestConsume(t *testing.T) {
 
 	Convey("Given an event consumer with a valid schema", t, func() {
 
-		messages := make(chan kafka.Message, 1)
-		mockConsumer := kafkatest.NewMessageConsumer(messages)
+		mockConsumer := kafkatest.NewMessageConsumer(true)
+
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
@@ -63,14 +73,14 @@ func TestConsume(t *testing.T) {
 		}
 
 		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 
-		messages <- message
+		mockConsumer.Channels().Upstream <- message
 
 		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
-			consumer.Consume(mockConsumer, mockEventHandler, nil, nil)
+			consumer.Consume(mockConsumer, mockEventHandler, nil)
 			waitForMessageToBeCommitted(message)
 
 			Convey("A event is sent to the mockEventHandler ", func() {
@@ -81,7 +91,7 @@ func TestConsume(t *testing.T) {
 			})
 
 			Convey("The message is committed", func() {
-				So(message.Committed(), ShouldEqual, true)
+				So(len(message.CommitCalls()), ShouldEqual, 1)
 			})
 		})
 	})
@@ -93,8 +103,8 @@ func TestConsume_HandlerError(t *testing.T) {
 
 		expectedError := errors.New("Something bad happened in the event handler.")
 
-		messages := make(chan kafka.Message, 1)
-		mockConsumer := kafkatest.NewMessageConsumer(messages)
+		mockConsumer := kafkatest.NewMessageConsumer(true)
+
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return expectedError
@@ -102,20 +112,20 @@ func TestConsume_HandlerError(t *testing.T) {
 		}
 
 		mockErrorHandler := &errorstest.HandlerMock{
-			HandleFunc: func(instanceID string, err error) {
+			HandleFunc: func(ctx context.Context, instanceID string, err error) {
 				// do nothing, just going to inspect the call.
 			},
 		}
 
 		expectedEvent := getExampleEvent()
 
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
-		messages <- message
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		mockConsumer.Channels().Upstream <- message
 
 		consumer := event.NewConsumer()
 
 		Convey("When consume is called", func() {
-			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler, nil)
+			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler)
 			waitForMessageToBeCommitted(message)
 
 			Convey("Then the error handler is given the error returned from the event handler", func() {
@@ -125,18 +135,17 @@ func TestConsume_HandlerError(t *testing.T) {
 			})
 
 			Convey("and the message is not committed - to be retried", func() {
-				So(message.Committed(), ShouldEqual, false)
+				So(len(message.CommitCalls()), ShouldEqual, 0)
 			})
 		})
 	})
 }
 
 func TestClose(t *testing.T) {
-
 	Convey("Given a consumer", t, func() {
 
-		messages := make(chan kafka.Message, 1)
-		mockConsumer := kafkatest.NewMessageConsumer(messages)
+		mockConsumer := kafkatest.NewMessageConsumer(true)
+
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
 				return nil
@@ -144,15 +153,15 @@ func TestClose(t *testing.T) {
 		}
 
 		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(marshal(*expectedEvent))
+		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 
-		messages <- message
+		mockConsumer.Channels().Upstream <- message
 
 		consumer := event.NewConsumer()
-		consumer.Consume(mockConsumer, mockEventHandler, nil, nil)
+		consumer.Consume(mockConsumer, mockEventHandler, nil)
 		Convey("When close is called", func() {
 
-			err := consumer.Close(context.Background())
+			err := consumer.Close(ctx)
 
 			Convey("Then no errors are returned", func() {
 				So(err, ShouldBeNil)
@@ -176,17 +185,16 @@ func getExampleEvent() *event.FilterSubmitted {
 }
 
 func waitForMessageToBeCommitted(message *kafkatest.Message) {
-
 	start := time.Now()
 	timeout := start.Add(time.Millisecond * 500)
 	for {
-		if message.Committed() {
-			log.Debug("message has been committed", nil)
+		if len(message.CommitCalls()) > 0 {
+			log.Event(ctx, "message has been committed", log.INFO)
 			break
 		}
 
 		if time.Now().After(timeout) {
-			log.Debug("timeout hit", nil)
+			log.Event(ctx, "timeout hit", log.INFO)
 			break
 		}
 
