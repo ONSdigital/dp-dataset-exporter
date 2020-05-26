@@ -9,7 +9,6 @@ import (
 
 	"github.com/ONSdigital/dp-api-clients-go/filter"
 
-	"github.com/ONSdigital/dp-graph/observation"
 	"github.com/ONSdigital/log.go/log"
 )
 
@@ -25,16 +24,6 @@ type Client interface {
 type Store struct {
 	Client
 	serviceAuthToken string
-}
-
-// FilterOutput represents a structure used to update the filter api
-type FilterOutput struct {
-	FilterID   string                 `json:"filter_id,omitempty"`
-	InstanceID string                 `json:"instance_id"`
-	State      string                 `json:"state,omitempty"`
-	Downloads  *observation.Downloads `json:"downloads,omitempty"`
-	Events     []*Event               `json:"events,omitempty"`
-	Published  bool                   `json:"published,omitempty"`
 }
 
 // Event represents a structure with type and time
@@ -58,42 +47,43 @@ func NewStore(cli Client, serviceAuthToken string) *Store {
 }
 
 // PutCSVData allows the filtered file data to be sent back to the filter store when complete.
-func (store *Store) PutCSVData(ctx context.Context, filterJobID string, csv observation.DownloadItem) error {
+func (store *Store) PutCSVData(ctx context.Context, filterJobID string, csv filter.Download) error {
 
 	// Add the CSV file to the filter job, the filter api will update the state when all formats are completed
-	putBody := FilterOutput{
-		Downloads: &observation.Downloads{
-			CSV: &observation.DownloadItem{
-				HRef:    csv.HRef,
+	putBody := filter.Model{
+		Downloads: map[string]filter.Download{
+			"CSV": {
+				URL:     csv.URL,
 				Private: csv.Private,
 				Public:  csv.Public,
 				Size:    csv.Size,
 			},
 		},
 	}
-	return store.updateFilterOutput(ctx, filterJobID, &putBody)
+
+	return store.updateFilterOutput(ctx, filterJobID, putBody)
 }
 
 // PutStateAsEmpty sets the filter output as empty
 func (store *Store) PutStateAsEmpty(ctx context.Context, filterJobID string) error {
-	putBody := FilterOutput{
+	putBody := filter.Model{
 		State: "completed",
 	}
 
-	return store.updateFilterOutput(ctx, filterJobID, &putBody)
+	return store.updateFilterOutput(ctx, filterJobID, putBody)
 }
 
 // PutStateAsError set the filter output as an error, we shouldn't state the type of error as
 // this will be displayed to the public
 func (store *Store) PutStateAsError(ctx context.Context, filterJobID string) error {
-	putBody := FilterOutput{
+	putBody := filter.Model{
 		State: "failed",
 	}
 
-	return store.updateFilterOutput(ctx, filterJobID, &putBody)
+	return store.updateFilterOutput(ctx, filterJobID, putBody)
 }
 
-func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, filter *FilterOutput) error {
+func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, filter filter.Model) error {
 
 	payload, err := json.Marshal(filter)
 	if err != nil {
@@ -105,7 +95,7 @@ func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, 
 }
 
 // GetFilter returns filter data from the filter API for the given ID
-func (store *Store) GetFilter(ctx context.Context, filterOutputID string) (filter *observation.Filter, err error) {
+func (store *Store) GetFilter(ctx context.Context, filterOutputID string) (filter *filter.Model, err error) {
 
 	bytes, err := store.GetOutputBytes(ctx, "", store.serviceAuthToken, "", "", filterOutputID)
 	if err != nil {
