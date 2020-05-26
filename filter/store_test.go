@@ -10,29 +10,26 @@ import (
 	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter/filtertest"
-	"github.com/ONSdigital/dp-graph/observation"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 const (
-	filterAPIURL   = "http://filter-api:8765"
 	filterOutputID = "123456784432"
-
-	fileHRef    = "download-url"
-	privateLink = "s3-private-link"
-	publicLink  = "s3-public-link"
-	fileSize    = "12345"
+	fileURL        = "download-url"
+	privateLink    = "s3-private-link"
+	publicLink     = "s3-public-link"
+	fileSize       = "12345"
 )
 
-var mockDimensionListData = []*observation.DimensionFilter{{
+var mockDimensionListData = []filterCli.ModelDimension{{
 	Name:    "Sex",
 	Options: []string{"male"},
 }}
 
-var mockFilterData = &observation.Filter{
-	FilterID:         filterOutputID,
-	InstanceID:       "123",
-	DimensionFilters: mockDimensionListData,
+var mockFilterData = &filterCli.Model{
+	FilterID:   filterOutputID,
+	InstanceID: "123",
+	Dimensions: mockDimensionListData,
 }
 
 var ctx = context.Background()
@@ -59,8 +56,8 @@ func TestStore_GetFilter(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				So(filter.FilterID, ShouldEqual, filterOutputID)
-				So(filter.DimensionFilters[0].Name, ShouldEqual, "Sex")
-				So(filter.DimensionFilters[0].Options, ShouldResemble, []string{"male"})
+				So(filter.Dimensions[0].Name, ShouldEqual, "Sex")
+				So(filter.Dimensions[0].Options, ShouldResemble, []string{"male"})
 			})
 
 			Convey("Filter client is called with the valid serviceAuthToken", func() {
@@ -174,8 +171,8 @@ func TestStore_PutCSVData(t *testing.T) {
 		filterStore := filter.NewStore(mockFilterClient, validServiceToken)
 
 		Convey("When PutCSVData is called with csv private link", func() {
-			csv := &observation.DownloadItem{
-				HRef:    fileHRef,
+			csv := &filterCli.Download{
+				URL:     fileURL,
 				Private: privateLink,
 				Size:    fileSize,
 			}
@@ -190,19 +187,19 @@ func TestStore_PutCSVData(t *testing.T) {
 				So(mockFilterClient.UpdateFilterOutputBytesCalls()[0].FilterJobID, ShouldEqual, filterOutputID)
 
 				// Validate filter output sent
-				actualFilter := &filter.FilterOutput{}
+				actualFilter := &filterCli.Model{}
 				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
 				So(err, ShouldBeNil)
-				So(actualFilter.Downloads.CSV.HRef, ShouldEqual, fileHRef)
-				So(actualFilter.Downloads.CSV.Private, ShouldEqual, privateLink)
-				So(actualFilter.Downloads.CSV.Public, ShouldBeEmpty)
-				So(actualFilter.Downloads.CSV.Size, ShouldEqual, fileSize)
+				So(actualFilter.Downloads["CSV"].URL, ShouldEqual, fileURL)
+				So(actualFilter.Downloads["CSV"].Private, ShouldEqual, privateLink)
+				So(actualFilter.Downloads["CSV"].Public, ShouldBeEmpty)
+				So(actualFilter.Downloads["CSV"].Size, ShouldEqual, fileSize)
 			})
 		})
 
 		Convey("When PutCSVData is called with csv public link", func() {
-			csv := &observation.DownloadItem{
-				HRef:   fileHRef,
+			csv := &filterCli.Download{
+				URL:    fileURL,
 				Public: publicLink,
 				Size:   fileSize,
 			}
@@ -217,13 +214,13 @@ func TestStore_PutCSVData(t *testing.T) {
 				So(mockFilterClient.UpdateFilterOutputBytesCalls()[0].FilterJobID, ShouldEqual, filterOutputID)
 
 				// Validate filter output sent
-				actualFilter := &filter.FilterOutput{}
+				actualFilter := &filterCli.Model{}
 				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
 				So(err, ShouldBeNil)
-				So(actualFilter.Downloads.CSV.HRef, ShouldEqual, fileHRef)
-				So(actualFilter.Downloads.CSV.Private, ShouldBeEmpty)
-				So(actualFilter.Downloads.CSV.Public, ShouldEqual, publicLink)
-				So(actualFilter.Downloads.CSV.Size, ShouldEqual, fileSize)
+				So(actualFilter.Downloads["CSV"].URL, ShouldEqual, fileURL)
+				So(actualFilter.Downloads["CSV"].Private, ShouldBeEmpty)
+				So(actualFilter.Downloads["CSV"].Public, ShouldEqual, publicLink)
+				So(actualFilter.Downloads["CSV"].Size, ShouldEqual, fileSize)
 			})
 		})
 	})
@@ -232,8 +229,8 @@ func TestStore_PutCSVData(t *testing.T) {
 func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 
 	Convey("Given a store with a mocked filter client with StatusNotFound error response", t, func() {
-		csv := &observation.DownloadItem{
-			HRef:    fileHRef,
+		csv := &filterCli.Download{
+			URL:     fileURL,
 			Private: privateLink,
 			Size:    fileSize,
 		}
@@ -267,8 +264,8 @@ func TestStore_PutCSVData_HTTPNotFoundError(t *testing.T) {
 func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 
 	Convey("Given a store with a mocked filter client with StatusInternalServerError error response", t, func() {
-		csv := &observation.DownloadItem{
-			HRef:    fileHRef,
+		csv := &filterCli.Download{
+			URL:     fileURL,
 			Private: privateLink,
 			Size:    fileSize,
 		}
@@ -302,8 +299,8 @@ func TestStore_PutCSVData_HTTPInternalServerError(t *testing.T) {
 func TestStore_PutCSVData_HTTPUnrecognisedError(t *testing.T) {
 
 	Convey("Given a store with a mocked filter client with StatusBadGateway error response", t, func() {
-		csv := &observation.DownloadItem{
-			HRef:    fileHRef,
+		csv := &filterCli.Download{
+			URL:     fileURL,
 			Private: privateLink,
 			Size:    fileSize,
 		}
@@ -355,7 +352,7 @@ func TestStore_PutStateAsEmpty(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				// Validate filter output sent
-				actualFilter := &filter.FilterOutput{}
+				actualFilter := &filterCli.Model{}
 				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
 				So(err, ShouldBeNil)
 				So(actualFilter.State, ShouldEqual, "completed")
@@ -384,7 +381,7 @@ func TestStore_PutStateAsError(t *testing.T) {
 				So(err, ShouldBeNil)
 
 				// Validate filter output sent
-				actualFilter := &filter.FilterOutput{}
+				actualFilter := &filterCli.Model{}
 				err := json.Unmarshal(mockFilterClient.UpdateFilterOutputBytesCalls()[0].B, actualFilter)
 				So(err, ShouldBeNil)
 				So(actualFilter.State, ShouldEqual, "failed")

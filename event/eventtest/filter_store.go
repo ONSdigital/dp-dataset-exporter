@@ -5,8 +5,8 @@ package eventtest
 
 import (
 	"context"
+	"github.com/ONSdigital/dp-api-clients-go/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
-	"github.com/ONSdigital/dp-graph/observation"
 	"sync"
 )
 
@@ -27,10 +27,10 @@ var _ event.FilterStore = &FilterStoreMock{}
 //
 //         // make and configure a mocked event.FilterStore
 //         mockedFilterStore := &FilterStoreMock{
-//             GetFilterFunc: func(ctx context.Context, filterID string) (*observation.Filter, error) {
+//             GetFilterFunc: func(ctx context.Context, filterID string) (*filter.Model, error) {
 // 	               panic("mock out the GetFilter method")
 //             },
-//             PutCSVDataFunc: func(ctx context.Context, filterID string, downloadItem observation.DownloadItem) error {
+//             PutCSVDataFunc: func(ctx context.Context, filterID string, downloadItem filter.Download) error {
 // 	               panic("mock out the PutCSVData method")
 //             },
 //             PutStateAsEmptyFunc: func(ctx context.Context, filterJobID string) error {
@@ -47,10 +47,10 @@ var _ event.FilterStore = &FilterStoreMock{}
 //     }
 type FilterStoreMock struct {
 	// GetFilterFunc mocks the GetFilter method.
-	GetFilterFunc func(ctx context.Context, filterID string) (*observation.Filter, error)
+	GetFilterFunc func(ctx context.Context, filterID string) (*filter.Model, error)
 
 	// PutCSVDataFunc mocks the PutCSVData method.
-	PutCSVDataFunc func(ctx context.Context, filterID string, downloadItem observation.DownloadItem) error
+	PutCSVDataFunc func(ctx context.Context, filterID string, downloadItem filter.Download) error
 
 	// PutStateAsEmptyFunc mocks the PutStateAsEmpty method.
 	PutStateAsEmptyFunc func(ctx context.Context, filterJobID string) error
@@ -74,7 +74,7 @@ type FilterStoreMock struct {
 			// FilterID is the filterID argument value.
 			FilterID string
 			// DownloadItem is the downloadItem argument value.
-			DownloadItem observation.DownloadItem
+			DownloadItem filter.Download
 		}
 		// PutStateAsEmpty holds details about calls to the PutStateAsEmpty method.
 		PutStateAsEmpty []struct {
@@ -94,7 +94,7 @@ type FilterStoreMock struct {
 }
 
 // GetFilter calls GetFilterFunc.
-func (mock *FilterStoreMock) GetFilter(ctx context.Context, filterID string) (*observation.Filter, error) {
+func (mock *FilterStoreMock) GetFilter(ctx context.Context, filterID string) (*filter.Model, error) {
 	if mock.GetFilterFunc == nil {
 		panic("FilterStoreMock.GetFilterFunc: method is nil but FilterStore.GetFilter was just called")
 	}
@@ -129,14 +129,14 @@ func (mock *FilterStoreMock) GetFilterCalls() []struct {
 }
 
 // PutCSVData calls PutCSVDataFunc.
-func (mock *FilterStoreMock) PutCSVData(ctx context.Context, filterID string, downloadItem observation.DownloadItem) error {
+func (mock *FilterStoreMock) PutCSVData(ctx context.Context, filterID string, downloadItem filter.Download) error {
 	if mock.PutCSVDataFunc == nil {
 		panic("FilterStoreMock.PutCSVDataFunc: method is nil but FilterStore.PutCSVData was just called")
 	}
 	callInfo := struct {
 		Ctx          context.Context
 		FilterID     string
-		DownloadItem observation.DownloadItem
+		DownloadItem filter.Download
 	}{
 		Ctx:          ctx,
 		FilterID:     filterID,
@@ -154,12 +154,12 @@ func (mock *FilterStoreMock) PutCSVData(ctx context.Context, filterID string, do
 func (mock *FilterStoreMock) PutCSVDataCalls() []struct {
 	Ctx          context.Context
 	FilterID     string
-	DownloadItem observation.DownloadItem
+	DownloadItem filter.Download
 } {
 	var calls []struct {
 		Ctx          context.Context
 		FilterID     string
-		DownloadItem observation.DownloadItem
+		DownloadItem filter.Download
 	}
 	lockFilterStoreMockPutCSVData.RLock()
 	calls = mock.calls.PutCSVData
