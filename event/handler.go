@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ONSdigital/dp-api-clients-go/filter"
+	filterAPI "github.com/ONSdigital/dp-api-clients-go/filter"
+	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"io"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
@@ -81,8 +81,8 @@ func NewExportHandler(
 
 // FilterStore provides existing filter data.
 type FilterStore interface {
-	GetFilter(ctx context.Context, filterID string) (*filter.Model, error)
-	PutCSVData(ctx context.Context, filterID string, downloadItem filter.Download) error
+	GetFilter(ctx context.Context, filterID string) (*filterAPI.Model, error)
+	PutCSVData(ctx context.Context, filterID string, downloadItem filterAPI.Download) error
 	PutStateAsEmpty(ctx context.Context, filterJobID string) error
 	PutStateAsError(ctx context.Context, filterJobID string) error
 }
@@ -94,6 +94,7 @@ type ObservationStore interface {
 
 // FileStore provides storage for filtered output files.
 type FileStore interface {
+	GetFile(ctx context.Context, filename string) (file io.ReadCloser, err error)
 	PutFile(ctx context.Context, reader io.Reader, filename string, isPublished bool) (url string, err error)
 }
 
@@ -181,44 +182,127 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
-	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
+	f, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return nil, err
 	}
 
-	dbFilter := mapFilter(filter)
+	// split filter into batches
+	s := filter.NewSplitter(8)
+	filterParts := s.Split(f)
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
-	if err != nil {
-		return nil, err
+	results := make(chan string)
+
+	var filenames []string
+
+	for i, filterPart := range filterParts {
+
+		fmt.Println("Starting filter batch ", i)
+
+		dbFilter := mapFilter(filterPart)
+
+		filename := handler.filteredDatasetFilePrefix + f.FilterID + "_" + strconv.Itoa(i) + ".csv"
+		filenames = append(filenames, filename)
+
+		go func(filename string, filter observation.DimensionFilters) {
+
+			fmt.Println("filter part: ", filter)
+
+			csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, f.InstanceID, f.FilterID, dbFilter, nil)
+			if err != nil {
+				//return nil, err
+			}
+
+			reader := observation.NewReader(csvRowReader)
+			defer func() {
+				closeErr := reader.Close(ctx)
+				if closeErr != nil {
+					log.Event(ctx, "error closing reader", log.ERROR, log.Error(closeErr))
+				}
+			}()
+
+			// When getting the data from the reader, this will call the neo4j driver to start streaming the data
+			// into the S3 library. We can only tell if data is present by reading the stream.
+			fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
+			if err != nil {
+				if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
+					log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": f.InstanceID,
+						"filter": f})
+					updateErr := handler.filterStore.PutStateAsEmpty(ctx, f.FilterID)
+					if updateErr != nil {
+						//return nil, updateErr
+					}
+					//return nil, err
+				} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
+					log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": f.InstanceID,
+						"filter": f}, log.Error(err))
+					updateErr := handler.filterStore.PutStateAsError(ctx, f.FilterID)
+					if updateErr != nil {
+						log.Event(ctx, "error", log.ERROR, log.Error(err))
+						//return nil, updateErr
+					}
+					log.Event(ctx, "error", log.ERROR, log.Error(err))
+					//return nil, err
+				}
+				log.Event(ctx, "error", log.ERROR, log.Error(err))
+				//return nil, err
+			}
+
+			log.Event(ctx, "file uploaded", log.INFO, log.Data{"fileURL": fileURL, "observations": reader.ObservationsCount()})
+
+			results <- fileURL
+		}(filename, *dbFilter)
 	}
 
-	reader := observation.NewReader(csvRowReader)
+	var partUrls []string
+
+	log.Event(ctx, "Waiting for all filter parts to complete", log.INFO)
+	for i := 0; i < len(filterParts); i++ {
+		select {
+		case result := <- results:
+			partUrls = append(partUrls, result)
+		}
+	}
+	log.Event(ctx, "all filter parts complete", log.INFO, log.Data{"urls": partUrls})
+
+	var partReaders []io.Reader
+	var partReadClosers []io.ReadCloser
+	for _, filename := range filenames {
+
+		file, err := handler.fileStore.GetFile(ctx, filename)
+		if err != nil {
+			return nil, err
+		}
+		partReaders = append(partReaders, file)
+		partReadClosers = append(partReadClosers, file)
+	}
+
 	defer func() {
-		closeErr := reader.Close(ctx)
-		if closeErr != nil {
-			log.Event(ctx, "error closing reader", log.ERROR, log.Error(closeErr))
+		for _, closer := range partReadClosers {
+			closer.Close()
 		}
 	}()
 
-	filename := handler.filteredDatasetFilePrefix + filter.FilterID + ".csv"
+	multiReader := io.MultiReader(partReaders...)
+
+	filename := handler.filteredDatasetFilePrefix + f.FilterID + ".csv"
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
+	fileURL, err := handler.fileStore.PutFile(ctx, multiReader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
-			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter})
-			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filter.FilterID)
+			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": f.InstanceID,
+				"filter": f})
+			updateErr := handler.filterStore.PutStateAsEmpty(ctx, f.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
 			return nil, err
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
-			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter}, log.Error(err))
-			updateErr := handler.filterStore.PutStateAsError(ctx, filter.FilterID)
+			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": f.InstanceID,
+				"filter": f}, log.Error(err))
+			updateErr := handler.filterStore.PutStateAsError(ctx, f.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
@@ -227,21 +311,26 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
-	csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
+	//csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
+	//
+	//// write url and file size to filter API
+	//err = handler.filterStore.PutCSVData(ctx, f.FilterID, csv)
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "error while putting CSV in filter store")
+	//}
 
-	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(ctx, filter.FilterID, csv)
-	if err != nil {
-		return nil, errors.Wrap(err, "error while putting CSV in filter store")
-	}
+	//rowCount := reader.ObservationsCount()
 
-	rowCount := reader.ObservationsCount()
+	//todo - maintain the count of rows
+	var rowCount int32 = 1
 
-	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
-	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL, RowCount: rowCount}, nil
+	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": f.FilterID, "file_url": fileURL, "row_count": rowCount})
+	return &CSVExported{FilterID: f.FilterID, FileURL: fileURL, RowCount: rowCount}, nil
+	return &CSVExported{FilterID: f.FilterID, FileURL: "", RowCount: 1}, nil
+
 }
 
-func mapFilter(filter *filter.Model) *observation.DimensionFilters {
+func mapFilter(filter *filterAPI.Model) *observation.DimensionFilters {
 
 	dbFilterDimensions := mapFilterDimensions(filter)
 
@@ -253,21 +342,23 @@ func mapFilter(filter *filter.Model) *observation.DimensionFilters {
 	return dbFilter
 }
 
-func mapFilterDimensions(filter *filter.Model) []*observation.Dimension {
+func mapFilterDimensions(filter *filterAPI.Model) []*observation.Dimension {
 
 	var dbFilterDimensions []*observation.Dimension
 
 	for _, dimension := range filter.Dimensions {
+		var options = make([]string, len(dimension.Options))
+		copy(options, dimension.Options)
 		dbFilterDimensions = append(dbFilterDimensions, &observation.Dimension{
 			Name:    dimension.Name,
-			Options: dimension.Options,
+			Options: options,
 		})
 	}
 
 	return dbFilterDimensions
 }
 
-func createCSVDownloadData(handler *ExportHandler, event *FilterSubmitted, isPublished bool, reader *observation.Reader, fileURL string) filter.Download {
+func createCSVDownloadData(handler *ExportHandler, event *FilterSubmitted, isPublished bool, reader *observation.Reader, fileURL string) filterAPI.Download {
 
 	downloadURL := fmt.Sprintf("%s/downloads/filter-outputs/%s.csv",
 		handler.downloadServiceURL,
@@ -275,10 +366,10 @@ func createCSVDownloadData(handler *ExportHandler, event *FilterSubmitted, isPub
 	)
 
 	if isPublished {
-		return filter.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, URL: downloadURL}
+		return filterAPI.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, URL: downloadURL}
 	}
 
-	return filter.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, URL: downloadURL}
+	return filterAPI.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Private: fileURL, URL: downloadURL}
 }
 
 func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {

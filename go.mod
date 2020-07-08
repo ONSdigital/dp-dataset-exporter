@@ -2,6 +2,9 @@ module github.com/ONSdigital/dp-dataset-exporter
 
 go 1.13
 
+replace github.com/ONSdigital/dp-graph/v2 => /Users/carl/code/dp-graph
+//replace github.com/ONSdigital/gremgo-neptune => /Users/carl/code/gremgo-neptune
+
 require (
 	github.com/ONSdigital/dp-api-clients-go v1.9.0
 	github.com/ONSdigital/dp-graph/v2 v2.0.12

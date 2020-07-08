@@ -36,6 +36,7 @@ type VaultClient interface {
 
 // Store provides file storage via S3.
 type Store struct {
+	S3Client       *s3client.S3
 	Uploader       Uploader
 	CryptoUploader Uploader
 	PublicURL      string
@@ -62,6 +63,11 @@ func NewStore(
 
 	cryptoUploader := s3client.NewUploaderWithSession(privateBucket, true, uploader.Session())
 
+	s3Client, err := s3client.NewClient(region, publicBucket, false)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Store{
 		Uploader:       uploader,
 		CryptoUploader: cryptoUploader,
@@ -70,7 +76,23 @@ func NewStore(
 		privateBucket:  privateBucket,
 		VaultPath:      vaultPath,
 		VaultClient:    vaultClient,
+		S3Client:       s3Client,
 	}, nil
+}
+
+func (store *Store) GetFile(ctx context.Context, filename string) (file io.ReadCloser, err error) {
+
+	log.Event(ctx, "getting file from S3", log.INFO, log.Data{
+		"bucket": store.PublicBucket,
+		"name":   filename,
+	})
+
+	response, err := store.S3Client.Get(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
