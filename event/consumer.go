@@ -52,15 +52,16 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 			case message := <-messageConsumer.Channels().Upstream:
 				// This context will be obtained from the kafka message in the future
 				ctx := context.Background()
+				logData := log.Data{"message_offset": message.Offset()}
 				err := processMessage(ctx, message, handler, errorHandler)
 				if err != nil {
-					log.Event(ctx, "failed to process message", log.INFO, log.Data{"err": err})
+					log.Event(ctx, "failed to process message", log.ERROR, log.Error(err), logData)
 				} else {
-					logData := log.Data{"message_offset": message.Offset()}
 					log.Event(ctx, "event processed - committing message", log.INFO, logData)
-					messageConsumer.CommitAndRelease(message)
-					log.Event(ctx, "message committed", log.INFO, logData)
 				}
+
+				messageConsumer.CommitAndRelease(message)
+				log.Event(ctx, "message committed", log.INFO, logData)
 
 			case event := <-consumer.closing:
 				log.Event(event.ctx, "closing event consumer loop", log.INFO)
