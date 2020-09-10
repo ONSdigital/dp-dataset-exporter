@@ -45,6 +45,7 @@ func NewConsumer() *Consumer {
 func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler) {
 
 	go func() {
+		defer log.Event(nil, "===== Consumer stopped listening")
 		defer close(consumer.closed)
 
 		for {
