@@ -47,9 +47,8 @@ func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Confi
 		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
-		kafka.OffsetNewest,
-		true,
-		kafka.CreateConsumerGroupChannels(true),
+		cfg.KafkaVersion,
+		kafka.CreateConsumerGroupChannels(1),
 	)
 	if err != nil {
 		return
@@ -92,12 +91,13 @@ func (e *ExternalServiceList) GetObservationStore(ctx context.Context) (observat
 }
 
 // GetProducer returns a kafka producer, which might no be initialised
-func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
+func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic, kafkaVersion string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
 	kafkaProducer, err = kafka.NewProducer(
 		ctx,
 		kafkaBrokers,
 		topic,
 		0,
+		kafkaVersion,
 		kafka.CreateProducerChannels(),
 	)
 	if err != nil {

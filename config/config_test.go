@@ -23,6 +23,7 @@ func TestSpec(t *testing.T) {
 			Convey("The values should be set to the expected defaults", func(c C) {
 				So(cfg.BindAddr, ShouldEqual, ":22500")
 				So(cfg.KafkaAddr, ShouldResemble, []string{"localhost:9092"})
+				So(cfg.KafkaVersion, ShouldResemble, "2.6.0")
 				So(cfg.FilterConsumerTopic, ShouldEqual, "filter-job-submitted")
 				So(cfg.FilterConsumerGroup, ShouldEqual, "dp-dataset-exporter")
 				So(cfg.FilterAPIURL, ShouldEqual, "http://localhost:22100")

@@ -25,7 +25,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/initialise"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	"github.com/ONSdigital/go-ns/server"
+	dphttp "github.com/ONSdigital/dp-net/http"
 )
 
 var (
@@ -65,6 +65,7 @@ func main() {
 		ctx,
 		cfg.KafkaAddr,
 		cfg.CSVExportedProducerTopic,
+		cfg.KafkaVersion,
 		initialise.CSVExported,
 	)
 	exitIfError(ctx, err)
@@ -74,6 +75,7 @@ func main() {
 		ctx,
 		cfg.KafkaAddr,
 		cfg.ErrorProducerTopic,
+		cfg.KafkaVersion,
 		initialise.Error,
 	)
 	exitIfError(ctx, err)
@@ -238,13 +240,13 @@ func main() {
 }
 
 // startHealthCheck sets up the Handler, starts the healthcheck and the http server that serves healthcheck endpoint
-func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr string) *server.Server {
+func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr string) *dphttp.Server {
 
 	router := mux.NewRouter()
 	router.Path("/health").HandlerFunc(hc.Handler)
 	hc.Start(ctx)
 
-	httpServer := server.New(bindAddr, router)
+	httpServer := dphttp.NewServer(bindAddr, router)
 	httpServer.HandleOSSignals = false
 
 	go func() {

@@ -15,7 +15,6 @@ import (
 // MessageConsumer provides a generic interface for consuming []byte messages
 type MessageConsumer interface {
 	Channels() *kafka.ConsumerGroupChannels
-	CommitAndRelease(kafka.Message)
 }
 
 // Handler represents a handler for processing a single event.
@@ -62,7 +61,7 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 					log.Event(ctx, "event processed - committing message", log.INFO, logData)
 				}
 
-				messageConsumer.CommitAndRelease(message)
+				message.Commit()
 				log.Event(ctx, "message committed", log.INFO, logData)
 
 			case event := <-consumer.closing:
