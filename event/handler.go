@@ -115,7 +115,11 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 			return err
 		}
 
-		logData = log.Data{"filter_id": event.FilterID, "published": isPublished}
+		logData = log.Data{"filter_id": event.FilterID,
+			"dataset_id": event.DatasetID,
+			"edition":    event.Edition,
+			"version":    event.Version,
+			"published":  isPublished}
 
 		log.Event(ctx, "filter job identified", log.INFO, logData)
 		csvExported, err = handler.filterJob(ctx, event, isPublished)
@@ -202,8 +206,8 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		}
 	}()
 
-	timestamp := strings.ReplaceAll(time.Now().Format(time.RFC3339), ":", "-") // ISO8601, with colon ':' replaced by hyphen '-'
-	s := strings.Split(timestamp, "+")                                         // Strip off UTC timezone data
+	timestamp := strings.ReplaceAll(time.Now().UTC().Format(time.RFC3339), ":", "-") // ISO8601, with colon ':' replaced by hyphen '-'
+	s := strings.Split(timestamp, "+")                                               // Strip off timezone data
 	name := event.FilterID + "/" + event.DatasetID + "-" + event.Edition + "-v" + event.Version + "-filtered-" + s[0]
 
 	log.Event(ctx, "storing filtered dataset file", log.INFO, log.Data{"name": name})
@@ -280,8 +284,6 @@ func createCSVDownloadData(handler *ExportHandler, event *FilterSubmitted, isPub
 		handler.downloadServiceURL,
 		event.FilterID,
 	)
-
-	log.Event(context.Background(), "what is fileURL?", log.INFO, log.Data{"file_url": fileURL})
 
 	if isPublished {
 		return filter.Download{Size: strconv.Itoa(int(reader.TotalBytesRead())), Public: fileURL, URL: downloadURL}

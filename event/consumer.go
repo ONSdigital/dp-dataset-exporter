@@ -6,7 +6,7 @@ import (
 
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	kafka "github.com/ONSdigital/dp-kafka"
+	kafka "github.com/ONSdigital/dp-kafka/v2"
 	"github.com/ONSdigital/log.go/log"
 )
 
@@ -44,13 +44,11 @@ func NewConsumer() *Consumer {
 func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler) {
 
 	go func() {
-		defer log.Event(nil, "===== Consumer stopped listening")
 		defer close(consumer.closed)
 
 		for {
 			select {
 			case message := <-messageConsumer.Channels().Upstream:
-				log.Event(nil, "===== Rx message")
 				// This context will be obtained from the kafka message in the future
 				ctx := context.Background()
 				logData := log.Data{"message_offset": message.Offset()}
@@ -71,8 +69,6 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 			}
 		}
 	}()
-	log.Event(nil, "===== Consumer is listening")
-
 }
 
 // Close safely closes the consumer and releases all resources

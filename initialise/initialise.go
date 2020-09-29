@@ -8,7 +8,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-graph/v2/graph"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	kafka "github.com/ONSdigital/dp-kafka"
+	kafka "github.com/ONSdigital/dp-kafka/v2"
 	vault "github.com/ONSdigital/dp-vault"
 )
 
@@ -47,8 +47,8 @@ func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Confi
 		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
-		cfg.KafkaVersion,
 		kafka.CreateConsumerGroupChannels(1),
+		&kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaVersion},
 	)
 	if err != nil {
 		return
@@ -96,9 +96,8 @@ func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []st
 		ctx,
 		kafkaBrokers,
 		topic,
-		0,
-		kafkaVersion,
 		kafka.CreateProducerChannels(),
+		&kafka.ProducerConfig{KafkaVersion: &kafkaVersion},
 	)
 	if err != nil {
 		return
