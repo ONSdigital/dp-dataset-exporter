@@ -43,7 +43,7 @@ func Get() (*Config, error) {
 	cfg := &Config{
 		BindAddr:                   ":22500",
 		KafkaAddr:                  []string{"localhost:9092"},
-		KafkaVersion:               "2.6.0",
+		KafkaVersion:               "1.0.2",
 		FilterConsumerTopic:        "filter-job-submitted",
 		FilterConsumerGroup:        "dp-dataset-exporter",
 		FilterAPIURL:               "http://localhost:22100",
