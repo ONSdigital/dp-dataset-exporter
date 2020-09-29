@@ -138,17 +138,14 @@ func main() {
 			select {
 			case <-time.After(time.Second * 2):
 				if serviceList.Consumer == false {
-					log.Event(ctx, "==== Kafka Consumer is not available yet. Will retry in 2 seconds", log.WARN, log.Error(err))
 					// Consumer not created yet
 					continue
 				}
 				if err = kafkaConsumer.Initialise(ctx); err != nil {
-					log.Event(ctx, "==== Failed to initialise Kafka Consumer. Will retry in 2 seconds", log.WARN, log.Error(err))
 					// Kafka client cannot be initialised
 					continue
 				}
 				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, ""); err != nil {
-					log.Event(ctx, "==== Failed to obtain datasets. Will retry in 2 seconds", log.WARN, log.Error(err))
 					// GetDatasets failed
 					continue
 				}
