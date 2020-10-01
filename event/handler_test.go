@@ -40,7 +40,10 @@ var cfg = &config.Config{
 }
 
 var filterSubmittedEvent = &event.FilterSubmitted{
-	FilterID: filterOutputId,
+	FilterID:  filterOutputId,
+	DatasetID: "12345",
+	Edition:   "2018",
+	Version:   "1",
 }
 
 var fullFileDownloadSubmittedEvent = &event.FilterSubmitted{

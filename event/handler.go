@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ONSdigital/dp-api-clients-go/filter"
 	"io"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/ONSdigital/dp-api-clients-go/filter"
 
 	"github.com/pkg/errors"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
@@ -114,7 +115,11 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 			return err
 		}
 
-		logData = log.Data{"filter_id": event.FilterID, "published": isPublished}
+		logData = log.Data{"filter_id": event.FilterID,
+			"dataset_id": event.DatasetID,
+			"edition":    event.Edition,
+			"version":    event.Version,
+			"published":  isPublished}
 
 		log.Event(ctx, "filter job identified", log.INFO, logData)
 		csvExported, err = handler.filterJob(ctx, event, isPublished)
@@ -201,7 +206,13 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		}
 	}()
 
-	filename := handler.filteredDatasetFilePrefix + filter.FilterID + ".csv"
+	timestamp := strings.ReplaceAll(time.Now().UTC().Format(time.RFC3339), ":", "-") // ISO8601, with colon ':' replaced by hyphen '-'
+	s := strings.Split(timestamp, "+")                                               // Strip off timezone data
+	name := event.FilterID + "/" + event.DatasetID + "-" + event.Edition + "-v" + event.Version + "-filtered-" + s[0]
+
+	log.Event(ctx, "storing filtered dataset file", log.INFO, log.Data{"name": name})
+
+	filename := handler.filteredDatasetFilePrefix + name + ".csv"
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
@@ -238,7 +249,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	rowCount := reader.ObservationsCount()
 
 	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
-	return &CSVExported{FilterID: filter.FilterID, FileURL: fileURL, RowCount: rowCount}, nil
+	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
 func mapFilter(filter *filter.Model) *observation.DimensionFilters {
@@ -289,10 +300,10 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 		"version":     event.Version,
 	})
 
-	fileID := uuid.NewV4().String()
-	log.Event(ctx, "storing pre-publish file", log.INFO, log.Data{"fileID": fileID})
+	name := event.DatasetID + "-" + event.Edition + "-v" + event.Version
+	log.Event(ctx, "storing pre-publish file", log.INFO, log.Data{"name": name})
 
-	filename := handler.fullDatasetFilePrefix + fileID + ".csv"
+	filename := handler.fullDatasetFilePrefix + name + ".csv"
 
 	csvDownload, csvS3URL, header, rowCount, err := handler.generateFullCSV(ctx, event, filename, isPublished)
 	if err != nil {
@@ -329,7 +340,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 		Edition:    event.Edition,
 		Version:    event.Version,
 		FileURL:    csvS3URL,
-		Filename:   fileID,
+		Filename:   name,
 		RowCount:   rowCount,
 	}, nil
 }

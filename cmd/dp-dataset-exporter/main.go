@@ -13,7 +13,7 @@ import (
 	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
 	"github.com/ONSdigital/dp-api-clients-go/health"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	kafka "github.com/ONSdigital/dp-kafka"
+	kafka "github.com/ONSdigital/dp-kafka/v2"
 	vault "github.com/ONSdigital/dp-vault"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/gorilla/mux"
@@ -25,7 +25,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/initialise"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	"github.com/ONSdigital/go-ns/server"
+	dphttp "github.com/ONSdigital/dp-net/http"
 )
 
 var (
@@ -65,6 +65,7 @@ func main() {
 		ctx,
 		cfg.KafkaAddr,
 		cfg.CSVExportedProducerTopic,
+		cfg.KafkaVersion,
 		initialise.CSVExported,
 	)
 	exitIfError(ctx, err)
@@ -74,6 +75,7 @@ func main() {
 		ctx,
 		cfg.KafkaAddr,
 		cfg.ErrorProducerTopic,
+		cfg.KafkaVersion,
 		initialise.Error,
 	)
 	exitIfError(ctx, err)
@@ -138,17 +140,14 @@ func main() {
 			select {
 			case <-time.After(time.Second * 2):
 				if serviceList.Consumer == false {
-					log.Event(ctx, "==== Kafka Consumer is not available yet. Will retry in 2 seconds", log.WARN, log.Error(err))
 					// Consumer not created yet
 					continue
 				}
 				if err = kafkaConsumer.Initialise(ctx); err != nil {
-					log.Event(ctx, "==== Failed to initialise Kafka Consumer. Will retry in 2 seconds", log.WARN, log.Error(err))
 					// Kafka client cannot be initialised
 					continue
 				}
 				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, ""); err != nil {
-					log.Event(ctx, "==== Failed to obtain datasets. Will retry in 2 seconds", log.WARN, log.Error(err))
 					// GetDatasets failed
 					continue
 				}
@@ -238,13 +237,13 @@ func main() {
 }
 
 // startHealthCheck sets up the Handler, starts the healthcheck and the http server that serves healthcheck endpoint
-func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr string) *server.Server {
+func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr string) *dphttp.Server {
 
 	router := mux.NewRouter()
 	router.Path("/health").HandlerFunc(hc.Handler)
 	hc.Start(ctx)
 
-	httpServer := server.New(bindAddr, router)
+	httpServer := dphttp.NewServer(bindAddr, router)
 	httpServer.HandleOSSignals = false
 
 	go func() {

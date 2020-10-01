@@ -10,8 +10,8 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	kafka "github.com/ONSdigital/dp-kafka"
-	"github.com/ONSdigital/dp-kafka/kafkatest"
+	kafka "github.com/ONSdigital/dp-kafka/v2"
+	"github.com/ONSdigital/dp-kafka/v2/kafkatest"
 	"github.com/ONSdigital/log.go/log"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -24,12 +24,11 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		// Create mock kafka consumer with upstream channel with 2 buffered messages
 		mockConsumer := kafkatest.NewMessageConsumerWithChannels(
 			&kafka.ConsumerGroupChannels{
-				Upstream:     make(chan kafka.Message, 2),
-				Errors:       make(chan error),
-				Init:         make(chan struct{}),
-				Closer:       make(chan struct{}),
-				Closed:       make(chan struct{}),
-				UpstreamDone: make(chan bool, 1),
+				Upstream: make(chan kafka.Message, 2),
+				Errors:   make(chan error),
+				Ready:    make(chan struct{}),
+				Closer:   make(chan struct{}),
+				Closed:   make(chan struct{}),
 			}, true)
 
 		mockEventHandler := &eventtest.HandlerMock{
@@ -93,10 +92,6 @@ func TestConsume(t *testing.T) {
 			Convey("The message is committed", func() {
 				So(len(message.CommitCalls()), ShouldEqual, 1)
 			})
-
-			Convey("and the Kafka consumer is released", func() {
-				So(len(mockConsumer.CommitAndReleaseCalls()), ShouldEqual, 1)
-			})
 		})
 	})
 }
@@ -140,10 +135,6 @@ func TestConsume_HandlerError(t *testing.T) {
 
 			Convey("and the message is committed - we assume any retry logic has occurred within the consumer", func() {
 				So(len(message.CommitCalls()), ShouldEqual, 1)
-			})
-
-			Convey("and the Kafka consumer is released", func() {
-				So(len(mockConsumer.CommitAndReleaseCalls()), ShouldEqual, 1)
 			})
 		})
 	})
