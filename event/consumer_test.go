@@ -93,6 +93,10 @@ func TestConsume(t *testing.T) {
 			Convey("The message is committed", func() {
 				So(len(message.CommitCalls()), ShouldEqual, 1)
 			})
+
+			Convey("and the Kafka consumer is released", func() {
+				So(len(mockConsumer.CommitAndReleaseCalls()), ShouldEqual, 1)
+			})
 		})
 	})
 }
@@ -134,8 +138,12 @@ func TestConsume_HandlerError(t *testing.T) {
 				So(mockErrorHandler.HandleCalls()[0].FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 
-			Convey("and the message is not committed - to be retried", func() {
-				So(len(message.CommitCalls()), ShouldEqual, 0)
+			Convey("and the message is committed - we assume any retry logic has occurred within the consumer", func() {
+				So(len(message.CommitCalls()), ShouldEqual, 1)
+			})
+
+			Convey("and the Kafka consumer is released", func() {
+				So(len(mockConsumer.CommitAndReleaseCalls()), ShouldEqual, 1)
 			})
 		})
 	})
