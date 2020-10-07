@@ -8,7 +8,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-graph/v2/graph"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	kafka "github.com/ONSdigital/dp-kafka"
+	kafka "github.com/ONSdigital/dp-kafka/v2"
 	vault "github.com/ONSdigital/dp-vault"
 )
 
@@ -47,9 +47,8 @@ func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Confi
 		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
-		kafka.OffsetNewest,
-		true,
-		kafka.CreateConsumerGroupChannels(true),
+		kafka.CreateConsumerGroupChannels(1),
+		&kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaVersion},
 	)
 	if err != nil {
 		return
@@ -92,13 +91,13 @@ func (e *ExternalServiceList) GetObservationStore(ctx context.Context) (observat
 }
 
 // GetProducer returns a kafka producer, which might no be initialised
-func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
+func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic, kafkaVersion string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
 	kafkaProducer, err = kafka.NewProducer(
 		ctx,
 		kafkaBrokers,
 		topic,
-		0,
 		kafka.CreateProducerChannels(),
+		&kafka.ProducerConfig{KafkaVersion: &kafkaVersion},
 	)
 	if err != nil {
 		return
