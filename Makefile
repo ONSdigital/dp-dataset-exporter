@@ -7,8 +7,8 @@ BIN_DIR?=.
 export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
 
-export GRAPH_DRIVER_TYPE?=neptune
-export GRAPH_ADDR?=ws://localhost:8182/gremlin
+export GRAPH_DRIVER_TYPE?=neo4j
+export GRAPH_ADDR?=bolt://localhost:7687
 
 VAULT_ADDR?=http://127.0.0.1:8200
 BUILD_TIME=$(shell date +%s)
