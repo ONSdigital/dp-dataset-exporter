@@ -4,6 +4,7 @@ import (
 	"context"
 	errs "errors"
 	"fmt"
+	"github.com/ONSdigital/dp-graph/v2/graph"
 	"os"
 	"os/signal"
 	"syscall"
@@ -126,7 +127,9 @@ func main() {
 		datasetAPICli,
 		filterAPIClient,
 		health.NewClient("Zebedee", cfg.ZebedeeURL),
-		fileStore.Uploader, fileStore.CryptoUploader)
+		fileStore.Uploader,
+		fileStore.CryptoUploader,
+		observationStore)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -255,13 +258,7 @@ func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr
 }
 
 // registerCheckers adds the checkers for the provided clients to the healthcheck object
-func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
-	kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup,
-	vaultClient *vault.Client,
-	datasetAPICli *dataset.Client,
-	filterAPICli *filterCli.Client,
-	zebedeeCli *health.Client,
-	publicUploader, privateUploader file.Uploader) (err error) {
+func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck, kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup, vaultClient *vault.Client, datasetAPICli *dataset.Client, filterAPICli *filterCli.Client, zebedeeCli *health.Client, publicUploader, privateUploader file.Uploader, graphDB *graph.DB) (err error) {
 
 	hasErrors := false
 
@@ -308,6 +305,11 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
 		hasErrors = true
 		log.Event(ctx, "error adding check for zebedee", log.ERROR, log.Error(err))
+	}
+
+	if err = hc.AddCheck("Graph DB", graphDB.Checker); err != nil {
+		hasErrors = true
+		log.Event(ctx, "error adding check for graph db", log.ERROR, log.Error(err))
 	}
 
 	if hasErrors {
