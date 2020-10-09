@@ -111,7 +111,7 @@ func main() {
 	)
 
 	// eventConsumer will Consume when the service is healthy - see goroutine below
-	eventConsumer := event.NewConsumer()
+	eventConsumer := event.NewConsumer(cfg.KafkaConsumerWorkers)
 
 	// Create healthcheck object with versionInfo
 	hc, err := serviceList.GetHealthCheck(cfg, BuildTime, GitCommit, Version)

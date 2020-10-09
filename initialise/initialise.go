@@ -47,7 +47,7 @@ func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Confi
 		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
-		kafka.CreateConsumerGroupChannels(1),
+		kafka.CreateConsumerGroupChannels(cfg.KafkaConsumerWorkers),
 		&kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaVersion},
 	)
 	if err != nil {

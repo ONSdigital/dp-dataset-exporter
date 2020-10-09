@@ -26,16 +26,31 @@ VAULT_POLICY:="$(shell vault policy write -address=$(VAULT_ADDR) write-psk polic
 TOKEN_INFO:="$(shell vault token create -address=$(VAULT_ADDR) -policy=write-psk -period=24h -display-name=dp-dataset-exporter)"
 APP_TOKEN:="$(shell echo $(TOKEN_INFO) | awk '{print $$6}')"
 
+.PHONY: all
+all: audit test build
+
+.PHONY: generate
 generate:
 	go generate ./...
+
+.PHONY: audit
+audit:
+	nancy go.sum
+
+.PHONY: build
 build:
 	@mkdir -p $(BUILD_ARCH)/$(BIN_DIR)
 	go build $(LDFLAGS) -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
 
+.PHONY: debug
 debug acceptance:
 	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run $(LDFLAGS) -race cmd/dp-dataset-exporter/main.go
+
+.PHONY: test
 test:
 	go test -cover -race ./...
+
+.PHONY: vault
 vault:
 	@echo "$(VAULT_POLICY)"
 	@echo "$(TOKEN_INFO)"

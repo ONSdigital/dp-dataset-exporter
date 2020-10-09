@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	errs "errors"
+	"sync"
 
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
@@ -28,30 +29,38 @@ type closeEvent struct {
 
 // Consumer consumes event messages.
 type Consumer struct {
-	closing chan closeEvent
-	closed  chan bool
+	closing    chan closeEvent
+	closed     chan bool
+	numWorkers int
 }
 
 // NewConsumer returns a new consumer instance.
-func NewConsumer() *Consumer {
+func NewConsumer(numWorkers int) *Consumer {
+	if numWorkers < 1 {
+		numWorkers = 1
+	}
 	return &Consumer{
-		closing: make(chan closeEvent),
-		closed:  make(chan bool),
+		closing:    make(chan closeEvent),
+		closed:     make(chan bool),
+		numWorkers: numWorkers,
 	}
 }
 
 // Consume converts messages to event instances, and pass the event to the provided handler.
 func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handler, errorHandler errors.Handler) {
 
-	go func() {
-		defer close(consumer.closed)
+	// waitGroup for workers
+	wg := &sync.WaitGroup{}
 
+	// func to be executed by each worker in a goroutine
+	workerConsume := func(workerNum int) {
+		defer wg.Done()
 		for {
 			select {
 			case message := <-messageConsumer.Channels().Upstream:
 				// This context will be obtained from the kafka message in the future
 				ctx := context.Background()
-				logData := log.Data{"message_offset": message.Offset()}
+				logData := log.Data{"message_offset": message.Offset(), "worker": workerNum}
 				err := processMessage(ctx, message, handler, errorHandler)
 				if err != nil {
 					log.Event(ctx, "failed to process message", log.ERROR, log.Error(err), logData)
@@ -62,12 +71,25 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 				message.Commit()
 				log.Event(ctx, "message committed", log.INFO, logData)
 
-			case event := <-consumer.closing:
+			case event, ok := <-consumer.closing:
+				if !ok {
+					return // 'closing' channel already closed
+				}
 				log.Event(event.ctx, "closing event consumer loop", log.INFO)
 				close(consumer.closing)
 				return
 			}
 		}
+	}
+
+	// Create the required workers to consume messages in parallel
+	go func() {
+		defer close(consumer.closed)
+		for w := 1; w <= consumer.numWorkers; w++ {
+			wg.Add(1)
+			go workerConsume(w)
+		}
+		wg.Wait()
 	}()
 }
 
