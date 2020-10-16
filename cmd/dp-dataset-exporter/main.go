@@ -234,7 +234,7 @@ func main() {
 			log.Event(shutdownCtx, "closing observation store", log.INFO)
 			logIfError(shutdownCtx, observationStore.Close(shutdownCtx))
 
-			log.Event(shutdownCtx, "closing graph db error consumer")
+			log.Event(shutdownCtx, "closing graph db error consumer", log.INFO)
 			logIfError(shutdownCtx, graphErrorConsumer.Close(shutdownCtx))
 		}
 	}()
