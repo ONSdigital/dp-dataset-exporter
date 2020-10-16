@@ -94,6 +94,11 @@ func main() {
 	observationStore, err := serviceList.GetObservationStore(ctx)
 	logIfError(ctx, err)
 
+	var graphErrorConsumer *graph.ErrorConsumer
+	if serviceList.ObservationStore {
+		graphErrorConsumer = graph.NewLoggingErrorConsumer(ctx, observationStore.Errors)
+	}
+
 	fileStore, err := serviceList.GetFileStore(cfg, vaultClient)
 	logIfError(ctx, err)
 
@@ -193,7 +198,7 @@ func main() {
 		// Health Checker should always be closed first as it relies on other
 		// services (clients) to exist - prevents DATA RACE
 		if serviceList.HealthCheck {
-			log.Event(shutdownCtx, "stopping healthchecker", log.INFO)
+			log.Event(shutdownCtx, "stopping health checker", log.INFO)
 			hc.Stop()
 		}
 
@@ -228,8 +233,10 @@ func main() {
 		if serviceList.ObservationStore {
 			log.Event(shutdownCtx, "closing observation store", log.INFO)
 			logIfError(shutdownCtx, observationStore.Close(shutdownCtx))
-		}
 
+			log.Event(shutdownCtx, "closing graph db error consumer")
+			logIfError(shutdownCtx, graphErrorConsumer.Close(shutdownCtx))
+		}
 	}()
 
 	// wait for shutdown success (via cancel) or failure (timeout)
