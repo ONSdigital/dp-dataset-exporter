@@ -4,6 +4,7 @@ import (
 	"context"
 	errs "errors"
 	"fmt"
+	"github.com/ONSdigital/dp-graph/v2/graph"
 	"os"
 	"os/signal"
 	"syscall"
@@ -93,6 +94,11 @@ func main() {
 	observationStore, err := serviceList.GetObservationStore(ctx)
 	logIfError(ctx, err)
 
+	var graphErrorConsumer *graph.ErrorConsumer
+	if serviceList.ObservationStore {
+		graphErrorConsumer = graph.NewLoggingErrorConsumer(ctx, observationStore.Errors)
+	}
+
 	fileStore, err := serviceList.GetFileStore(cfg, vaultClient)
 	logIfError(ctx, err)
 
@@ -110,7 +116,7 @@ func main() {
 	)
 
 	// eventConsumer will Consume when the service is healthy - see goroutine below
-	eventConsumer := event.NewConsumer()
+	eventConsumer := event.NewConsumer(cfg.KafkaConsumerWorkers)
 
 	// Create healthcheck object with versionInfo
 	hc, err := serviceList.GetHealthCheck(cfg, BuildTime, GitCommit, Version)
@@ -126,7 +132,9 @@ func main() {
 		datasetAPICli,
 		filterAPIClient,
 		health.NewClient("Zebedee", cfg.ZebedeeURL),
-		fileStore.Uploader, fileStore.CryptoUploader)
+		fileStore.Uploader,
+		fileStore.CryptoUploader,
+		observationStore)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -190,7 +198,7 @@ func main() {
 		// Health Checker should always be closed first as it relies on other
 		// services (clients) to exist - prevents DATA RACE
 		if serviceList.HealthCheck {
-			log.Event(shutdownCtx, "stopping healthchecker", log.INFO)
+			log.Event(shutdownCtx, "stopping health checker", log.INFO)
 			hc.Stop()
 		}
 
@@ -225,8 +233,10 @@ func main() {
 		if serviceList.ObservationStore {
 			log.Event(shutdownCtx, "closing observation store", log.INFO)
 			logIfError(shutdownCtx, observationStore.Close(shutdownCtx))
-		}
 
+			log.Event(shutdownCtx, "closing graph db error consumer", log.INFO)
+			logIfError(shutdownCtx, graphErrorConsumer.Close(shutdownCtx))
+		}
 	}()
 
 	// wait for shutdown success (via cancel) or failure (timeout)
@@ -255,13 +265,7 @@ func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr
 }
 
 // registerCheckers adds the checkers for the provided clients to the healthcheck object
-func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
-	kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup,
-	vaultClient *vault.Client,
-	datasetAPICli *dataset.Client,
-	filterAPICli *filterCli.Client,
-	zebedeeCli *health.Client,
-	publicUploader, privateUploader file.Uploader) (err error) {
+func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck, kafkaProducer, kafkaErrorProducer *kafka.Producer, kafkaConsumer *kafka.ConsumerGroup, vaultClient *vault.Client, datasetAPICli *dataset.Client, filterAPICli *filterCli.Client, zebedeeCli *health.Client, publicUploader, privateUploader file.Uploader, graphDB *graph.DB) (err error) {
 
 	hasErrors := false
 
@@ -308,6 +312,11 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck,
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
 		hasErrors = true
 		log.Event(ctx, "error adding check for zebedee", log.ERROR, log.Error(err))
+	}
+
+	if err = hc.AddCheck("Graph DB", graphDB.Checker); err != nil {
+		hasErrors = true
+		log.Event(ctx, "error adding check for graph db", log.ERROR, log.Error(err))
 	}
 
 	if hasErrors {

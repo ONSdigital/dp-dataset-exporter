@@ -12,7 +12,7 @@ var (
 	lockWrappedReaderMockRead sync.RWMutex
 )
 
-// Ensure, that WrappedReaderMock does implement reader.WrappedReader.
+// Ensure, that WrappedReaderMock does implement WrappedReader.
 // If this is not the case, regenerate this file with moq.
 var _ reader.WrappedReader = &WrappedReaderMock{}
 

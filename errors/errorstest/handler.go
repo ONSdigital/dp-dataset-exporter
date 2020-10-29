@@ -13,7 +13,7 @@ var (
 	lockHandlerMockHandle sync.RWMutex
 )
 
-// Ensure, that HandlerMock does implement errors.Handler.
+// Ensure, that HandlerMock does implement Handler.
 // If this is not the case, regenerate this file with moq.
 var _ errors.Handler = &HandlerMock{}
 

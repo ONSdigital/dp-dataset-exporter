@@ -12,6 +12,7 @@ type Config struct {
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
 	KafkaAddr                  []string      `envconfig:"KAFKA_ADDR"`
 	KafkaVersion               string        `envconfig:"KAFKA_VERSION"`
+	KafkaConsumerWorkers       int           `envconfig:"KAFKA_CONSUMER_WORKERS"`
 	FilterConsumerGroup        string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic        string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
 	FilterAPIURL               string        `envconfig:"FILTER_API_URL"`
@@ -44,6 +45,7 @@ func Get() (*Config, error) {
 		BindAddr:                   ":22500",
 		KafkaAddr:                  []string{"localhost:9092"},
 		KafkaVersion:               "1.0.2",
+		KafkaConsumerWorkers:       1,
 		FilterConsumerTopic:        "filter-job-submitted",
 		FilterConsumerGroup:        "dp-dataset-exporter",
 		FilterAPIURL:               "http://localhost:22100",

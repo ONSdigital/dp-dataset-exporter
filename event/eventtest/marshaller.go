@@ -12,7 +12,7 @@ var (
 	lockMarshallerMockMarshal sync.RWMutex
 )
 
-// Ensure, that MarshallerMock does implement event.Marshaller.
+// Ensure, that MarshallerMock does implement Marshaller.
 // If this is not the case, regenerate this file with moq.
 var _ event.Marshaller = &MarshallerMock{}
 

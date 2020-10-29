@@ -20,7 +20,7 @@ var (
 	lockUploaderMockUploadWithPSK sync.RWMutex
 )
 
-// Ensure, that UploaderMock does implement file.Uploader.
+// Ensure, that UploaderMock does implement Uploader.
 // If this is not the case, regenerate this file with moq.
 var _ file.Uploader = &UploaderMock{}
 

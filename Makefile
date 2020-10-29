@@ -7,6 +7,10 @@ BIN_DIR?=.
 export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
 
+export GRAPH_DRIVER_TYPE?=neo4j
+export GRAPH_ADDR?=bolt://localhost:7687
+
+VAULT_ADDR?=http://127.0.0.1:8200
 BUILD_TIME=$(shell date +%s)
 GIT_COMMIT=$(shell git rev-parse HEAD)
 VERSION ?= $(shell git tag --points-at HEAD | grep ^v | head -n 1)
@@ -25,6 +29,10 @@ APP_TOKEN:="$(shell echo $(TOKEN_INFO) | awk '{print $$6}')"
 .PHONY: all
 all: audit test build
 
+.PHONY: generate
+generate:
+	go generate ./...
+
 .PHONY: audit
 audit:
 	nancy go.sum
@@ -36,7 +44,7 @@ build:
 
 .PHONY: debug
 debug acceptance:
-	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) GRAPH_DRIVER_TYPE=neo4j GRAPH_ADDR="$(DATABASE_ADDRESS)" go run $(LDFLAGS) -race cmd/dp-dataset-exporter/main.go
+	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run $(LDFLAGS) -race cmd/dp-dataset-exporter/main.go
 
 .PHONY: test
 test:
@@ -47,4 +55,4 @@ vault:
 	@echo "$(VAULT_POLICY)"
 	@echo "$(TOKEN_INFO)"
 	@echo "$(APP_TOKEN)"
-.PHONY: build debug test vault acceptance
+.PHONY: build debug test vault acceptance generate

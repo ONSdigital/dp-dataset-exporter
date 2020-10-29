@@ -14,7 +14,7 @@ var (
 	lockObservationStoreMockStreamCSVRows sync.RWMutex
 )
 
-// Ensure, that ObservationStoreMock does implement event.ObservationStore.
+// Ensure, that ObservationStoreMock does implement ObservationStore.
 // If this is not the case, regenerate this file with moq.
 var _ event.ObservationStore = &ObservationStoreMock{}
 

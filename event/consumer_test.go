@@ -43,7 +43,7 @@ func TestConsume_UnmarshallError(t *testing.T) {
 		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 		mockConsumer.Channels().Upstream <- message
 
-		consumer := event.NewConsumer()
+		consumer := event.NewConsumer(cfg.KafkaConsumerWorkers)
 
 		Convey("When consume messages is called", func() {
 			consumer.Consume(mockConsumer, mockEventHandler, nil)
@@ -76,7 +76,7 @@ func TestConsume(t *testing.T) {
 
 		mockConsumer.Channels().Upstream <- message
 
-		consumer := event.NewConsumer()
+		consumer := event.NewConsumer(1)
 
 		Convey("When consume is called", func() {
 			consumer.Consume(mockConsumer, mockEventHandler, nil)
@@ -121,7 +121,7 @@ func TestConsume_HandlerError(t *testing.T) {
 		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
 		mockConsumer.Channels().Upstream <- message
 
-		consumer := event.NewConsumer()
+		consumer := event.NewConsumer(1)
 
 		Convey("When consume is called", func() {
 			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler)
@@ -156,7 +156,7 @@ func TestClose(t *testing.T) {
 
 		mockConsumer.Channels().Upstream <- message
 
-		consumer := event.NewConsumer()
+		consumer := event.NewConsumer(1)
 		consumer.Consume(mockConsumer, mockEventHandler, nil)
 		Convey("When close is called", func() {
 

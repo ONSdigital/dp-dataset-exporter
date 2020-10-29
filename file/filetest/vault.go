@@ -12,7 +12,7 @@ var (
 	lockVaultClientMockWriteKey sync.RWMutex
 )
 
-// Ensure, that VaultClientMock does implement file.VaultClient.
+// Ensure, that VaultClientMock does implement VaultClient.
 // If this is not the case, regenerate this file with moq.
 var _ file.VaultClient = &VaultClientMock{}
 

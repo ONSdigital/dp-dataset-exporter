@@ -12,7 +12,7 @@ var (
 	lockProducerMockCSVExported sync.RWMutex
 )
 
-// Ensure, that ProducerMock does implement event.Producer.
+// Ensure, that ProducerMock does implement Producer.
 // If this is not the case, regenerate this file with moq.
 var _ event.Producer = &ProducerMock{}
 

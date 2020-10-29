@@ -17,7 +17,7 @@ var (
 	lockFilterStoreMockPutStateAsError sync.RWMutex
 )
 
-// Ensure, that FilterStoreMock does implement event.FilterStore.
+// Ensure, that FilterStoreMock does implement FilterStore.
 // If this is not the case, regenerate this file with moq.
 var _ event.FilterStore = &FilterStoreMock{}
 

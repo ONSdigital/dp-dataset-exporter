@@ -18,7 +18,7 @@ var (
 	lockDatasetAPIMockPutVersion         sync.RWMutex
 )
 
-// Ensure, that DatasetAPIMock does implement event.DatasetAPI.
+// Ensure, that DatasetAPIMock does implement DatasetAPI.
 // If this is not the case, regenerate this file with moq.
 var _ event.DatasetAPI = &DatasetAPIMock{}
 

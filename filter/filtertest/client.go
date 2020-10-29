@@ -14,7 +14,7 @@ var (
 	lockClientMockUpdateFilterOutputBytes sync.RWMutex
 )
 
-// Ensure, that ClientMock does implement filter.Client.
+// Ensure, that ClientMock does implement Client.
 // If this is not the case, regenerate this file with moq.
 var _ filter.Client = &ClientMock{}
 

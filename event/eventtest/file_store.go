@@ -14,7 +14,7 @@ var (
 	lockFileStoreMockPutFile sync.RWMutex
 )
 
-// Ensure, that FileStoreMock does implement event.FileStore.
+// Ensure, that FileStoreMock does implement FileStore.
 // If this is not the case, regenerate this file with moq.
 var _ event.FileStore = &FileStoreMock{}
 
