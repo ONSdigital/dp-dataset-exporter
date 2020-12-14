@@ -68,8 +68,8 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 					log.Event(ctx, "event processed - committing message", log.INFO, logData)
 				}
 
-				message.Commit()
-				log.Event(ctx, "message committed", log.INFO, logData)
+				message.CommitAndRelease()
+				log.Event(ctx, "message committed and released", log.INFO, logData)
 
 			case event, ok := <-consumer.closing:
 				if !ok {

@@ -90,7 +90,9 @@ func TestConsume(t *testing.T) {
 			})
 
 			Convey("The message is committed", func() {
-				So(len(message.CommitCalls()), ShouldEqual, 1)
+				So(message.IsMarked(), ShouldBeTrue)
+				So(message.IsCommitted(), ShouldBeTrue)
+				So(len(message.CommitAndReleaseCalls()), ShouldEqual, 1)
 			})
 		})
 	})
@@ -134,7 +136,9 @@ func TestConsume_HandlerError(t *testing.T) {
 			})
 
 			Convey("and the message is committed - we assume any retry logic has occurred within the consumer", func() {
-				So(len(message.CommitCalls()), ShouldEqual, 1)
+				So(message.IsMarked(), ShouldBeTrue)
+				So(message.IsCommitted(), ShouldBeTrue)
+				So(len(message.CommitAndReleaseCalls()), ShouldEqual, 1)
 			})
 		})
 	})
@@ -187,7 +191,7 @@ func waitForMessageToBeCommitted(message *kafkatest.Message) {
 	start := time.Now()
 	timeout := start.Add(time.Millisecond * 500)
 	for {
-		if len(message.CommitCalls()) > 0 {
+		if len(message.CommitAndReleaseCalls()) > 0 {
 			log.Event(ctx, "message has been committed", log.INFO)
 			break
 		}
