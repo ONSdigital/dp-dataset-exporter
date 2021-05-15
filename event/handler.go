@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -191,12 +192,17 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
+	// =====
+	fmt.Printf("\ndoing: StreamCSVRows\n")
+	start := time.Now()
+	// =====
 	dbFilter := mapFilter(filter)
 
 	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
 	if err != nil {
 		return nil, err
 	}
+	//	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: "/bla/bla", RowCount: 10}, nil
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {
@@ -247,6 +253,42 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	}
 
 	rowCount := reader.ObservationsCount()
+
+	// =====
+	endTime := time.Now()
+
+	elapsed := endTime.Sub(start) //time.Since(start)
+	res := fmt.Sprintf("done: StreamCSVRows  %s -> %s\n", filter.FilterID, elapsed)
+	fmt.Printf("\n%s", res)
+	e := fmt.Sprintf("%s", elapsed)
+	if strings.Contains(e, "ms") {
+		e = e[0 : len(e)-2]
+		n, _ := strconv.ParseFloat(e, 64)
+		n = n * 1000.0
+		parts := strings.Split(fmt.Sprintf("%f", n), ".")
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(start.Format("15:04:05.000000")), filter.FilterID, parts[0])
+	} else if strings.Contains(e, "µs") {
+		parts := strings.Split(e, ".")
+		p := strings.Replace(parts[0], "µs", "", 1)
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(start.Format("15:04:05.000000")), filter.FilterID, p)
+	} else {
+		e = e[0 : len(e)-1]
+		n, _ := strconv.ParseFloat(e, 64)
+		n = n * 1000000.0
+		parts := strings.Split(fmt.Sprintf("%f", n), ".")
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(start.Format("15:04:05.000000")), filter.FilterID, parts[0])
+	}
+	f, err := os.OpenFile("timings.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("Can't access file: timings.txt\n")
+	} else {
+		defer f.Close()
+		_, err := f.WriteString(res)
+		if err != nil {
+			fmt.Printf("Can't write file: timings.txt\n")
+		}
+	}
+	// =====
 
 	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
 	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil

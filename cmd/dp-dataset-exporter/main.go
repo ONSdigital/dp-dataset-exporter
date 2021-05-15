@@ -4,11 +4,12 @@ import (
 	"context"
 	errs "errors"
 	"fmt"
-	"github.com/ONSdigital/dp-graph/v2/graph"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/ONSdigital/dp-graph/v2/graph"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
 	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
@@ -31,11 +32,18 @@ import (
 
 var (
 	// BuildTime represents the time in which the service was built
-	BuildTime string
+	//BuildTime string
 	// GitCommit represents the commit (SHA-1) hash of the service that is running
-	GitCommit string
+	//GitCommit string
 	// Version represents the version of the service that is running
-	Version string
+	//Version string
+
+	/* NOTE: replace the above with the below to run code with for example vscode debugger.*/
+	BuildTime string = "1601119818"
+	GitCommit string = "6584b786caac36b6214ffe04bf62f058d4021538"
+	Version   string = "v0.1.0"
+
+	/**/
 )
 
 func main() {

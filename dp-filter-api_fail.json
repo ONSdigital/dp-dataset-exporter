@@ -1,0 +1,5442 @@
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:04.612086Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+    "started_at": "2021-05-15T08:50:04.612083Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.612561Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.612788Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.613051Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.613271Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.614965Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.615562Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.615939Z",
+  "data": {
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.652343Z",
+  "data": {
+    "filter_blueprint_id": "88a550ec-58c9-4cdd-8010-f97167ebe109",
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.653544Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1T100000",
+            "cpih1dim1A0",
+            "cpih1dim1T80000",
+            "cpih1dim1T90000",
+            "cpih1dim1T30000",
+            "cpih1dim1T10000",
+            "cpih1dim1T70000",
+            "cpih1dim1T50000",
+            "cpih1dim1T60000",
+            "cpih1dim1T20000",
+            "cpih1dim1T110000",
+            "cpih1dim1T120000",
+            "cpih1dim1T40000"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Mar-04",
+            "Mar-96",
+            "Dec-07",
+            "Mar-90",
+            "Aug-09",
+            "Oct-14",
+            "Aug-92",
+            "Oct-92",
+            "Feb-05",
+            "Sep-07",
+            "Nov-06",
+            "Jul-09",
+            "Oct-99",
+            "Mar-20",
+            "Jan-90",
+            "Apr-98",
+            "Aug-15",
+            "Jul-11",
+            "Sep-98",
+            "Oct-08",
+            "May-18",
+            "Jul-19",
+            "Feb-13",
+            "Jul-98",
+            "Feb-06",
+            "Feb-15",
+            "Oct-18",
+            "Sep-15",
+            "Jun-07",
+            "Sep-00",
+            "Dec-06",
+            "Apr-96",
+            "Feb-91",
+            "Nov-99",
+            "Nov-92",
+            "Feb-97",
+            "Mar-97",
+            "Jun-95",
+            "Nov-05",
+            "Jun-96",
+            "Feb-96",
+            "Jun-09",
+            "Nov-91",
+            "Aug-96",
+            "Jun-16",
+            "Sep-94",
+            "Oct-90",
+            "May-00",
+            "Jul-02",
+            "Apr-03",
+            "Mar-89",
+            "Jul-99",
+            "Oct-16",
+            "Jul-00",
+            "Jun-98",
+            "Mar-95",
+            "Mar-99",
+            "Sep-16",
+            "May-09",
+            "Oct-02",
+            "Dec-93",
+            "May-03",
+            "Sep-13",
+            "Sep-08",
+            "Jul-96",
+            "Jan-13",
+            "Aug-07",
+            "Apr-00",
+            "Feb-90",
+            "Dec-99",
+            "Oct-12",
+            "Dec-92",
+            "Apr-97",
+            "Feb-18",
+            "May-89",
+            "Sep-18",
+            "Jun-15",
+            "Aug-94",
+            "Apr-90",
+            "Oct-15",
+            "Oct-03",
+            "Jun-14",
+            "Feb-14",
+            "Apr-17",
+            "May-20",
+            "Mar-08",
+            "Oct-91",
+            "Aug-14",
+            "May-91",
+            "Mar-19",
+            "Aug-95",
+            "Aug-99",
+            "Sep-06",
+            "Jun-88",
+            "Nov-90",
+            "May-11",
+            "Feb-11",
+            "Nov-94",
+            "Apr-09",
+            "Nov-03",
+            "Feb-89",
+            "May-90",
+            "Nov-18",
+            "Mar-05",
+            "Apr-15",
+            "Nov-07",
+            "Dec-18",
+            "Oct-00",
+            "Jul-14",
+            "Apr-18",
+            "May-07",
+            "Aug-02",
+            "Jan-18",
+            "Sep-02",
+            "Jul-03",
+            "Apr-02",
+            "May-99",
+            "Apr-14",
+            "Mar-98",
+            "Feb-19",
+            "Jun-20",
+            "Dec-90",
+            "Oct-97",
+            "Jan-09",
+            "Aug-12",
+            "Jun-93",
+            "Apr-13",
+            "Mar-01",
+            "Oct-98",
+            "Feb-01",
+            "Jan-89",
+            "Oct-11",
+            "Aug-88",
+            "Aug-19",
+            "Nov-88",
+            "Aug-05",
+            "Jul-10",
+            "Nov-08",
+            "Oct-06",
+            "Jul-18",
+            "Oct-04",
+            "Apr-10",
+            "Aug-08",
+            "Nov-02",
+            "Feb-98",
+            "Dec-89",
+            "Jan-02",
+            "May-15",
+            "Feb-07",
+            "Sep-97",
+            "Mar-17",
+            "Nov-93",
+            "Jun-99",
+            "Aug-18",
+            "Jul-08",
+            "Feb-16",
+            "Jul-16",
+            "Apr-04",
+            "Jun-94",
+            "Sep-93",
+            "Jul-90",
+            "Nov-95",
+            "Mar-16",
+            "Aug-11",
+            "Dec-16",
+            "Aug-10",
+            "Nov-17",
+            "Apr-19",
+            "Feb-95",
+            "May-10",
+            "Jun-12",
+            "Sep-88",
+            "Nov-10",
+            "Jan-00",
+            "Mar-18",
+            "Mar-10",
+            "May-94",
+            "Dec-91",
+            "Sep-12",
+            "Nov-04",
+            "Apr-94",
+            "Sep-09",
+            "Dec-94",
+            "Sep-99",
+            "Dec-14",
+            "Jul-07",
+            "Jan-15",
+            "Feb-88",
+            "Dec-00",
+            "Aug-17",
+            "Sep-11",
+            "Sep-91",
+            "Mar-11",
+            "Nov-15",
+            "Jan-17",
+            "Mar-13",
+            "Jan-93",
+            "May-06",
+            "Jan-04",
+            "Dec-09",
+            "Sep-92",
+            "Oct-09",
+            "Dec-03",
+            "Jan-19",
+            "Dec-08",
+            "Feb-94",
+            "Jul-20",
+            "Jun-08",
+            "Mar-09",
+            "Jan-01",
+            "Oct-93",
+            "Sep-89",
+            "May-13",
+            "Jan-10",
+            "Dec-02",
+            "May-95",
+            "Mar-03",
+            "Dec-98",
+            "Mar-88",
+            "Dec-95",
+            "Jul-91",
+            "Apr-20",
+            "Feb-04",
+            "May-88",
+            "Dec-15",
+            "Sep-03",
+            "Feb-10",
+            "May-04",
+            "Jan-14",
+            "Jun-11",
+            "Jan-12",
+            "Oct-19",
+            "Jul-95",
+            "Oct-96",
+            "Mar-06",
+            "Nov-97",
+            "Oct-13",
+            "Mar-00",
+            "Sep-14",
+            "Aug-89",
+            "Apr-08",
+            "Jun-06",
+            "Oct-10",
+            "Feb-08",
+            "Feb-12",
+            "Jun-01",
+            "Aug-01",
+            "Nov-13",
+            "Apr-06",
+            "Jun-02",
+            "Dec-88",
+            "Nov-96",
+            "Jul-88",
+            "Nov-16",
+            "Aug-91",
+            "Apr-99",
+            "Apr-05",
+            "Oct-89",
+            "Mar-07",
+            "Sep-90",
+            "Feb-93",
+            "May-12",
+            "Jun-05",
+            "Jan-99",
+            "Apr-01",
+            "Nov-11",
+            "Jul-94",
+            "May-01",
+            "May-96",
+            "Mar-94",
+            "Jul-92",
+            "Sep-04",
+            "Apr-95",
+            "Nov-01",
+            "Jan-16",
+            "Aug-06",
+            "Jul-04",
+            "Jun-19",
+            "Jan-88",
+            "Dec-01",
+            "Nov-98",
+            "May-93",
+            "Mar-02",
+            "Dec-11",
+            "Aug-00",
+            "Dec-05",
+            "Feb-99",
+            "Dec-13",
+            "Apr-89",
+            "Dec-12",
+            "Apr-93",
+            "Feb-09",
+            "Jul-97",
+            "Feb-03",
+            "May-98",
+            "Oct-05",
+            "Nov-19",
+            "Oct-07",
+            "Jul-01",
+            "Aug-13",
+            "Jul-89",
+            "Jun-18",
+            "May-08",
+            "Nov-89",
+            "Apr-07",
+            "Mar-91",
+            "Sep-17",
+            "Aug-90",
+            "May-97",
+            "May-16",
+            "May-14",
+            "Jan-94",
+            "Jun-92",
+            "Jul-93",
+            "Nov-00",
+            "Jan-92",
+            "Jun-97",
+            "Sep-96",
+            "Aug-93",
+            "Aug-98",
+            "Aug-97",
+            "Aug-03",
+            "Nov-14",
+            "Oct-17",
+            "May-05",
+            "Jun-89",
+            "Jun-00",
+            "Nov-12",
+            "Mar-14",
+            "Jul-06",
+            "Dec-17",
+            "Jan-95",
+            "Aug-16",
+            "Jul-12",
+            "Jul-13",
+            "Apr-91",
+            "Apr-12",
+            "Mar-15",
+            "Jan-07",
+            "Apr-88",
+            "Feb-92",
+            "May-92",
+            "Sep-19",
+            "Sep-95",
+            "Jan-96",
+            "Jan-91",
+            "Feb-20",
+            "Jun-03",
+            "Mar-12",
+            "Jul-05",
+            "Apr-92",
+            "Dec-96",
+            "Dec-04",
+            "Jan-98",
+            "Feb-17",
+            "Oct-94",
+            "Jan-20",
+            "Sep-01",
+            "Jun-17",
+            "Jun-13",
+            "May-17",
+            "May-19",
+            "Aug-04",
+            "Sep-05",
+            "Jan-05",
+            "Jan-03",
+            "Dec-19",
+            "May-02",
+            "Apr-16",
+            "Jan-97",
+            "Nov-09",
+            "Jun-10",
+            "Feb-02",
+            "Jun-90",
+            "Jul-15",
+            "Sep-10",
+            "Dec-10",
+            "Jun-04",
+            "Jul-17",
+            "Jan-08",
+            "Apr-11",
+            "Jan-06",
+            "Feb-00",
+            "Mar-92",
+            "Mar-93",
+            "Jun-91",
+            "Oct-95",
+            "Oct-01",
+            "Jan-11",
+            "Oct-88",
+            "Dec-97"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44.csv",
+          "size": "445481"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44.xlsx",
+          "size": "30869"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-10T11:26:23.933Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-10T11:26:25.647Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+      "id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.7.16:10450/filters/88a550ec-58c9-4cdd-8010-f97167ebe109",
+          "id": "88a550ec-58c9-4cdd-8010-f97167ebe109"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.7.16:10450/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.666893Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 54804000,
+    "ended_at": "2021-05-15T08:50:04.666887Z",
+    "method": "GET",
+    "path": "/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+    "response_content_length": 4902,
+    "started_at": "2021-05-15T08:50:04.612083Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "fguywdOoMVvzQDIOcdXw"
+}
+{
+  "created_at": "2021-05-15T08:50:04.670559Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+    "started_at": "2021-05-15T08:50:04.670556Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.671011Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.671222Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.671438Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.671658Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.673258Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.67377Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.674085Z",
+  "data": {
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.705789Z",
+  "data": {
+    "filter_blueprint_id": "88a550ec-58c9-4cdd-8010-f97167ebe109",
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.70697Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1T100000",
+            "cpih1dim1A0",
+            "cpih1dim1T80000",
+            "cpih1dim1T90000",
+            "cpih1dim1T30000",
+            "cpih1dim1T10000",
+            "cpih1dim1T70000",
+            "cpih1dim1T50000",
+            "cpih1dim1T60000",
+            "cpih1dim1T20000",
+            "cpih1dim1T110000",
+            "cpih1dim1T120000",
+            "cpih1dim1T40000"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Mar-04",
+            "Mar-96",
+            "Dec-07",
+            "Mar-90",
+            "Aug-09",
+            "Oct-14",
+            "Aug-92",
+            "Oct-92",
+            "Feb-05",
+            "Sep-07",
+            "Nov-06",
+            "Jul-09",
+            "Oct-99",
+            "Mar-20",
+            "Jan-90",
+            "Apr-98",
+            "Aug-15",
+            "Jul-11",
+            "Sep-98",
+            "Oct-08",
+            "May-18",
+            "Jul-19",
+            "Feb-13",
+            "Jul-98",
+            "Feb-06",
+            "Feb-15",
+            "Oct-18",
+            "Sep-15",
+            "Jun-07",
+            "Sep-00",
+            "Dec-06",
+            "Apr-96",
+            "Feb-91",
+            "Nov-99",
+            "Nov-92",
+            "Feb-97",
+            "Mar-97",
+            "Jun-95",
+            "Nov-05",
+            "Jun-96",
+            "Feb-96",
+            "Jun-09",
+            "Nov-91",
+            "Aug-96",
+            "Jun-16",
+            "Sep-94",
+            "Oct-90",
+            "May-00",
+            "Jul-02",
+            "Apr-03",
+            "Mar-89",
+            "Jul-99",
+            "Oct-16",
+            "Jul-00",
+            "Jun-98",
+            "Mar-95",
+            "Mar-99",
+            "Sep-16",
+            "May-09",
+            "Oct-02",
+            "Dec-93",
+            "May-03",
+            "Sep-13",
+            "Sep-08",
+            "Jul-96",
+            "Jan-13",
+            "Aug-07",
+            "Apr-00",
+            "Feb-90",
+            "Dec-99",
+            "Oct-12",
+            "Dec-92",
+            "Apr-97",
+            "Feb-18",
+            "May-89",
+            "Sep-18",
+            "Jun-15",
+            "Aug-94",
+            "Apr-90",
+            "Oct-15",
+            "Oct-03",
+            "Jun-14",
+            "Feb-14",
+            "Apr-17",
+            "May-20",
+            "Mar-08",
+            "Oct-91",
+            "Aug-14",
+            "May-91",
+            "Mar-19",
+            "Aug-95",
+            "Aug-99",
+            "Sep-06",
+            "Jun-88",
+            "Nov-90",
+            "May-11",
+            "Feb-11",
+            "Nov-94",
+            "Apr-09",
+            "Nov-03",
+            "Feb-89",
+            "May-90",
+            "Nov-18",
+            "Mar-05",
+            "Apr-15",
+            "Nov-07",
+            "Dec-18",
+            "Oct-00",
+            "Jul-14",
+            "Apr-18",
+            "May-07",
+            "Aug-02",
+            "Jan-18",
+            "Sep-02",
+            "Jul-03",
+            "Apr-02",
+            "May-99",
+            "Apr-14",
+            "Mar-98",
+            "Feb-19",
+            "Jun-20",
+            "Dec-90",
+            "Oct-97",
+            "Jan-09",
+            "Aug-12",
+            "Jun-93",
+            "Apr-13",
+            "Mar-01",
+            "Oct-98",
+            "Feb-01",
+            "Jan-89",
+            "Oct-11",
+            "Aug-88",
+            "Aug-19",
+            "Nov-88",
+            "Aug-05",
+            "Jul-10",
+            "Nov-08",
+            "Oct-06",
+            "Jul-18",
+            "Oct-04",
+            "Apr-10",
+            "Aug-08",
+            "Nov-02",
+            "Feb-98",
+            "Dec-89",
+            "Jan-02",
+            "May-15",
+            "Feb-07",
+            "Sep-97",
+            "Mar-17",
+            "Nov-93",
+            "Jun-99",
+            "Aug-18",
+            "Jul-08",
+            "Feb-16",
+            "Jul-16",
+            "Apr-04",
+            "Jun-94",
+            "Sep-93",
+            "Jul-90",
+            "Nov-95",
+            "Mar-16",
+            "Aug-11",
+            "Dec-16",
+            "Aug-10",
+            "Nov-17",
+            "Apr-19",
+            "Feb-95",
+            "May-10",
+            "Jun-12",
+            "Sep-88",
+            "Nov-10",
+            "Jan-00",
+            "Mar-18",
+            "Mar-10",
+            "May-94",
+            "Dec-91",
+            "Sep-12",
+            "Nov-04",
+            "Apr-94",
+            "Sep-09",
+            "Dec-94",
+            "Sep-99",
+            "Dec-14",
+            "Jul-07",
+            "Jan-15",
+            "Feb-88",
+            "Dec-00",
+            "Aug-17",
+            "Sep-11",
+            "Sep-91",
+            "Mar-11",
+            "Nov-15",
+            "Jan-17",
+            "Mar-13",
+            "Jan-93",
+            "May-06",
+            "Jan-04",
+            "Dec-09",
+            "Sep-92",
+            "Oct-09",
+            "Dec-03",
+            "Jan-19",
+            "Dec-08",
+            "Feb-94",
+            "Jul-20",
+            "Jun-08",
+            "Mar-09",
+            "Jan-01",
+            "Oct-93",
+            "Sep-89",
+            "May-13",
+            "Jan-10",
+            "Dec-02",
+            "May-95",
+            "Mar-03",
+            "Dec-98",
+            "Mar-88",
+            "Dec-95",
+            "Jul-91",
+            "Apr-20",
+            "Feb-04",
+            "May-88",
+            "Dec-15",
+            "Sep-03",
+            "Feb-10",
+            "May-04",
+            "Jan-14",
+            "Jun-11",
+            "Jan-12",
+            "Oct-19",
+            "Jul-95",
+            "Oct-96",
+            "Mar-06",
+            "Nov-97",
+            "Oct-13",
+            "Mar-00",
+            "Sep-14",
+            "Aug-89",
+            "Apr-08",
+            "Jun-06",
+            "Oct-10",
+            "Feb-08",
+            "Feb-12",
+            "Jun-01",
+            "Aug-01",
+            "Nov-13",
+            "Apr-06",
+            "Jun-02",
+            "Dec-88",
+            "Nov-96",
+            "Jul-88",
+            "Nov-16",
+            "Aug-91",
+            "Apr-99",
+            "Apr-05",
+            "Oct-89",
+            "Mar-07",
+            "Sep-90",
+            "Feb-93",
+            "May-12",
+            "Jun-05",
+            "Jan-99",
+            "Apr-01",
+            "Nov-11",
+            "Jul-94",
+            "May-01",
+            "May-96",
+            "Mar-94",
+            "Jul-92",
+            "Sep-04",
+            "Apr-95",
+            "Nov-01",
+            "Jan-16",
+            "Aug-06",
+            "Jul-04",
+            "Jun-19",
+            "Jan-88",
+            "Dec-01",
+            "Nov-98",
+            "May-93",
+            "Mar-02",
+            "Dec-11",
+            "Aug-00",
+            "Dec-05",
+            "Feb-99",
+            "Dec-13",
+            "Apr-89",
+            "Dec-12",
+            "Apr-93",
+            "Feb-09",
+            "Jul-97",
+            "Feb-03",
+            "May-98",
+            "Oct-05",
+            "Nov-19",
+            "Oct-07",
+            "Jul-01",
+            "Aug-13",
+            "Jul-89",
+            "Jun-18",
+            "May-08",
+            "Nov-89",
+            "Apr-07",
+            "Mar-91",
+            "Sep-17",
+            "Aug-90",
+            "May-97",
+            "May-16",
+            "May-14",
+            "Jan-94",
+            "Jun-92",
+            "Jul-93",
+            "Nov-00",
+            "Jan-92",
+            "Jun-97",
+            "Sep-96",
+            "Aug-93",
+            "Aug-98",
+            "Aug-97",
+            "Aug-03",
+            "Nov-14",
+            "Oct-17",
+            "May-05",
+            "Jun-89",
+            "Jun-00",
+            "Nov-12",
+            "Mar-14",
+            "Jul-06",
+            "Dec-17",
+            "Jan-95",
+            "Aug-16",
+            "Jul-12",
+            "Jul-13",
+            "Apr-91",
+            "Apr-12",
+            "Mar-15",
+            "Jan-07",
+            "Apr-88",
+            "Feb-92",
+            "May-92",
+            "Sep-19",
+            "Sep-95",
+            "Jan-96",
+            "Jan-91",
+            "Feb-20",
+            "Jun-03",
+            "Mar-12",
+            "Jul-05",
+            "Apr-92",
+            "Dec-96",
+            "Dec-04",
+            "Jan-98",
+            "Feb-17",
+            "Oct-94",
+            "Jan-20",
+            "Sep-01",
+            "Jun-17",
+            "Jun-13",
+            "May-17",
+            "May-19",
+            "Aug-04",
+            "Sep-05",
+            "Jan-05",
+            "Jan-03",
+            "Dec-19",
+            "May-02",
+            "Apr-16",
+            "Jan-97",
+            "Nov-09",
+            "Jun-10",
+            "Feb-02",
+            "Jun-90",
+            "Jul-15",
+            "Sep-10",
+            "Dec-10",
+            "Jun-04",
+            "Jul-17",
+            "Jan-08",
+            "Apr-11",
+            "Jan-06",
+            "Feb-00",
+            "Mar-92",
+            "Mar-93",
+            "Jun-91",
+            "Oct-95",
+            "Oct-01",
+            "Jan-11",
+            "Oct-88",
+            "Dec-97"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44.csv",
+          "size": "445481"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44.xlsx",
+          "size": "30869"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-10T11:26:23.933Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-10T11:26:25.647Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+      "id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.7.16:10450/filters/88a550ec-58c9-4cdd-8010-f97167ebe109",
+          "id": "88a550ec-58c9-4cdd-8010-f97167ebe109"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.7.16:10450/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:04.718864Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 48302000,
+    "ended_at": "2021-05-15T08:50:04.718858Z",
+    "method": "GET",
+    "path": "/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+    "response_content_length": 4902,
+    "started_at": "2021-05-15T08:50:04.670556Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "tyqZhwIJvgaaZYnYkood"
+}
+{
+  "created_at": "2021-05-15T08:50:05.820232Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+    "started_at": "2021-05-15T08:50:05.820228Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.82095Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.821261Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.821549Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.821823Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.823739Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.82469Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.825124Z",
+  "data": {
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:05.825774Z",
+  "data": {
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:06.015804Z",
+  "data": {
+    "current_filter_timestamp": 6881951447001333762,
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:06.018737Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44/--v-filtered-2021-05-15T08-50-04Z.csv",
+          "size": "445481"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+{
+  "created_at": "2021-05-15T08:50:06.021811Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 201578000,
+    "ended_at": "2021-05-15T08:50:06.021806Z",
+    "method": "PUT",
+    "path": "/filter-outputs/dc1ccecb-c8dd-4f6a-9f7c-5786a1f0cc44",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:05.820228Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "PKnASQjNFCOCzEJQbEaw"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:06.034368Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87",
+    "started_at": "2021-05-15T08:50:06.034365Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.034878Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.035146Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.035525Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.035929Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.037603Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.038164Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.038478Z",
+  "data": {
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.068244Z",
+  "data": {
+    "filter_blueprint_id": "9022bdb5-c82f-4a62-aadf-b1bf3f7ba81a",
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.068824Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "trade",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "countriesandterritories",
+          "options": [
+            "W1"
+          ]
+        },
+        {
+          "name": "direction",
+          "options": [
+            "EX"
+          ]
+        },
+        {
+          "name": "standardindustrialtradeclassification",
+          "options": [
+            "T",
+            "0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-20"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87.csv",
+          "size": "355"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87.xlsx",
+          "size": "5512"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-10T14:25:24.265Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-10T14:25:28.146Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "53affc45-1d12-4652-acdd-9970cc7dfc87",
+      "id": "53affc45-1d12-4652-acdd-9970cc7dfc87",
+      "instance_id": "accab5b5-0509-4f9a-8364-9f4941d2d045",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/9022bdb5-c82f-4a62-aadf-b1bf3f7ba81a",
+          "id": "9022bdb5-c82f-4a62-aadf-b1bf3f7ba81a"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87"
+        },
+        "version": {
+          "href": "http://10.201.4.213:10400/datasets/trade/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.071166Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 36795000,
+    "ended_at": "2021-05-15T08:50:06.07116Z",
+    "method": "GET",
+    "path": "/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87",
+    "response_content_length": 1280,
+    "started_at": "2021-05-15T08:50:06.034365Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "dLLHNPscpZeTAIipasPt"
+}
+{
+  "created_at": "2021-05-15T08:50:06.074104Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87",
+    "started_at": "2021-05-15T08:50:06.074101Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.074597Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.074819Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.075046Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.075255Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.076784Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.077333Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.077632Z",
+  "data": {
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.105923Z",
+  "data": {
+    "filter_blueprint_id": "9022bdb5-c82f-4a62-aadf-b1bf3f7ba81a",
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.106608Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "trade",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "countriesandterritories",
+          "options": [
+            "W1"
+          ]
+        },
+        {
+          "name": "direction",
+          "options": [
+            "EX"
+          ]
+        },
+        {
+          "name": "standardindustrialtradeclassification",
+          "options": [
+            "T",
+            "0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-20"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87.csv",
+          "size": "355"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87.xlsx",
+          "size": "5512"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-10T14:25:24.265Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-10T14:25:28.146Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "53affc45-1d12-4652-acdd-9970cc7dfc87",
+      "id": "53affc45-1d12-4652-acdd-9970cc7dfc87",
+      "instance_id": "accab5b5-0509-4f9a-8364-9f4941d2d045",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/9022bdb5-c82f-4a62-aadf-b1bf3f7ba81a",
+          "id": "9022bdb5-c82f-4a62-aadf-b1bf3f7ba81a"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87"
+        },
+        "version": {
+          "href": "http://10.201.4.213:10400/datasets/trade/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:06.109029Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 34921000,
+    "ended_at": "2021-05-15T08:50:06.109022Z",
+    "method": "GET",
+    "path": "/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87",
+    "response_content_length": 1280,
+    "started_at": "2021-05-15T08:50:06.074101Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "svWKgiOvSbnngEtYYziD"
+}
+{
+  "created_at": "2021-05-15T08:50:08.043411Z",
+  "data": {
+    "action": "retrieving service health",
+    "method": "GET",
+    "uri": "http://localhost:22000"
+  },
+  "event": "Making request to service: dataset-api",
+  "namespace": "dp-filter-api",
+  "severity": 3
+}
+{
+  "created_at": "2021-05-15T08:50:10.486048Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87",
+    "started_at": "2021-05-15T08:50:10.486044Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.486752Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.487618Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.488459Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.488727Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.49074Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.491395Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.491907Z",
+  "data": {
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.49258Z",
+  "data": {
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.523896Z",
+  "data": {
+    "current_filter_timestamp": 6881997587834994689,
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.52705Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/53affc45-1d12-4652-acdd-9970cc7dfc87/--v-filtered-2021-05-15T08-50-06Z.csv",
+          "size": "355"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "53affc45-1d12-4652-acdd-9970cc7dfc87"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+{
+  "created_at": "2021-05-15T08:50:10.530018Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 43967000,
+    "ended_at": "2021-05-15T08:50:10.530011Z",
+    "method": "PUT",
+    "path": "/filter-outputs/53affc45-1d12-4652-acdd-9970cc7dfc87",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:10.486044Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "JfMlvZDCTOamICDWjmGo"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:10.541792Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+    "started_at": "2021-05-15T08:50:10.541787Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.542272Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.542485Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.542731Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.542957Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.544597Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.545182Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.5455Z",
+  "data": {
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.575935Z",
+  "data": {
+    "filter_blueprint_id": "7b0cdceb-1eee-496d-8882-5de45f8cd8dc",
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.57654Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1T120000",
+            "cpih1dim1T90000",
+            "cpih1dim1T20000",
+            "cpih1dim1T100000",
+            "cpih1dim1T60000",
+            "cpih1dim1A0",
+            "cpih1dim1T70000",
+            "cpih1dim1T40000",
+            "cpih1dim1T50000",
+            "cpih1dim1T80000",
+            "cpih1dim1T30000",
+            "cpih1dim1T110000",
+            "cpih1dim1T10000"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-20"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5.csv",
+          "size": "1208"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5.xlsx",
+          "size": "5470"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T06:57:17.018Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T06:57:17.611Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+      "id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.7.16:10450/filters/7b0cdceb-1eee-496d-8882-5de45f8cd8dc",
+          "id": "7b0cdceb-1eee-496d-8882-5de45f8cd8dc"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.7.16:10450/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.579042Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 37248000,
+    "ended_at": "2021-05-15T08:50:10.579035Z",
+    "method": "GET",
+    "path": "/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+    "response_content_length": 1389,
+    "started_at": "2021-05-15T08:50:10.541787Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "MnfgYOizJxtIiIubIhcM"
+}
+{
+  "created_at": "2021-05-15T08:50:10.582146Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+    "started_at": "2021-05-15T08:50:10.582143Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.582614Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.582833Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.583052Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.583265Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.584897Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.585427Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.585744Z",
+  "data": {
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.616656Z",
+  "data": {
+    "filter_blueprint_id": "7b0cdceb-1eee-496d-8882-5de45f8cd8dc",
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.617237Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1T120000",
+            "cpih1dim1T90000",
+            "cpih1dim1T20000",
+            "cpih1dim1T100000",
+            "cpih1dim1T60000",
+            "cpih1dim1A0",
+            "cpih1dim1T70000",
+            "cpih1dim1T40000",
+            "cpih1dim1T50000",
+            "cpih1dim1T80000",
+            "cpih1dim1T30000",
+            "cpih1dim1T110000",
+            "cpih1dim1T10000"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-20"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5.csv",
+          "size": "1208"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5.xlsx",
+          "size": "5470"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T06:57:17.018Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T06:57:17.611Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+      "id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.7.16:10450/filters/7b0cdceb-1eee-496d-8882-5de45f8cd8dc",
+          "id": "7b0cdceb-1eee-496d-8882-5de45f8cd8dc"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.7.16:10450/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:10.619616Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 37469000,
+    "ended_at": "2021-05-15T08:50:10.619612Z",
+    "method": "GET",
+    "path": "/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+    "response_content_length": 1389,
+    "started_at": "2021-05-15T08:50:10.582143Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "GRfrZhInOWXeecVrpoSh"
+}
+{
+  "created_at": "2021-05-15T08:50:11.013362Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+    "started_at": "2021-05-15T08:50:11.013357Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.01392Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.014185Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.014462Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.014827Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.016818Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.017366Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.017795Z",
+  "data": {
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.018345Z",
+  "data": {
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.047939Z",
+  "data": {
+    "current_filter_timestamp": 6882624262218186755,
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.051622Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/6a21b2e8-4b90-45ab-a7d8-dace66328ad5/--v-filtered-2021-05-15T08-50-10Z.csv",
+          "size": "1208"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "6a21b2e8-4b90-45ab-a7d8-dace66328ad5"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+{
+  "created_at": "2021-05-15T08:50:11.05428Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 40918000,
+    "ended_at": "2021-05-15T08:50:11.054275Z",
+    "method": "PUT",
+    "path": "/filter-outputs/6a21b2e8-4b90-45ab-a7d8-dace66328ad5",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:11.013357Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "ikzdOAPawJQtvIMoYEnp"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:11.065225Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca",
+    "started_at": "2021-05-15T08:50:11.065222Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.065699Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.065917Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.06617Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.066393Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.068069Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.068645Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.068992Z",
+  "data": {
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.100407Z",
+  "data": {
+    "filter_blueprint_id": "a64e0a7c-cf52-4979-96ab-e898e84e985f",
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.101044Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "ashe-tables-27-and-28",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "averagesandpercentiles",
+          "options": [
+            "10",
+            "20"
+          ]
+        },
+        {
+          "name": "geography",
+          "options": [
+            "E37000001",
+            "E37000002",
+            "E37000003",
+            "E37000027",
+            "E37000040",
+            "E37000029"
+          ]
+        },
+        {
+          "name": "hoursandearnings",
+          "options": [
+            "annual-pay-gross",
+            "annual-pay-incentive",
+            "basic-pay-including-other-pay"
+          ]
+        },
+        {
+          "name": "sex",
+          "options": [
+            "all",
+            "female",
+            "male"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "2018",
+            "2019"
+          ]
+        },
+        {
+          "name": "workingpattern",
+          "options": [
+            "all",
+            "full-time",
+            "part-time"
+          ]
+        },
+        {
+          "name": "workplaceorresidence",
+          "options": [
+            "workplace",
+            "residence"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca.csv",
+          "size": "210043"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca.xlsx",
+          "size": "43282"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T09:25:24.894Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T09:39:47.647Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca",
+      "id": "33908f59-56fa-4b6e-bea5-9a49783de7ca",
+      "instance_id": "e9c894eb-ac72-4167-9939-4059408dd2a8",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/a64e0a7c-cf52-4979-96ab-e898e84e985f",
+          "id": "a64e0a7c-cf52-4979-96ab-e898e84e985f"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca"
+        },
+        "version": {
+          "href": "http://10.201.4.213:10400/datasets/ashe-tables-27-and-28/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.104114Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 38886000,
+    "ended_at": "2021-05-15T08:50:11.104108Z",
+    "method": "GET",
+    "path": "/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca",
+    "response_content_length": 1622,
+    "started_at": "2021-05-15T08:50:11.065222Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "PCEZESiYKSjlRbVtKMCS"
+}
+{
+  "created_at": "2021-05-15T08:50:11.107341Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca",
+    "started_at": "2021-05-15T08:50:11.107337Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.107799Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.108025Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.108246Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.108465Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.110368Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.110926Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.11126Z",
+  "data": {
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.140945Z",
+  "data": {
+    "filter_blueprint_id": "a64e0a7c-cf52-4979-96ab-e898e84e985f",
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.141566Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "ashe-tables-27-and-28",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "averagesandpercentiles",
+          "options": [
+            "10",
+            "20"
+          ]
+        },
+        {
+          "name": "geography",
+          "options": [
+            "E37000001",
+            "E37000002",
+            "E37000003",
+            "E37000027",
+            "E37000040",
+            "E37000029"
+          ]
+        },
+        {
+          "name": "hoursandearnings",
+          "options": [
+            "annual-pay-gross",
+            "annual-pay-incentive",
+            "basic-pay-including-other-pay"
+          ]
+        },
+        {
+          "name": "sex",
+          "options": [
+            "all",
+            "female",
+            "male"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "2018",
+            "2019"
+          ]
+        },
+        {
+          "name": "workingpattern",
+          "options": [
+            "all",
+            "full-time",
+            "part-time"
+          ]
+        },
+        {
+          "name": "workplaceorresidence",
+          "options": [
+            "workplace",
+            "residence"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca.csv",
+          "size": "210043"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca.xlsx",
+          "size": "43282"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T09:25:24.894Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T09:39:47.647Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca",
+      "id": "33908f59-56fa-4b6e-bea5-9a49783de7ca",
+      "instance_id": "e9c894eb-ac72-4167-9939-4059408dd2a8",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/a64e0a7c-cf52-4979-96ab-e898e84e985f",
+          "id": "a64e0a7c-cf52-4979-96ab-e898e84e985f"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca"
+        },
+        "version": {
+          "href": "http://10.201.4.213:10400/datasets/ashe-tables-27-and-28/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.144742Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 37400000,
+    "ended_at": "2021-05-15T08:50:11.144737Z",
+    "method": "GET",
+    "path": "/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca",
+    "response_content_length": 1622,
+    "started_at": "2021-05-15T08:50:11.107337Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "mqujszofGfDBfMKMxxYF"
+}
+{
+  "created_at": "2021-05-15T08:50:11.381133Z",
+  "data": {
+    "action": "retrieving service health",
+    "method": "GET",
+    "uri": "http://localhost:8082"
+  },
+  "event": "Making request to service: identity",
+  "namespace": "dp-filter-api",
+  "severity": 3
+}
+{
+  "created_at": "2021-05-15T08:50:15.807044Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/health",
+    "started_at": "2021-05-15T08:50:15.80704Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "XmbDSSuontxYbpCNHkia"
+}
+{
+  "created_at": "2021-05-15T08:50:15.807993Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 949000,
+    "ended_at": "2021-05-15T08:50:15.807989Z",
+    "method": "GET",
+    "path": "/health",
+    "response_content_length": 1204,
+    "started_at": "2021-05-15T08:50:15.80704Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "XmbDSSuontxYbpCNHkia"
+}
+{
+  "created_at": "2021-05-15T08:50:16.148985Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca",
+    "started_at": "2021-05-15T08:50:16.148982Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.149552Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.14982Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.150104Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.150364Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.15221Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.152859Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.153277Z",
+  "data": {
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.158643Z",
+  "data": {
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.350728Z",
+  "data": {
+    "current_filter_timestamp": 6882666138149322754,
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.353959Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/33908f59-56fa-4b6e-bea5-9a49783de7ca/--v-filtered-2021-05-15T08-50-11Z.csv",
+          "size": "210043"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "33908f59-56fa-4b6e-bea5-9a49783de7ca"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+{
+  "created_at": "2021-05-15T08:50:16.356731Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 207744000,
+    "ended_at": "2021-05-15T08:50:16.356726Z",
+    "method": "PUT",
+    "path": "/filter-outputs/33908f59-56fa-4b6e-bea5-9a49783de7ca",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:16.148982Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "gJMKMoQGPvMLzTFcscpG"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:16.369037Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+    "started_at": "2021-05-15T08:50:16.369034Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.369562Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.369814Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.370097Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.370344Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.372913Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.373625Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.373999Z",
+  "data": {
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.404684Z",
+  "data": {
+    "filter_blueprint_id": "565ab931-3b05-4996-aeb3-23b20de75d7b",
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.405395Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1A0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-20"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6.csv",
+          "size": "131"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6.xlsx",
+          "size": "5002"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T10:47:15.096Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T10:47:23.08Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+      "id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/565ab931-3b05-4996-aeb3-23b20de75d7b",
+          "id": "565ab931-3b05-4996-aeb3-23b20de75d7b"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.407575Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 38531000,
+    "ended_at": "2021-05-15T08:50:16.407565Z",
+    "method": "GET",
+    "path": "/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+    "response_content_length": 1168,
+    "started_at": "2021-05-15T08:50:16.369034Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "tWIOsItZnSrMhkTRztcr"
+}
+{
+  "created_at": "2021-05-15T08:50:16.410578Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+    "started_at": "2021-05-15T08:50:16.410575Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.41102Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.411247Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.411469Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.411685Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.413294Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.413828Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.414146Z",
+  "data": {
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.44411Z",
+  "data": {
+    "filter_blueprint_id": "565ab931-3b05-4996-aeb3-23b20de75d7b",
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.444683Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1A0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-20"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6.csv",
+          "size": "131"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6.xlsx",
+          "size": "5002"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T10:47:15.096Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T10:47:23.08Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+      "id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/565ab931-3b05-4996-aeb3-23b20de75d7b",
+          "id": "565ab931-3b05-4996-aeb3-23b20de75d7b"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.446688Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 36106000,
+    "ended_at": "2021-05-15T08:50:16.446681Z",
+    "method": "GET",
+    "path": "/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+    "response_content_length": 1168,
+    "started_at": "2021-05-15T08:50:16.410575Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "MDKUgEoVygKHDdMpBcBJ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.56254Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+    "started_at": "2021-05-15T08:50:16.562535Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.563183Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.563445Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.563709Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.563967Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.565801Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.566353Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.56677Z",
+  "data": {
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.567362Z",
+  "data": {
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.595911Z",
+  "data": {
+    "current_filter_timestamp": 6882683558536675329,
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.598222Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/2f7f8e17-168a-4645-8b11-8f9c5773eca6/--v-filtered-2021-05-15T08-50-16Z.csv",
+          "size": "131"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "2f7f8e17-168a-4645-8b11-8f9c5773eca6"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+{
+  "created_at": "2021-05-15T08:50:16.601096Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 38555000,
+    "ended_at": "2021-05-15T08:50:16.60109Z",
+    "method": "PUT",
+    "path": "/filter-outputs/2f7f8e17-168a-4645-8b11-8f9c5773eca6",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:16.562535Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "XtqEFOqJQZBbfTYSbfdA"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:16.615003Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12",
+    "started_at": "2021-05-15T08:50:16.615Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.615485Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.615722Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.615991Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.616211Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.617909Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.619341Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.61976Z",
+  "data": {
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.64976Z",
+  "data": {
+    "filter_blueprint_id": "565ab931-3b05-4996-aeb3-23b20de75d7b",
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.650313Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1A0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-98"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12.csv",
+          "size": "130"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12.xlsx",
+          "size": "5001"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T10:47:36.215Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T10:47:36.58Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "0412d7de-5a1f-4395-955f-b2be52e42f12",
+      "id": "0412d7de-5a1f-4395-955f-b2be52e42f12",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.7.16:10450/filters/565ab931-3b05-4996-aeb3-23b20de75d7b",
+          "id": "565ab931-3b05-4996-aeb3-23b20de75d7b"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.7.16:10450/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.652307Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 37301000,
+    "ended_at": "2021-05-15T08:50:16.652301Z",
+    "method": "GET",
+    "path": "/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12",
+    "response_content_length": 1168,
+    "started_at": "2021-05-15T08:50:16.615Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "SghMAUqCbnMMQHPuXjyV"
+}
+{
+  "created_at": "2021-05-15T08:50:16.655062Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12",
+    "started_at": "2021-05-15T08:50:16.655059Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.655518Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.65574Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.655962Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.656166Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.657946Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.658666Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.658995Z",
+  "data": {
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.689868Z",
+  "data": {
+    "filter_blueprint_id": "565ab931-3b05-4996-aeb3-23b20de75d7b",
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.69062Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1A0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jul-98"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12.csv",
+          "size": "130"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12.xlsx",
+          "size": "5001"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T10:47:36.215Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T10:47:36.58Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "0412d7de-5a1f-4395-955f-b2be52e42f12",
+      "id": "0412d7de-5a1f-4395-955f-b2be52e42f12",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.7.16:10450/filters/565ab931-3b05-4996-aeb3-23b20de75d7b",
+          "id": "565ab931-3b05-4996-aeb3-23b20de75d7b"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.7.16:10450/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.693059Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 37995000,
+    "ended_at": "2021-05-15T08:50:16.693054Z",
+    "method": "GET",
+    "path": "/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12",
+    "response_content_length": 1168,
+    "started_at": "2021-05-15T08:50:16.655059Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "oVljMuMXMZgUpDyZcbDa"
+}
+{
+  "created_at": "2021-05-15T08:50:16.875685Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12",
+    "started_at": "2021-05-15T08:50:16.875681Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.876238Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.876503Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.876772Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.876996Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.878571Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.879087Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.879428Z",
+  "data": {
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.879956Z",
+  "data": {
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.917608Z",
+  "data": {
+    "current_filter_timestamp": 6882683614371250179,
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.920557Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/0412d7de-5a1f-4395-955f-b2be52e42f12/--v-filtered-2021-05-15T08-50-16Z.csv",
+          "size": "130"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "0412d7de-5a1f-4395-955f-b2be52e42f12"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.923544Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 47858000,
+    "ended_at": "2021-05-15T08:50:16.923539Z",
+    "method": "PUT",
+    "path": "/filter-outputs/0412d7de-5a1f-4395-955f-b2be52e42f12",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:16.875681Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "ItiflEZvyzrjrkIDIgQC"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
+{
+  "created_at": "2021-05-15T08:50:16.934321Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004",
+    "started_at": "2021-05-15T08:50:16.934318Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.934851Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.935085Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.935341Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.935561Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.937281Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.937867Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.938209Z",
+  "data": {
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.975353Z",
+  "data": {
+    "filter_blueprint_id": "565ab931-3b05-4996-aeb3-23b20de75d7b",
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.976085Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1A0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jan-05",
+            "Feb-05",
+            "Mar-05",
+            "Apr-05",
+            "May-05",
+            "Jun-05",
+            "Jul-05",
+            "Aug-05",
+            "Sep-05",
+            "Oct-05",
+            "Nov-05",
+            "Dec-05",
+            "Jan-06",
+            "Feb-06",
+            "Mar-06",
+            "Apr-06",
+            "May-06",
+            "Jun-06",
+            "Jul-06",
+            "Aug-06",
+            "Sep-06",
+            "Oct-06",
+            "Nov-06",
+            "Dec-06",
+            "Jan-07",
+            "Feb-07",
+            "Mar-07",
+            "Apr-07",
+            "May-07",
+            "Jun-07",
+            "Jul-07",
+            "Aug-07",
+            "Sep-07",
+            "Oct-07",
+            "Nov-07",
+            "Dec-07",
+            "Jan-08",
+            "Feb-08",
+            "Mar-08",
+            "Apr-08",
+            "May-08",
+            "Jun-08",
+            "Jul-08",
+            "Aug-08",
+            "Sep-08",
+            "Oct-08",
+            "Nov-08",
+            "Dec-08",
+            "Jan-09",
+            "Feb-09",
+            "Mar-09",
+            "Apr-09",
+            "May-09",
+            "Jun-09",
+            "Jul-09",
+            "Aug-09",
+            "Sep-09",
+            "Oct-09",
+            "Nov-09",
+            "Dec-09",
+            "Jan-10",
+            "Feb-10",
+            "Mar-10",
+            "Apr-10",
+            "May-10",
+            "Jun-10",
+            "Jul-10",
+            "Aug-10",
+            "Sep-10",
+            "Oct-10",
+            "Nov-10",
+            "Dec-10",
+            "Jan-11",
+            "Feb-11",
+            "Mar-11",
+            "Apr-11",
+            "May-11",
+            "Jun-11",
+            "Jul-11",
+            "Aug-11",
+            "Sep-11",
+            "Oct-11",
+            "Nov-11",
+            "Dec-11",
+            "Jan-12",
+            "Feb-12",
+            "Mar-12",
+            "Apr-12",
+            "May-12",
+            "Jun-12",
+            "Jul-12",
+            "Aug-12",
+            "Sep-12",
+            "Oct-12",
+            "Nov-12",
+            "Dec-12",
+            "Jan-13",
+            "Feb-13",
+            "Mar-13",
+            "Apr-13",
+            "May-13",
+            "Jun-13",
+            "Jul-13",
+            "Aug-13",
+            "Sep-13",
+            "Oct-13",
+            "Nov-13",
+            "Dec-13",
+            "Jan-14",
+            "Feb-14",
+            "Mar-14",
+            "Apr-14",
+            "May-14",
+            "Jun-14",
+            "Jul-14",
+            "Aug-14",
+            "Sep-14",
+            "Oct-14",
+            "Nov-14",
+            "Dec-14",
+            "Jan-15",
+            "Feb-15",
+            "Mar-15",
+            "Apr-15",
+            "May-15",
+            "Jun-15",
+            "Jul-15",
+            "Aug-15",
+            "Sep-15",
+            "Oct-15"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004.csv",
+          "size": "9168"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004.xlsx",
+          "size": "6464"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T10:48:09.218Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T10:48:09.694Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "30473f62-5ace-44e3-8553-d2f40441f004",
+      "id": "30473f62-5ace-44e3-8553-d2f40441f004",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/565ab931-3b05-4996-aeb3-23b20de75d7b",
+          "id": "565ab931-3b05-4996-aeb3-23b20de75d7b"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.98213Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 47805000,
+    "ended_at": "2021-05-15T08:50:16.982123Z",
+    "method": "GET",
+    "path": "/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004",
+    "response_content_length": 2331,
+    "started_at": "2021-05-15T08:50:16.934318Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "VIxiqnMlyPmjRTfyqHRC"
+}
+{
+  "created_at": "2021-05-15T08:50:16.985391Z",
+  "event": "http request received",
+  "http": {
+    "method": "GET",
+    "path": "/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004",
+    "started_at": "2021-05-15T08:50:16.985388Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.985834Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.986042Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.986264Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.98647Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.988001Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.988551Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:16.988882Z",
+  "data": {
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "getting filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:17.019143Z",
+  "data": {
+    "filter_blueprint_id": "565ab931-3b05-4996-aeb3-23b20de75d7b",
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "a valid download service token has not been provided. hiding links",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:17.019894Z",
+  "data": {
+    "filter_output": {
+      "dataset": {
+        "edition": "time-series",
+        "id": "cpih01",
+        "version": 1
+      },
+      "dimensions": [
+        {
+          "name": "aggregate",
+          "options": [
+            "cpih1dim1A0"
+          ]
+        },
+        {
+          "name": "time",
+          "options": [
+            "Jan-05",
+            "Feb-05",
+            "Mar-05",
+            "Apr-05",
+            "May-05",
+            "Jun-05",
+            "Jul-05",
+            "Aug-05",
+            "Sep-05",
+            "Oct-05",
+            "Nov-05",
+            "Dec-05",
+            "Jan-06",
+            "Feb-06",
+            "Mar-06",
+            "Apr-06",
+            "May-06",
+            "Jun-06",
+            "Jul-06",
+            "Aug-06",
+            "Sep-06",
+            "Oct-06",
+            "Nov-06",
+            "Dec-06",
+            "Jan-07",
+            "Feb-07",
+            "Mar-07",
+            "Apr-07",
+            "May-07",
+            "Jun-07",
+            "Jul-07",
+            "Aug-07",
+            "Sep-07",
+            "Oct-07",
+            "Nov-07",
+            "Dec-07",
+            "Jan-08",
+            "Feb-08",
+            "Mar-08",
+            "Apr-08",
+            "May-08",
+            "Jun-08",
+            "Jul-08",
+            "Aug-08",
+            "Sep-08",
+            "Oct-08",
+            "Nov-08",
+            "Dec-08",
+            "Jan-09",
+            "Feb-09",
+            "Mar-09",
+            "Apr-09",
+            "May-09",
+            "Jun-09",
+            "Jul-09",
+            "Aug-09",
+            "Sep-09",
+            "Oct-09",
+            "Nov-09",
+            "Dec-09",
+            "Jan-10",
+            "Feb-10",
+            "Mar-10",
+            "Apr-10",
+            "May-10",
+            "Jun-10",
+            "Jul-10",
+            "Aug-10",
+            "Sep-10",
+            "Oct-10",
+            "Nov-10",
+            "Dec-10",
+            "Jan-11",
+            "Feb-11",
+            "Mar-11",
+            "Apr-11",
+            "May-11",
+            "Jun-11",
+            "Jul-11",
+            "Aug-11",
+            "Sep-11",
+            "Oct-11",
+            "Nov-11",
+            "Dec-11",
+            "Jan-12",
+            "Feb-12",
+            "Mar-12",
+            "Apr-12",
+            "May-12",
+            "Jun-12",
+            "Jul-12",
+            "Aug-12",
+            "Sep-12",
+            "Oct-12",
+            "Nov-12",
+            "Dec-12",
+            "Jan-13",
+            "Feb-13",
+            "Mar-13",
+            "Apr-13",
+            "May-13",
+            "Jun-13",
+            "Jul-13",
+            "Aug-13",
+            "Sep-13",
+            "Oct-13",
+            "Nov-13",
+            "Dec-13",
+            "Jan-14",
+            "Feb-14",
+            "Mar-14",
+            "Apr-14",
+            "May-14",
+            "Jun-14",
+            "Jul-14",
+            "Aug-14",
+            "Sep-14",
+            "Oct-14",
+            "Nov-14",
+            "Dec-14",
+            "Jan-15",
+            "Feb-15",
+            "Mar-15",
+            "Apr-15",
+            "May-15",
+            "Jun-15",
+            "Jul-15",
+            "Aug-15",
+            "Sep-15",
+            "Oct-15"
+          ]
+        }
+      ],
+      "downloads": {
+        "csv": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004.csv",
+          "size": "9168"
+        },
+        "xls": {
+          "href": "https://download.develop.onsdigital.co.uk/downloads/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004.xlsx",
+          "size": "6464"
+        }
+      },
+      "events": [
+        {
+          "time": "2020-10-12T10:48:09.218Z",
+          "type": "FilterOutputCreated"
+        },
+        {
+          "time": "2020-10-12T10:48:09.694Z",
+          "type": "FilterOutputCompleted"
+        }
+      ],
+      "filter_id": "30473f62-5ace-44e3-8553-d2f40441f004",
+      "id": "30473f62-5ace-44e3-8553-d2f40441f004",
+      "instance_id": "f9ee5944-8549-4d24-8bee-6be86cba1051",
+      "links": {
+        "dimensions": {},
+        "filter_blueprint": {
+          "href": "http://10.201.6.77:10450/filters/565ab931-3b05-4996-aeb3-23b20de75d7b",
+          "id": "565ab931-3b05-4996-aeb3-23b20de75d7b"
+        },
+        "filter_output": {},
+        "self": {
+          "href": "http://10.201.6.77:10450/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004"
+        },
+        "version": {
+          "href": "http://10.201.4.83:10400/datasets/cpih01/editions/time-series/versions/1",
+          "id": "1"
+        }
+      },
+      "published": true,
+      "state": "completed"
+    },
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "got filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:17.024898Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 39504000,
+    "ended_at": "2021-05-15T08:50:17.024892Z",
+    "method": "GET",
+    "path": "/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004",
+    "response_content_length": 2331,
+    "started_at": "2021-05-15T08:50:16.985388Z",
+    "status_code": 200
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "hqTlRnAFKOrMBPQEVbhZ"
+}
+{
+  "created_at": "2021-05-15T08:50:17.187176Z",
+  "event": "http request received",
+  "http": {
+    "method": "PUT",
+    "path": "/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004",
+    "started_at": "2021-05-15T08:50:17.187172Z",
+    "status_code": 0
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.187788Z",
+  "event": "executing identity check middleware",
+  "namespace": "dp-filter-api",
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.188038Z",
+  "event": "florence access token header not found attempting to find access token cookie",
+  "namespace": "dp-filter-api",
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.188304Z",
+  "event": "florence access token cookie not found in request",
+  "namespace": "dp-filter-api",
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.188565Z",
+  "data": {
+    "auth_token": {},
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity"
+  },
+  "event": "calling AuthAPI to authenticate caller identity",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.190591Z",
+  "data": {
+    "auth_token": {},
+    "caller_identity": "",
+    "is_service_request": true,
+    "is_user_request": false,
+    "url": "http://localhost:8082/identity",
+    "user_identity": ""
+  },
+  "event": "caller identity retrieved setting context values",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.191208Z",
+  "event": "identity client check request completed successfully invoking downstream http handler",
+  "namespace": "dp-filter-api",
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.191775Z",
+  "data": {
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "handling update filter output request",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.192428Z",
+  "data": {
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "event": "updating filter output",
+  "namespace": "dp-filter-api",
+  "severity": 3,
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.231506Z",
+  "data": {
+    "current_filter_timestamp": 6882683756105170947,
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutput",
+        "line": 112
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 80
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      }
+    ]
+  },
+  "event": "filter output failed validation",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.23394Z",
+  "data": {
+    "filter_output": {
+      "dataset": null,
+      "downloads": {
+        "csv": {
+          "href": "http://localhost:23600/downloads/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004.csv",
+          "public": "https://csv-exported.s3.eu-west-1.amazonaws.com/filtered-datasets/30473f62-5ace-44e3-8553-d2f40441f004/--v-filtered-2021-05-15T08-50-17Z.csv",
+          "size": "9168"
+        }
+      },
+      "instance_id": "",
+      "links": {
+        "filter_blueprint": {},
+        "filter_output": {},
+        "version": {}
+      },
+      "published": false
+    },
+    "filter_output_id": "30473f62-5ace-44e3-8553-d2f40441f004"
+  },
+  "error": {
+    "data": {},
+    "error": "Forbidden from updating the following fields: [downloads.csv]",
+    "stack_trace": [
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/api/filter_outputs.go",
+        "function": "github.com/ONSdigital/dp-filter-api/api.(*FilterAPI).updateFilterOutputHandler",
+        "line": 82
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/gorilla/mux@v1.8.0/mux.go",
+        "function": "github.com/gorilla/mux.(*Router).ServeHTTP",
+        "line": 210
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/identity.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.identityWithHTTPClient.func1.1",
+        "line": 64
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/dp-net@v1.0.10/handlers/handlers.go",
+        "function": "github.com/ONSdigital/dp-net/handlers.DoCheckHeader.func1",
+        "line": 27
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/src/github.com/ONSdigital/dp-filter-api/service/service.go",
+        "function": "github.com/ONSdigital/dp-filter-api/service.newMiddleware.func1.1",
+        "line": 197
+      },
+      {
+        "file": "/usr/local/opt/go@1.15.8/go/src/net/http/server.go",
+        "function": "net/http.HandlerFunc.ServeHTTP",
+        "line": 2042
+      },
+      {
+        "file": "/Users/rhysdavies/go/pkg/mod/github.com/!o!n!sdigital/log.go@v1.0.1/log/middleware.go",
+        "function": "github.com/ONSdigital/log.go/log.Middleware.func1",
+        "line": 46
+      }
+    ]
+  },
+  "event": "failed to update filter output",
+  "namespace": "dp-filter-api",
+  "severity": 1,
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+{
+  "created_at": "2021-05-15T08:50:17.23677Z",
+  "event": "http request completed",
+  "http": {
+    "duration": 49593000,
+    "ended_at": "2021-05-15T08:50:17.236765Z",
+    "method": "PUT",
+    "path": "/filter-outputs/30473f62-5ace-44e3-8553-d2f40441f004",
+    "response_content_length": 62,
+    "started_at": "2021-05-15T08:50:17.187172Z",
+    "status_code": 403
+  },
+  "namespace": "dp-filter-api",
+  "trace_id": "GoVdluBxGOHnYpRidsWc"
+}
+
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+// #######################################################################################################
+
