@@ -12,15 +12,7 @@ import (
 	"sync"
 )
 
-var (
-	lockUploaderMockBucketName    sync.RWMutex
-	lockUploaderMockChecker       sync.RWMutex
-	lockUploaderMockSession       sync.RWMutex
-	lockUploaderMockUpload        sync.RWMutex
-	lockUploaderMockUploadWithPSK sync.RWMutex
-)
-
-// Ensure, that UploaderMock does implement Uploader.
+// Ensure, that UploaderMock does implement file.Uploader.
 // If this is not the case, regenerate this file with moq.
 var _ file.Uploader = &UploaderMock{}
 
@@ -97,6 +89,11 @@ type UploaderMock struct {
 			Psk []byte
 		}
 	}
+	lockBucketName    sync.RWMutex
+	lockChecker       sync.RWMutex
+	lockSession       sync.RWMutex
+	lockUpload        sync.RWMutex
+	lockUploadWithPSK sync.RWMutex
 }
 
 // BucketName calls BucketNameFunc.
@@ -106,9 +103,9 @@ func (mock *UploaderMock) BucketName() string {
 	}
 	callInfo := struct {
 	}{}
-	lockUploaderMockBucketName.Lock()
+	mock.lockBucketName.Lock()
 	mock.calls.BucketName = append(mock.calls.BucketName, callInfo)
-	lockUploaderMockBucketName.Unlock()
+	mock.lockBucketName.Unlock()
 	return mock.BucketNameFunc()
 }
 
@@ -119,9 +116,9 @@ func (mock *UploaderMock) BucketNameCalls() []struct {
 } {
 	var calls []struct {
 	}
-	lockUploaderMockBucketName.RLock()
+	mock.lockBucketName.RLock()
 	calls = mock.calls.BucketName
-	lockUploaderMockBucketName.RUnlock()
+	mock.lockBucketName.RUnlock()
 	return calls
 }
 
@@ -137,9 +134,9 @@ func (mock *UploaderMock) Checker(ctx context.Context, state *healthcheck.CheckS
 		Ctx:   ctx,
 		State: state,
 	}
-	lockUploaderMockChecker.Lock()
+	mock.lockChecker.Lock()
 	mock.calls.Checker = append(mock.calls.Checker, callInfo)
-	lockUploaderMockChecker.Unlock()
+	mock.lockChecker.Unlock()
 	return mock.CheckerFunc(ctx, state)
 }
 
@@ -154,9 +151,9 @@ func (mock *UploaderMock) CheckerCalls() []struct {
 		Ctx   context.Context
 		State *healthcheck.CheckState
 	}
-	lockUploaderMockChecker.RLock()
+	mock.lockChecker.RLock()
 	calls = mock.calls.Checker
-	lockUploaderMockChecker.RUnlock()
+	mock.lockChecker.RUnlock()
 	return calls
 }
 
@@ -167,9 +164,9 @@ func (mock *UploaderMock) Session() *session.Session {
 	}
 	callInfo := struct {
 	}{}
-	lockUploaderMockSession.Lock()
+	mock.lockSession.Lock()
 	mock.calls.Session = append(mock.calls.Session, callInfo)
-	lockUploaderMockSession.Unlock()
+	mock.lockSession.Unlock()
 	return mock.SessionFunc()
 }
 
@@ -180,9 +177,9 @@ func (mock *UploaderMock) SessionCalls() []struct {
 } {
 	var calls []struct {
 	}
-	lockUploaderMockSession.RLock()
+	mock.lockSession.RLock()
 	calls = mock.calls.Session
-	lockUploaderMockSession.RUnlock()
+	mock.lockSession.RUnlock()
 	return calls
 }
 
@@ -198,9 +195,9 @@ func (mock *UploaderMock) Upload(input *s3manager.UploadInput, options ...func(*
 		Input:   input,
 		Options: options,
 	}
-	lockUploaderMockUpload.Lock()
+	mock.lockUpload.Lock()
 	mock.calls.Upload = append(mock.calls.Upload, callInfo)
-	lockUploaderMockUpload.Unlock()
+	mock.lockUpload.Unlock()
 	return mock.UploadFunc(input, options...)
 }
 
@@ -215,9 +212,9 @@ func (mock *UploaderMock) UploadCalls() []struct {
 		Input   *s3manager.UploadInput
 		Options []func(*s3manager.Uploader)
 	}
-	lockUploaderMockUpload.RLock()
+	mock.lockUpload.RLock()
 	calls = mock.calls.Upload
-	lockUploaderMockUpload.RUnlock()
+	mock.lockUpload.RUnlock()
 	return calls
 }
 
@@ -233,9 +230,9 @@ func (mock *UploaderMock) UploadWithPSK(input *s3manager.UploadInput, psk []byte
 		Input: input,
 		Psk:   psk,
 	}
-	lockUploaderMockUploadWithPSK.Lock()
+	mock.lockUploadWithPSK.Lock()
 	mock.calls.UploadWithPSK = append(mock.calls.UploadWithPSK, callInfo)
-	lockUploaderMockUploadWithPSK.Unlock()
+	mock.lockUploadWithPSK.Unlock()
 	return mock.UploadWithPSKFunc(input, psk)
 }
 
@@ -250,8 +247,8 @@ func (mock *UploaderMock) UploadWithPSKCalls() []struct {
 		Input *s3manager.UploadInput
 		Psk   []byte
 	}
-	lockUploaderMockUploadWithPSK.RLock()
+	mock.lockUploadWithPSK.RLock()
 	calls = mock.calls.UploadWithPSK
-	lockUploaderMockUploadWithPSK.RUnlock()
+	mock.lockUploadWithPSK.RUnlock()
 	return calls
 }

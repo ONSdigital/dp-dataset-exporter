@@ -191,8 +191,8 @@ func (csvw *CSVW) AddNotes(metadata *dataset.Metadata, url string) {
 		}
 	}
 
-	if metadata.UsageNotes != nil {
-		for _, u := range *metadata.UsageNotes {
+	if metadata.Version.UsageNotes != nil {
+		for _, u := range *metadata.Version.UsageNotes {
 			csvw.Notes = append(csvw.Notes, Note{
 				Type: u.Title,
 				Body: u.Note,

@@ -8,11 +8,7 @@ import (
 	"sync"
 )
 
-var (
-	lockWrappedReaderMockRead sync.RWMutex
-)
-
-// Ensure, that WrappedReaderMock does implement WrappedReader.
+// Ensure, that WrappedReaderMock does implement reader.WrappedReader.
 // If this is not the case, regenerate this file with moq.
 var _ reader.WrappedReader = &WrappedReaderMock{}
 
@@ -43,6 +39,7 @@ type WrappedReaderMock struct {
 			P []byte
 		}
 	}
+	lockRead sync.RWMutex
 }
 
 // Read calls ReadFunc.
@@ -55,9 +52,9 @@ func (mock *WrappedReaderMock) Read(p []byte) (int, error) {
 	}{
 		P: p,
 	}
-	lockWrappedReaderMockRead.Lock()
+	mock.lockRead.Lock()
 	mock.calls.Read = append(mock.calls.Read, callInfo)
-	lockWrappedReaderMockRead.Unlock()
+	mock.lockRead.Unlock()
 	return mock.ReadFunc(p)
 }
 
@@ -70,8 +67,8 @@ func (mock *WrappedReaderMock) ReadCalls() []struct {
 	var calls []struct {
 		P []byte
 	}
-	lockWrappedReaderMockRead.RLock()
+	mock.lockRead.RLock()
 	calls = mock.calls.Read
-	lockWrappedReaderMockRead.RUnlock()
+	mock.lockRead.RUnlock()
 	return calls
 }

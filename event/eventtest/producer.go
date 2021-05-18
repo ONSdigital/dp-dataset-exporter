@@ -8,11 +8,7 @@ import (
 	"sync"
 )
 
-var (
-	lockProducerMockCSVExported sync.RWMutex
-)
-
-// Ensure, that ProducerMock does implement Producer.
+// Ensure, that ProducerMock does implement event.Producer.
 // If this is not the case, regenerate this file with moq.
 var _ event.Producer = &ProducerMock{}
 
@@ -43,6 +39,7 @@ type ProducerMock struct {
 			E *event.CSVExported
 		}
 	}
+	lockCSVExported sync.RWMutex
 }
 
 // CSVExported calls CSVExportedFunc.
@@ -55,9 +52,9 @@ func (mock *ProducerMock) CSVExported(e *event.CSVExported) error {
 	}{
 		E: e,
 	}
-	lockProducerMockCSVExported.Lock()
+	mock.lockCSVExported.Lock()
 	mock.calls.CSVExported = append(mock.calls.CSVExported, callInfo)
-	lockProducerMockCSVExported.Unlock()
+	mock.lockCSVExported.Unlock()
 	return mock.CSVExportedFunc(e)
 }
 
@@ -70,8 +67,8 @@ func (mock *ProducerMock) CSVExportedCalls() []struct {
 	var calls []struct {
 		E *event.CSVExported
 	}
-	lockProducerMockCSVExported.RLock()
+	mock.lockCSVExported.RLock()
 	calls = mock.calls.CSVExported
-	lockProducerMockCSVExported.RUnlock()
+	mock.lockCSVExported.RUnlock()
 	return calls
 }

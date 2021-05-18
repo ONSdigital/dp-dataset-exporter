@@ -163,7 +163,7 @@ func main() {
 					// Kafka client cannot be initialised
 					continue
 				}
-				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, ""); err != nil {
+				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, "", nil); err != nil {
 					// GetDatasets failed
 					continue
 				}

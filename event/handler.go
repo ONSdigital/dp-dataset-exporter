@@ -55,6 +55,7 @@ type DatasetAPI interface {
 	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
 	GetMetadataURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.Metadata, err error)
+	GetOptions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (m dataset.Options, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -184,6 +185,8 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 	return instance.State == publishedState, nil
 }
 
+var callCount int
+
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
@@ -194,9 +197,34 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	// =====
 	fmt.Printf("\ndoing: StreamCSVRows\n")
+	//fmt.Printf("%+v\n", filter)
 	start := time.Now()
 	// =====
 	dbFilter := mapFilter(filter)
+	//spew.Dump(dbFilter)
+
+	// get info from mongo
+
+	for i, dimension := range dbFilter.Dimensions {
+
+		options, err := handler.datasetAPICli.GetOptions(ctx,
+			"", // userAuthToken ??
+			handler.serviceAuthToken,
+			"", // collectionID, // ??
+			event.DatasetID,
+			event.Edition,
+			event.Version,
+			dimension.Name,
+			&dataset.QueryParams{Offset: 0, Limit: 0})
+		if err != nil {
+			fmt.Printf("options err: %v\n", err)
+			return nil, err
+		} else {
+			fmt.Printf("index %d. ID: %s, name %s, options.TotalCount: %d\n", i, event.FilterID, dimension.Name, options.TotalCount)
+		}
+	}
+	callCount++
+	fmt.Printf("callCount: %d\n", callCount)
 
 	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
 	if err != nil {

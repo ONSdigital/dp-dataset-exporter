@@ -10,11 +10,7 @@ import (
 	"sync"
 )
 
-var (
-	lockObservationStoreMockStreamCSVRows sync.RWMutex
-)
-
-// Ensure, that ObservationStoreMock does implement ObservationStore.
+// Ensure, that ObservationStoreMock does implement event.ObservationStore.
 // If this is not the case, regenerate this file with moq.
 var _ event.ObservationStore = &ObservationStoreMock{}
 
@@ -53,6 +49,7 @@ type ObservationStoreMock struct {
 			Limit *int
 		}
 	}
+	lockStreamCSVRows sync.RWMutex
 }
 
 // StreamCSVRows calls StreamCSVRowsFunc.
@@ -73,9 +70,9 @@ func (mock *ObservationStoreMock) StreamCSVRows(ctx context.Context, instanceID 
 		Filters:    filters,
 		Limit:      limit,
 	}
-	lockObservationStoreMockStreamCSVRows.Lock()
+	mock.lockStreamCSVRows.Lock()
 	mock.calls.StreamCSVRows = append(mock.calls.StreamCSVRows, callInfo)
-	lockObservationStoreMockStreamCSVRows.Unlock()
+	mock.lockStreamCSVRows.Unlock()
 	return mock.StreamCSVRowsFunc(ctx, instanceID, filterID, filters, limit)
 }
 
@@ -96,8 +93,8 @@ func (mock *ObservationStoreMock) StreamCSVRowsCalls() []struct {
 		Filters    *observation.DimensionFilters
 		Limit      *int
 	}
-	lockObservationStoreMockStreamCSVRows.RLock()
+	mock.lockStreamCSVRows.RLock()
 	calls = mock.calls.StreamCSVRows
-	lockObservationStoreMockStreamCSVRows.RUnlock()
+	mock.lockStreamCSVRows.RUnlock()
 	return calls
 }
