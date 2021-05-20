@@ -18,7 +18,7 @@ import (
 type Client interface {
 	UpdateFilterOutputBytes(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID string, b []byte) error
 	GetOutputBytes(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, collectionID, filterOutputID string) ([]byte, error)
-	AddEvent(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID string, event filter.Event) error
+	AddEvent(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID string, event *filter.Event) error
 }
 
 // Store provides access to stored dimension data using the filter dp-api-client
@@ -84,7 +84,7 @@ func (store *Store) PutStateAsError(ctx context.Context, filterJobID string) err
 // PutEvent makes a call to update the filter output with a new event
 func (store *Store) PutEvent(ctx context.Context, filterJobID string, eventType ...string) error {
 	for _, e := range eventType {
-		err := store.AddEvent(ctx, "", store.serviceAuthToken, "", filterJobID, filter.Event{
+		err := store.AddEvent(ctx, "", store.serviceAuthToken, "", filterJobID, &filter.Event{
 			Type: e,
 			Time: time.Now(),
 		})

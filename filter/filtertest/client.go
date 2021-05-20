@@ -20,7 +20,7 @@ var _ dpdatasetexporterfilter.Client = &ClientMock{}
 //
 // 		// make and configure a mocked dpdatasetexporterfilter.Client
 // 		mockedClient := &ClientMock{
-// 			AddEventFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event dpapiclientsfilter.Event) error {
+// 			AddEventFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event *dpapiclientsfilter.Event) error {
 // 				panic("mock out the AddEvent method")
 // 			},
 // 			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
@@ -37,7 +37,7 @@ var _ dpdatasetexporterfilter.Client = &ClientMock{}
 // 	}
 type ClientMock struct {
 	// AddEventFunc mocks the AddEvent method.
-	AddEventFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event dpapiclientsfilter.Event) error
+	AddEventFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event *dpapiclientsfilter.Event) error
 
 	// GetOutputBytesFunc mocks the GetOutputBytes method.
 	GetOutputBytesFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error)
@@ -60,7 +60,7 @@ type ClientMock struct {
 			// FilterJobID is the filterJobID argument value.
 			FilterJobID string
 			// Event is the event argument value.
-			Event dpapiclientsfilter.Event
+			Event *dpapiclientsfilter.Event
 		}
 		// GetOutputBytes holds details about calls to the GetOutputBytes method.
 		GetOutputBytes []struct {
@@ -99,7 +99,7 @@ type ClientMock struct {
 }
 
 // AddEvent calls AddEventFunc.
-func (mock *ClientMock) AddEvent(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event dpapiclientsfilter.Event) error {
+func (mock *ClientMock) AddEvent(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event *dpapiclientsfilter.Event) error {
 	if mock.AddEventFunc == nil {
 		panic("ClientMock.AddEventFunc: method is nil but Client.AddEvent was just called")
 	}
@@ -109,7 +109,7 @@ func (mock *ClientMock) AddEvent(ctx context.Context, userAuthToken string, serv
 		ServiceAuthToken     string
 		DownloadServiceToken string
 		FilterJobID          string
-		Event                dpapiclientsfilter.Event
+		Event                *dpapiclientsfilter.Event
 	}{
 		Ctx:                  ctx,
 		UserAuthToken:        userAuthToken,
@@ -133,7 +133,7 @@ func (mock *ClientMock) AddEventCalls() []struct {
 	ServiceAuthToken     string
 	DownloadServiceToken string
 	FilterJobID          string
-	Event                dpapiclientsfilter.Event
+	Event                *dpapiclientsfilter.Event
 } {
 	var calls []struct {
 		Ctx                  context.Context
@@ -141,7 +141,7 @@ func (mock *ClientMock) AddEventCalls() []struct {
 		ServiceAuthToken     string
 		DownloadServiceToken string
 		FilterJobID          string
-		Event                dpapiclientsfilter.Event
+		Event                *dpapiclientsfilter.Event
 	}
 	mock.lockAddEvent.RLock()
 	calls = mock.calls.AddEvent
