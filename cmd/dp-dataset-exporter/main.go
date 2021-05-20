@@ -4,11 +4,12 @@ import (
 	"context"
 	errs "errors"
 	"fmt"
-	"github.com/ONSdigital/dp-graph/v2/graph"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/ONSdigital/dp-graph/v2/graph"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
 	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
@@ -155,7 +156,7 @@ func main() {
 					// Kafka client cannot be initialised
 					continue
 				}
-				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, ""); err != nil {
+				if _, err = datasetAPICli.GetDatasets(ctx, "", cfg.ServiceAuthToken, "", nil); err != nil {
 					// GetDatasets failed
 					continue
 				}

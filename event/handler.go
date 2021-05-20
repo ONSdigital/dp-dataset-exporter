@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ONSdigital/dp-api-clients-go/filter"
-
 	"github.com/pkg/errors"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
@@ -19,6 +17,7 @@ import (
 	"github.com/ONSdigital/dp-graph/v2/observation"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
+	"github.com/ONSdigital/dp-api-clients-go/filter"
 	"github.com/ONSdigital/log.go/log"
 )
 
@@ -86,6 +85,7 @@ type FilterStore interface {
 	PutCSVData(ctx context.Context, filterID string, downloadItem filter.Download) error
 	PutStateAsEmpty(ctx context.Context, filterJobID string) error
 	PutStateAsError(ctx context.Context, filterJobID string) error
+	PutEvent(ctx context.Context, filterJobID string, eventType ...string) error
 }
 
 // ObservationStore provides filtered observation data in CSV rows.
@@ -186,14 +186,16 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
-	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
+	filterOutput, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return nil, err
 	}
 
-	dbFilter := mapFilter(filter)
+	dbFilter := mapFilter(filterOutput)
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
+	go handler.filterStore.PutEvent(ctx, filterOutput.FilterID, filter.EventFilterOutputQueryStart)
+
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filterOutput.InstanceID, filterOutput.FilterID, dbFilter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -214,22 +216,23 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	filename := handler.filteredDatasetFilePrefix + name + ".csv"
 
-	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
+	go handler.filterStore.PutEvent(ctx, filterOutput.FilterID, filter.EventFilterOutputCSVGenStart)
+	// When getting the data from the reader, this will call the graphDB driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
 	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
-			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter})
-			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filter.FilterID)
+			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filterOutput.InstanceID,
+				"filter": filterOutput})
+			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filterOutput.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
 			return nil, err
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
-			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter}, log.Error(err))
-			updateErr := handler.filterStore.PutStateAsError(ctx, filter.FilterID)
+			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filterOutput.InstanceID,
+				"filter": filterOutput}, log.Error(err))
+			updateErr := handler.filterStore.PutStateAsError(ctx, filterOutput.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
@@ -241,15 +244,15 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
 
 	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(ctx, filter.FilterID, csv)
+	err = handler.filterStore.PutCSVData(ctx, filterOutput.FilterID, csv)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
 
 	rowCount := reader.ObservationsCount()
 
-	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
-	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
+	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filterOutput.FilterID, "file_url": fileURL, "row_count": rowCount})
+	return &CSVExported{FilterID: filterOutput.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
 func mapFilter(filter *filter.Model) *observation.DimensionFilters {
@@ -369,6 +372,7 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 
 	log.Event(ctx, "header extracted from csv", log.INFO, log.Data{"header": header})
 
+	go handler.filterStore.PutEvent(ctx, event.FilterID, filter.EventFilterOutputCSVGenStart)
 	url, err := handler.fileStore.PutFile(ctx, hReader, filename, isPublished)
 	if err != nil {
 		return nil, "", "", 0, err
