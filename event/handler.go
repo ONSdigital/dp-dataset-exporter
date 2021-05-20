@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/filter"
@@ -185,7 +187,99 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 	return instance.State == publishedState, nil
 }
 
-var callCount int
+// sortFilter by Dimension size, largest first, to make Neptune searches faster
+// The sort is done here because the sizes are retrieved from Mongo and
+// its best not to have the dp-graph library acquiring such coupling to its caller.
+func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmitted, dbFilter *observation.DimensionFilters) {
+	nofDimensions := len(dbFilter.Dimensions)
+	if nofDimensions <= 1 {
+		return
+	}
+	// Create a slice of sorted dimension sizes
+	type dim struct {
+		index         int
+		dimensionSize int
+	}
+
+	dimSizes := make([]dim, 0, nofDimensions)
+	var dimSizesMutex sync.Mutex
+
+	// get info from mongo
+	getError := false
+	var getErrorMutex sync.Mutex
+	var concurrent int = 10 // limit number of go routines so as to not put too much on heap
+	var semaphoreChan = make(chan struct{}, concurrent)
+	var wg sync.WaitGroup // number of working goroutines
+
+	for i, dimension := range dbFilter.Dimensions {
+		if getError {
+			break
+		}
+		semaphoreChan <- struct{}{} // block while full
+
+		wg.Add(1)
+
+		// Get dimension sizes in parallel
+		go func(i int, dimension *observation.Dimension) {
+			defer func() {
+				<-semaphoreChan // read to release a slot
+			}()
+
+			defer wg.Done()
+
+			options, err := handler.datasetAPICli.GetOptions(ctx,
+				"", // userAuthToken
+				handler.serviceAuthToken,
+				"", // collectionID
+				event.DatasetID, event.Edition, event.Version, dimension.Name,
+				&dataset.QueryParams{Offset: 0, Limit: 0})
+			if err != nil {
+				getErrorMutex.Lock()
+				getError = true
+				getErrorMutex.Unlock()
+			} else {
+				d := dim{dimensionSize: options.TotalCount, index: i}
+				dimSizesMutex.Lock()
+				dimSizes = append(dimSizes, d)
+				dimSizesMutex.Unlock()
+				fmt.Printf("index %d. ID: %s, name %s, options.TotalCount: %d\n", i, event.FilterID, dimension.Name, options.TotalCount)
+			}
+		}(i, dimension)
+	}
+	wg.Wait()
+
+	if getError {
+		// frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
+		dimSizes = dimSizes[:0]
+		for i, dimension := range dbFilter.Dimensions {
+			if strings.ToLower(dimension.Name) == "geography" {
+				d := dim{dimensionSize: 999999, index: i}
+				dimSizes = append(dimSizes, d)
+			} else {
+				// Set sizes of dimensions as largest first to retain list order to improve sort speed
+				d := dim{dimensionSize: nofDimensions - i, index: i}
+				dimSizes = append(dimSizes, d)
+			}
+		}
+	}
+
+	// sort slice by number of options per dimension, smallest first
+	sort.Slice(dimSizes, func(i, j int) bool {
+		return dimSizes[i].dimensionSize < dimSizes[j].dimensionSize
+	})
+
+	sortedDimensions := make([]observation.Dimension, 0, nofDimensions)
+
+	for i := nofDimensions - 1; i >= 0; i-- { // largest first
+		sortedDimensions = append(sortedDimensions, *dbFilter.Dimensions[dimSizes[i].index])
+	}
+
+	// Now copy the sorted dimensions back over the original
+	for i, dimension := range sortedDimensions {
+		*dbFilter.Dimensions[i] = dimension
+		fmt.Printf("index %d. ID: %s, name %s\n", i, event.FilterID, dimension.Name)
+	}
+}
 
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
@@ -203,28 +297,9 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	dbFilter := mapFilter(filter)
 	//spew.Dump(dbFilter)
 
-	// get info from mongo
+	handler.sortFilter(ctx, event, dbFilter)
 
-	for i, dimension := range dbFilter.Dimensions {
-
-		options, err := handler.datasetAPICli.GetOptions(ctx,
-			"", // userAuthToken ??
-			handler.serviceAuthToken,
-			"", // collectionID, // ??
-			event.DatasetID,
-			event.Edition,
-			event.Version,
-			dimension.Name,
-			&dataset.QueryParams{Offset: 0, Limit: 0})
-		if err != nil {
-			fmt.Printf("options err: %v\n", err)
-			return nil, err
-		} else {
-			fmt.Printf("index %d. ID: %s, name %s, options.TotalCount: %d\n", i, event.FilterID, dimension.Name, options.TotalCount)
-		}
-	}
-	callCount++
-	fmt.Printf("callCount: %d\n", callCount)
+	//endTime := time.Now()
 
 	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
 	if err != nil {
