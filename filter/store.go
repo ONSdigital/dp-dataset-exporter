@@ -18,18 +18,13 @@ import (
 type Client interface {
 	UpdateFilterOutputBytes(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID string, b []byte) error
 	GetOutputBytes(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, collectionID, filterOutputID string) ([]byte, error)
+	AddEvent(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID string, event *filter.Event) error
 }
 
 // Store provides access to stored dimension data using the filter dp-api-client
 type Store struct {
 	Client
 	serviceAuthToken string
-}
-
-// Event represents a structure with type and time
-type Event struct {
-	Type string    `bson:"type,omitempty" json:"type"`
-	Time time.Time `bson:"time,omitempty" json:"time"`
 }
 
 // ErrFilterJobNotFound returned when the filter job count not be found for the given ID.
@@ -59,6 +54,7 @@ func (store *Store) PutCSVData(ctx context.Context, filterJobID string, csv filt
 				Size:    csv.Size,
 			},
 		},
+		Events: createEvents(filter.EventFilterOutputCSVGenEnd, filter.EventFilterOutputQueryEnd),
 	}
 
 	return store.updateFilterOutput(ctx, filterJobID, putBody)
@@ -67,7 +63,8 @@ func (store *Store) PutCSVData(ctx context.Context, filterJobID string, csv filt
 // PutStateAsEmpty sets the filter output as empty
 func (store *Store) PutStateAsEmpty(ctx context.Context, filterJobID string) error {
 	putBody := filter.Model{
-		State: "completed",
+		State:  "completed",
+		Events: createEvents(filter.EventFilterOutputCSVGenEnd, filter.EventFilterOutputQueryEnd),
 	}
 
 	return store.updateFilterOutput(ctx, filterJobID, putBody)
@@ -77,14 +74,39 @@ func (store *Store) PutStateAsEmpty(ctx context.Context, filterJobID string) err
 // this will be displayed to the public
 func (store *Store) PutStateAsError(ctx context.Context, filterJobID string) error {
 	putBody := filter.Model{
-		State: "failed",
+		State:  "failed",
+		Events: createEvents(filter.EventFilterOutputCSVGenEnd, filter.EventFilterOutputQueryEnd),
 	}
 
 	return store.updateFilterOutput(ctx, filterJobID, putBody)
 }
 
-func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, filter filter.Model) error {
+// PutEvent makes a call to update the filter output with a new event
+func (store *Store) PutEvent(ctx context.Context, filterJobID string, eventType ...string) error {
+	for _, e := range eventType {
+		err := store.AddEvent(ctx, "", store.serviceAuthToken, "", filterJobID, &filter.Event{
+			Type: e,
+			Time: time.Now(),
+		})
+		if err != nil {
+			return handleInvalidFilterAPIResponse(ctx, err)
+		}
+	}
 
+	return nil
+}
+
+func createEvents(eventType ...string) (events []filter.Event) {
+	for _, e := range eventType {
+		events = append(events, filter.Event{
+			Type: e,
+			Time: time.Now(),
+		})
+	}
+	return
+}
+
+func (store *Store) updateFilterOutput(ctx context.Context, filterJobID string, filter filter.Model) error {
 	payload, err := json.Marshal(filter)
 	if err != nil {
 		return err

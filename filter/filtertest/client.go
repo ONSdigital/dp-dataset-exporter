@@ -5,38 +5,40 @@ package filtertest
 
 import (
 	"context"
-	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	dpapiclientsfilter "github.com/ONSdigital/dp-api-clients-go/filter"
+	dpdatasetexporterfilter "github.com/ONSdigital/dp-dataset-exporter/filter"
 	"sync"
 )
 
-var (
-	lockClientMockGetOutputBytes          sync.RWMutex
-	lockClientMockUpdateFilterOutputBytes sync.RWMutex
-)
-
-// Ensure, that ClientMock does implement Client.
+// Ensure, that ClientMock does implement dpdatasetexporterfilter.Client.
 // If this is not the case, regenerate this file with moq.
-var _ filter.Client = &ClientMock{}
+var _ dpdatasetexporterfilter.Client = &ClientMock{}
 
-// ClientMock is a mock implementation of filter.Client.
+// ClientMock is a mock implementation of dpdatasetexporterfilter.Client.
 //
-//     func TestSomethingThatUsesClient(t *testing.T) {
+// 	func TestSomethingThatUsesClient(t *testing.T) {
 //
-//         // make and configure a mocked filter.Client
-//         mockedClient := &ClientMock{
-//             GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
-// 	               panic("mock out the GetOutputBytes method")
-//             },
-//             UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
-// 	               panic("mock out the UpdateFilterOutputBytes method")
-//             },
-//         }
+// 		// make and configure a mocked dpdatasetexporterfilter.Client
+// 		mockedClient := &ClientMock{
+// 			AddEventFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event *dpapiclientsfilter.Event) error {
+// 				panic("mock out the AddEvent method")
+// 			},
+// 			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+// 				panic("mock out the GetOutputBytes method")
+// 			},
+// 			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+// 				panic("mock out the UpdateFilterOutputBytes method")
+// 			},
+// 		}
 //
-//         // use mockedClient in code that requires filter.Client
-//         // and then make assertions.
+// 		// use mockedClient in code that requires dpdatasetexporterfilter.Client
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type ClientMock struct {
+	// AddEventFunc mocks the AddEvent method.
+	AddEventFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event *dpapiclientsfilter.Event) error
+
 	// GetOutputBytesFunc mocks the GetOutputBytes method.
 	GetOutputBytesFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error)
 
@@ -45,6 +47,21 @@ type ClientMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// AddEvent holds details about calls to the AddEvent method.
+		AddEvent []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserAuthToken is the userAuthToken argument value.
+			UserAuthToken string
+			// ServiceAuthToken is the serviceAuthToken argument value.
+			ServiceAuthToken string
+			// DownloadServiceToken is the downloadServiceToken argument value.
+			DownloadServiceToken string
+			// FilterJobID is the filterJobID argument value.
+			FilterJobID string
+			// Event is the event argument value.
+			Event *dpapiclientsfilter.Event
+		}
 		// GetOutputBytes holds details about calls to the GetOutputBytes method.
 		GetOutputBytes []struct {
 			// Ctx is the ctx argument value.
@@ -76,6 +93,60 @@ type ClientMock struct {
 			B []byte
 		}
 	}
+	lockAddEvent                sync.RWMutex
+	lockGetOutputBytes          sync.RWMutex
+	lockUpdateFilterOutputBytes sync.RWMutex
+}
+
+// AddEvent calls AddEventFunc.
+func (mock *ClientMock) AddEvent(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, event *dpapiclientsfilter.Event) error {
+	if mock.AddEventFunc == nil {
+		panic("ClientMock.AddEventFunc: method is nil but Client.AddEvent was just called")
+	}
+	callInfo := struct {
+		Ctx                  context.Context
+		UserAuthToken        string
+		ServiceAuthToken     string
+		DownloadServiceToken string
+		FilterJobID          string
+		Event                *dpapiclientsfilter.Event
+	}{
+		Ctx:                  ctx,
+		UserAuthToken:        userAuthToken,
+		ServiceAuthToken:     serviceAuthToken,
+		DownloadServiceToken: downloadServiceToken,
+		FilterJobID:          filterJobID,
+		Event:                event,
+	}
+	mock.lockAddEvent.Lock()
+	mock.calls.AddEvent = append(mock.calls.AddEvent, callInfo)
+	mock.lockAddEvent.Unlock()
+	return mock.AddEventFunc(ctx, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID, event)
+}
+
+// AddEventCalls gets all the calls that were made to AddEvent.
+// Check the length with:
+//     len(mockedClient.AddEventCalls())
+func (mock *ClientMock) AddEventCalls() []struct {
+	Ctx                  context.Context
+	UserAuthToken        string
+	ServiceAuthToken     string
+	DownloadServiceToken string
+	FilterJobID          string
+	Event                *dpapiclientsfilter.Event
+} {
+	var calls []struct {
+		Ctx                  context.Context
+		UserAuthToken        string
+		ServiceAuthToken     string
+		DownloadServiceToken string
+		FilterJobID          string
+		Event                *dpapiclientsfilter.Event
+	}
+	mock.lockAddEvent.RLock()
+	calls = mock.calls.AddEvent
+	mock.lockAddEvent.RUnlock()
+	return calls
 }
 
 // GetOutputBytes calls GetOutputBytesFunc.
@@ -98,9 +169,9 @@ func (mock *ClientMock) GetOutputBytes(ctx context.Context, userAuthToken string
 		CollectionID:         collectionID,
 		FilterOutputID:       filterOutputID,
 	}
-	lockClientMockGetOutputBytes.Lock()
+	mock.lockGetOutputBytes.Lock()
 	mock.calls.GetOutputBytes = append(mock.calls.GetOutputBytes, callInfo)
-	lockClientMockGetOutputBytes.Unlock()
+	mock.lockGetOutputBytes.Unlock()
 	return mock.GetOutputBytesFunc(ctx, userAuthToken, serviceAuthToken, downloadServiceToken, collectionID, filterOutputID)
 }
 
@@ -123,9 +194,9 @@ func (mock *ClientMock) GetOutputBytesCalls() []struct {
 		CollectionID         string
 		FilterOutputID       string
 	}
-	lockClientMockGetOutputBytes.RLock()
+	mock.lockGetOutputBytes.RLock()
 	calls = mock.calls.GetOutputBytes
-	lockClientMockGetOutputBytes.RUnlock()
+	mock.lockGetOutputBytes.RUnlock()
 	return calls
 }
 
@@ -149,9 +220,9 @@ func (mock *ClientMock) UpdateFilterOutputBytes(ctx context.Context, userAuthTok
 		FilterJobID:          filterJobID,
 		B:                    b,
 	}
-	lockClientMockUpdateFilterOutputBytes.Lock()
+	mock.lockUpdateFilterOutputBytes.Lock()
 	mock.calls.UpdateFilterOutputBytes = append(mock.calls.UpdateFilterOutputBytes, callInfo)
-	lockClientMockUpdateFilterOutputBytes.Unlock()
+	mock.lockUpdateFilterOutputBytes.Unlock()
 	return mock.UpdateFilterOutputBytesFunc(ctx, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID, b)
 }
 
@@ -174,8 +245,8 @@ func (mock *ClientMock) UpdateFilterOutputBytesCalls() []struct {
 		FilterJobID          string
 		B                    []byte
 	}
-	lockClientMockUpdateFilterOutputBytes.RLock()
+	mock.lockUpdateFilterOutputBytes.RLock()
 	calls = mock.calls.UpdateFilterOutputBytes
-	lockClientMockUpdateFilterOutputBytes.RUnlock()
+	mock.lockUpdateFilterOutputBytes.RUnlock()
 	return calls
 }
