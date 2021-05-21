@@ -372,7 +372,6 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 
 	log.Event(ctx, "header extracted from csv", log.INFO, log.Data{"header": header})
 
-	go handler.filterStore.PutEvent(ctx, event.FilterID, filter.EventFilterOutputCSVGenStart)
 	url, err := handler.fileStore.PutFile(ctx, hReader, filename, isPublished)
 	if err != nil {
 		return nil, "", "", 0, err

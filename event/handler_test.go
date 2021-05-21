@@ -149,6 +149,9 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			GetFilterFunc: func(ctx context.Context, filterJobId string) (*filterCli.Model, error) {
 				return filter, nil
 			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
+				return nil
+			},
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
@@ -192,6 +195,9 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 		mockFilterStore := &eventtest.FilterStoreMock{
 			GetFilterFunc: func(ctx context.Context, filterJobId string) (*filterCli.Model, error) {
 				return filter, nil
+			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
+				return nil
 			},
 		}
 
@@ -249,6 +255,9 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 			PutStateAsEmptyFunc: func(ctx context.Context, filterJobID string) error {
 				return nil
 			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
+				return nil
+			},
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
@@ -302,6 +311,9 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 				return filter, nil
 			},
 			PutStateAsErrorFunc: func(ctx context.Context, filterJobID string) error {
+				return nil
+			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
 				return nil
 			},
 		}
@@ -358,6 +370,9 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			GetFilterFunc: func(ctx context.Context, filterJobId string) (*filterCli.Model, error) {
 				return filter, nil
 			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
+				return nil
+			},
 		}
 
 		mockObservationStore := &eventtest.ObservationStoreMock{
@@ -413,6 +428,9 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 				return filter, nil
 			},
 			PutCSVDataFunc: func(ctx context.Context, filterJobID string, csv filterCli.Download) error {
+				return nil
+			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
 				return nil
 			},
 		}
@@ -474,6 +492,9 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 				return filter, nil
 			},
 			PutCSVDataFunc: func(ctx context.Context, filterJobID string, csv filterCli.Download) error {
+				return nil
+			},
+			PutEventFunc: func(ctx context.Context, filterJobId string, eventType ...string) error {
 				return nil
 			},
 		}
