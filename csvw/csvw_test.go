@@ -142,7 +142,7 @@ func TestAddNotes(t *testing.T) {
 					count++
 				}
 
-				for _, a := range *n.UsageNotes {
+				for _, a := range *n.DatasetDetails.UsageNotes {
 					So(csvw.Notes[count].Type, ShouldEqual, a.Title)
 					So(csvw.Notes[count].Body, ShouldEqual, a.Note)
 					So(csvw.Notes[count].Target, ShouldBeEmpty)
@@ -158,7 +158,7 @@ func TestAddNotes(t *testing.T) {
 			Convey("Then the values should be set to the expected fields", func() {
 				So(csvw.Notes, ShouldHaveLength, 2)
 
-				for i, a := range *n.UsageNotes {
+				for i, a := range *n.DatasetDetails.UsageNotes {
 					So(csvw.Notes[i].Type, ShouldEqual, a.Title)
 					So(csvw.Notes[i].Body, ShouldEqual, a.Note)
 					So(csvw.Notes[i].Target, ShouldBeEmpty)
@@ -167,7 +167,7 @@ func TestAddNotes(t *testing.T) {
 		})
 
 		Convey("When there are no usage notes and the AddNotes function is called", func() {
-			n.UsageNotes = nil
+			n.DatasetDetails.UsageNotes = nil
 			csvw.AddNotes(n, fileURL)
 
 			Convey("Then the values should be set to the expected fields", func() {
@@ -182,7 +182,7 @@ func TestAddNotes(t *testing.T) {
 		})
 
 		Convey("When there are no usage notes or and the AddNotes function is called", func() {
-			n.UsageNotes = nil
+			n.DatasetDetails.UsageNotes = nil
 			n.Alerts = nil
 			csvw.AddNotes(n, fileURL)
 
