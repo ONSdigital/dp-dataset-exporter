@@ -227,6 +227,8 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 
 			defer wg.Done()
 
+			// passing a 'Limit' of 0 makes GetOptions skip getting the documents
+			// and to return only what we are interested in: TotalCount
 			options, err := handler.datasetAPICli.GetOptions(ctx,
 				"", // userAuthToken
 				handler.serviceAuthToken,
