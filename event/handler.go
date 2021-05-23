@@ -285,22 +285,21 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
+	startTime := time.Now()
 	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return nil, err
 	}
 
 	// =====
-	fmt.Printf("\ndoing: StreamCSVRows\n")
 	//fmt.Printf("%+v\n", filter)
-	start := time.Now()
 	// =====
 	dbFilter := mapFilter(filter)
 	//spew.Dump(dbFilter)
 
+	sortFilterStartTime := time.Now()
 	handler.sortFilter(ctx, event, dbFilter)
-
-	//endTime := time.Now()
+	sortFilterEndTime := time.Now()
 
 	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
 	if err != nil {
@@ -358,29 +357,42 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	rowCount := reader.ObservationsCount()
 
-	// =====
-	endTime := time.Now()
+	totTime := time.Now()
 
-	elapsed := endTime.Sub(start) //time.Since(start)
+	sortFilterDiff := sortFilterEndTime.Sub(sortFilterStartTime)
+	fd := sortFilterDiff.Microseconds()
+	quotient := fd / 1000000
+	remainder := fd % 1000000
+	sortFilterTime := fmt.Sprintf("%d.%d seconds", quotient, remainder)
+
+	totalDiff := totTime.Sub(startTime)
+	td := totalDiff.Microseconds()
+	quotient = td / 1000000
+	remainder = td % 1000000
+	totalTime := fmt.Sprintf("%d.%d seconds", quotient, remainder)
+
+	// =====
+	elapsed := totTime.Sub(startTime)
 	res := fmt.Sprintf("done: StreamCSVRows  %s -> %s\n", filter.FilterID, elapsed)
 	fmt.Printf("\n%s", res)
 	e := fmt.Sprintf("%s", elapsed)
+	// reformulate the time that gets logged to file as microseconds to make after the event analysis python scripts job easier
 	if strings.Contains(e, "ms") {
 		e = e[0 : len(e)-2]
 		n, _ := strconv.ParseFloat(e, 64)
 		n = n * 1000.0
 		parts := strings.Split(fmt.Sprintf("%f", n), ".")
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(start.Format("15:04:05.000000")), filter.FilterID, parts[0])
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, parts[0])
 	} else if strings.Contains(e, "µs") {
 		parts := strings.Split(e, ".")
 		p := strings.Replace(parts[0], "µs", "", 1)
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(start.Format("15:04:05.000000")), filter.FilterID, p)
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, p)
 	} else {
 		e = e[0 : len(e)-1]
 		n, _ := strconv.ParseFloat(e, 64)
 		n = n * 1000000.0
 		parts := strings.Split(fmt.Sprintf("%f", n), ".")
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(start.Format("15:04:05.000000")), filter.FilterID, parts[0])
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, parts[0])
 	}
 	f, err := os.OpenFile("timings.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -394,7 +406,14 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	}
 	// =====
 
-	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
+	log.Event(ctx, "csv export completed", log.INFO,
+		log.Data{
+			"filter_id":        filter.FilterID,
+			"file_url":         fileURL,
+			"row_count":        rowCount,
+			"sort_filter_time": sortFilterTime,
+			"total_time":       totalTime,
+		})
 	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
