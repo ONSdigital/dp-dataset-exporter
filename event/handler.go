@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/filter"
@@ -205,14 +206,13 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 	var dimSizesMutex sync.Mutex
 
 	// get info from mongo
-	getError := false
-	var getErrorMutex sync.Mutex
+	var getErrorFlag int32
 	var concurrent int = 10 // limit number of go routines so as to not put too much on heap
 	var semaphoreChan = make(chan struct{}, concurrent)
 	var wg sync.WaitGroup // number of working goroutines
 
 	for i, dimension := range dbFilter.Dimensions {
-		if getError {
+		if atomic.LoadInt32(&getErrorFlag) != 0 {
 			break
 		}
 		semaphoreChan <- struct{}{} // block while full
@@ -235,10 +235,9 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 				"", // collectionID
 				event.DatasetID, event.Edition, event.Version, dimension.Name,
 				&dataset.QueryParams{Offset: 0, Limit: 0})
+
 			if err != nil {
-				getErrorMutex.Lock()
-				getError = true
-				getErrorMutex.Unlock()
+				atomic.AddInt32(&getErrorFlag, 1)
 			} else {
 				d := dim{dimensionSize: options.TotalCount, index: i}
 				dimSizesMutex.Lock()
@@ -250,7 +249,7 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 	}
 	wg.Wait()
 
-	if getError {
+	if getErrorFlag != 0 {
 		// frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
 		dimSizes = dimSizes[:0]
 		for i, dimension := range dbFilter.Dimensions {
@@ -272,7 +271,7 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 
 	sortedDimensions := make([]observation.Dimension, 0, nofDimensions)
 
-	for i := nofDimensions - 1; i >= 0; i-- { // largest first
+	for i := nofDimensions - 1; i >= 0; i-- { // build required return structure, largest first
 		sortedDimensions = append(sortedDimensions, *dbFilter.Dimensions[dimSizes[i].index])
 	}
 
