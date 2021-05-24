@@ -292,10 +292,10 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	}
 
 	// =====
-	//fmt.Printf("%+v\n", filter)
+	// fmt.Printf("%+v\n", filter)
 	// =====
 	dbFilter := mapFilter(filter)
-	//spew.Dump(dbFilter)
+	// spew.Dump(dbFilter)
 
 	sortFilterStartTime := time.Now()
 	handler.sortFilter(ctx, event, dbFilter)
@@ -380,7 +380,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	if strings.Contains(e, "ms") {
 		e = e[0 : len(e)-2]
 		n, _ := strconv.ParseFloat(e, 64)
-		n = n * 1000.0
+		n *= 1000.0
 		parts := strings.Split(fmt.Sprintf("%f", n), ".")
 		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, parts[0])
 	} else if strings.Contains(e, "µs") {
@@ -390,7 +390,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	} else {
 		e = e[0 : len(e)-1]
 		n, _ := strconv.ParseFloat(e, 64)
-		n = n * 1000000.0
+		n *= 1000000.0
 		parts := strings.Split(fmt.Sprintf("%f", n), ".")
 		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, parts[0])
 	}
