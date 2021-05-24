@@ -157,6 +157,9 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			},
 		}
 
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, nil, nil, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
@@ -205,6 +208,9 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return "", expectedError
 			},
+		}
+
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
@@ -263,6 +269,9 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 			},
 		}
 
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
@@ -318,6 +327,9 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 			},
 		}
 
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
@@ -370,6 +382,9 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 				return "", expectedError
 			},
+		}
+
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
@@ -435,6 +450,9 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
@@ -494,6 +512,9 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 			CSVExportedFunc: func(e *event.CSVExported) error {
 				return nil
 			},
+		}
+
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, cfg)

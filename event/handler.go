@@ -191,7 +191,7 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 // sortFilter by Dimension size, largest first, to make Neptune searches faster
 // The sort is done here because the sizes are retrieved from Mongo and
 // its best not to have the dp-graph library acquiring such coupling to its caller.
-func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmitted, dbFilter *observation.DimensionFilters) {
+var SortFilter = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, dbFilter *observation.DimensionFilters) {
 	nofDimensions := len(dbFilter.Dimensions)
 	if nofDimensions <= 1 {
 		return
@@ -298,7 +298,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	// spew.Dump(dbFilter)
 
 	sortFilterStartTime := time.Now()
-	handler.sortFilter(ctx, event, dbFilter)
+	SortFilter(ctx, handler, event, dbFilter)
 	sortFilterEndTime := time.Now()
 
 	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filterStruct.InstanceID, filterStruct.FilterID, dbFilter, nil)
