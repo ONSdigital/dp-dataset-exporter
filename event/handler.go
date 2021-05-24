@@ -160,12 +160,12 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 }
 
 func (handler *ExportHandler) isFilterOutputPublished(ctx context.Context, event *FilterSubmitted) (bool, error) {
-	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
+	filterStruct, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return false, err
 	}
 
-	return filter.IsPublished == observation.Published, nil
+	return filterStruct.IsPublished == observation.Published, nil
 }
 
 func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *FilterSubmitted) (bool, error) {
@@ -207,7 +207,7 @@ func (handler *ExportHandler) sortFilter(ctx context.Context, event *FilterSubmi
 
 	// get info from mongo
 	var getErrorFlag int32
-	var concurrent int = 10 // limit number of go routines so as to not put too much on heap
+	var concurrent = 10 // limit number of go routines so as to not put too much on heap
 	var semaphoreChan = make(chan struct{}, concurrent)
 	var wg sync.WaitGroup // number of working goroutines
 
@@ -286,7 +286,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
 	startTime := time.Now()
-	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
+	filterStruct, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return nil, err
 	}
@@ -294,14 +294,14 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	// =====
 	// fmt.Printf("%+v\n", filter)
 	// =====
-	dbFilter := mapFilter(filter)
+	dbFilter := mapFilter(filterStruct)
 	// spew.Dump(dbFilter)
 
 	sortFilterStartTime := time.Now()
 	handler.sortFilter(ctx, event, dbFilter)
 	sortFilterEndTime := time.Now()
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filterStruct.InstanceID, filterStruct.FilterID, dbFilter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -328,17 +328,17 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
-			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter})
-			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filter.FilterID)
+			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filterStruct.InstanceID,
+				"filter": filterStruct})
+			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filterStruct.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
 			return nil, err
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
-			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter}, log.Error(err))
-			updateErr := handler.filterStore.PutStateAsError(ctx, filter.FilterID)
+			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filterStruct.InstanceID,
+				"filter": filterStruct}, log.Error(err))
+			updateErr := handler.filterStore.PutStateAsError(ctx, filterStruct.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
@@ -350,7 +350,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
 
 	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(ctx, filter.FilterID, csv)
+	err = handler.filterStore.PutCSVData(ctx, filterStruct.FilterID, csv)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
@@ -373,7 +373,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	// =====
 	elapsed := totTime.Sub(startTime)
-	res := fmt.Sprintf("done: StreamCSVRows  %s -> %s\n", filter.FilterID, elapsed)
+	res := fmt.Sprintf("done: StreamCSVRows  %s -> %s\n", filterStruct.FilterID, elapsed)
 	fmt.Printf("\n%s", res)
 	e := fmt.Sprintf("%s", elapsed)
 	// reformulate the time that gets logged to file as microseconds to make after the event analysis python scripts job easier
@@ -382,17 +382,17 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		n, _ := strconv.ParseFloat(e, 64)
 		n *= 1000.0
 		parts := strings.Split(fmt.Sprintf("%f", n), ".")
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, parts[0])
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filterStruct.FilterID, parts[0])
 	} else if strings.Contains(e, "µs") {
 		parts := strings.Split(e, ".")
 		p := strings.Replace(parts[0], "µs", "", 1)
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, p)
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filterStruct.FilterID, p)
 	} else {
 		e = e[0 : len(e)-1]
 		n, _ := strconv.ParseFloat(e, 64)
 		n *= 1000000.0
 		parts := strings.Split(fmt.Sprintf("%f", n), ".")
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filter.FilterID, parts[0])
+		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filterStruct.FilterID, parts[0])
 	}
 	f, err := os.OpenFile("timings.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -408,13 +408,13 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	log.Event(ctx, "csv export completed", log.INFO,
 		log.Data{
-			"filter_id":        filter.FilterID,
+			"filter_id":        filterStruct.FilterID,
 			"file_url":         fileURL,
 			"row_count":        rowCount,
 			"sort_filter_time": sortFilterTime,
 			"total_time":       totalTime,
 		})
-	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
+	return &CSVExported{FilterID: filterStruct.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
 func mapFilter(filter *filter.Model) *observation.DimensionFilters {
