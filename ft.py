@@ -48,9 +48,9 @@ for i in dict_names:
         bucket_counts[bucket] += 1
 
     # squash outlier buckets
-    for b in range(nof_buckets+1):
-        if bucket_counts[b] < 3:
-            bucket_counts[b] = 0
+    #for b in range(nof_buckets+1):
+    #    if bucket_counts[b] <= 3:
+    #        bucket_counts[b] = 0
 
     filtered_results = []
     for y in x:

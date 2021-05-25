@@ -109,7 +109,7 @@ func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []st
 	case name == Error:
 		e.ErrorProducer = true
 	default:
-		err = fmt.Errorf("Kafka producer name not recognised: '%s'. Valid names: %v", name.String(), kafkaProducerNames)
+		err = fmt.Errorf("kafka producer name not recognised: '%s'. Valid names: %v", name.String(), kafkaProducerNames)
 	}
 
 	return
