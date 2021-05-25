@@ -2,8 +2,6 @@ module github.com/ONSdigital/dp-dataset-exporter
 
 go 1.15
 
-replace github.com/ONSdigital/dp-graph/v2 => /Users/rhysdavies/src/github.com/ONSdigital/dp-graph
-
 require (
 	github.com/ONSdigital/dp-api-clients-go v1.34.4
 	github.com/ONSdigital/dp-graph/v2 v2.12.1
