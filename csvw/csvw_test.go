@@ -26,12 +26,12 @@ func TestNew(t *testing.T) {
 				License:          "license",
 				ReleaseFrequency: "annual",
 				Contacts: &[]dataset.Contact{
-					dataset.Contact{
+					{
 						Name:      "contact name",
 						Telephone: "1234",
 						Email:     "a@b.com",
 					},
-					dataset.Contact{
+					{
 						Name:      "contact name2",
 						Telephone: "5678",
 						Email:     "y@z.com",
@@ -114,11 +114,11 @@ func TestAddNotes(t *testing.T) {
 			},
 			DatasetDetails: dataset.DatasetDetails{
 				UsageNotes: &[]dataset.UsageNote{
-					dataset.UsageNote{
+					{
 						Note:  "use it this way",
 						Title: "first note",
 					},
-					dataset.UsageNote{
+					{
 						Note:  "use it that way",
 						Title: "second note",
 					},
@@ -261,7 +261,7 @@ func TestGenerate(t *testing.T) {
 			Version: dataset.Version{
 				ReleaseDate: "1 Jan 2000",
 				Dimensions: []dataset.VersionDimension{
-					dataset.VersionDimension{
+					{
 						Name: "geography",
 						Links: dataset.Links{
 							Self: dataset.Link{
