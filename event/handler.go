@@ -291,11 +291,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
-	// =====
-	// fmt.Printf("%+v\n", filter)
-	// =====
 	dbFilter := mapFilter(filterStruct)
-	// spew.Dump(dbFilter)
 
 	sortFilterStartTime := time.Now()
 	SortFilter(ctx, handler, event, dbFilter)
@@ -305,7 +301,6 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	if err != nil {
 		return nil, err
 	}
-	//	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: "/bla/bla", RowCount: 10}, nil
 
 	reader := observation.NewReader(csvRowReader)
 	defer func() {

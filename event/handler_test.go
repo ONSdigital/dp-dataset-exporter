@@ -2,7 +2,6 @@ package event_test
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"testing"
 
@@ -148,6 +147,10 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -201,6 +204,10 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -260,6 +267,10 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -318,6 +329,10 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -375,6 +390,10 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -441,6 +460,10 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -505,6 +528,10 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 			},
 		}
 
+		originalFunc := event.SortFilter
+		defer func() {
+			event.SortFilter = originalFunc
+		}()
 		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
 		}
 
@@ -1015,6 +1042,7 @@ func TestSortFilter(t *testing.T) {
 			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
 
 			Convey("The dimension sees no change", func() {
+				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 0)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "economicactivity")
 			})
 		})
@@ -1051,6 +1079,7 @@ func TestSortFilter(t *testing.T) {
 			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
 
 			Convey("The dimension order puts 'geogrphy' first and the rest retain their order", func() {
+				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")
 				So(dbFilter.Dimensions[1].Name, ShouldEqual, "economicactivity")
 				So(dbFilter.Dimensions[2].Name, ShouldEqual, "sex")
@@ -1079,7 +1108,6 @@ func TestSortFilter(t *testing.T) {
 
 		datasetAPIMock := &eventtest.DatasetAPIMock{
 			GetOptionsFunc: func(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (dataset.Options, error) {
-				fmt.Printf("\n=============\nhere\n=============\n")
 				switch dimension {
 				case "economicactivity":
 					return dataset.Options{TotalCount: 2}, nil // smallest
@@ -1098,6 +1126,7 @@ func TestSortFilter(t *testing.T) {
 			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
 
 			Convey("The dimension order is returned by largest dimension first to smallest last order", func() {
+				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")        // largest first
 				So(dbFilter.Dimensions[1].Name, ShouldEqual, "sex")              // in the middle
 				So(dbFilter.Dimensions[2].Name, ShouldEqual, "economicactivity") // smallest last
