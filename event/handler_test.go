@@ -2,6 +2,7 @@ package event_test
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"testing"
 
@@ -19,9 +20,7 @@ import (
 const (
 	filterOutputId  = "345"
 	fileHRef        = "s3://some/url/123.csv"
-	publishedState  = "published"
 	associatedState = "associated"
-	ServiceToken    = "gravy"
 
 	downloadServiceURL        = "http://download-service"
 	apiDomainURL              = "http://api-example"
@@ -58,14 +57,6 @@ var filter = &filterCli.Model{
 		{Name: "age", Options: []string{"29", "30"}},
 		{Name: "sex", Options: []string{"male", "female"}},
 	},
-}
-
-var fullDownloadFilter = &filterCli.Model{
-	InstanceID: "888",
-}
-
-var publishedDataset = dataset.Version{
-	State: publishedState,
 }
 
 var associatedDataset = dataset.Version{
@@ -984,6 +975,132 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 					URL:     downloadServiceURL + "/downloads/datasets/111/editions/333/versions/444.csv",
 					Private: "/url",
 				})
+			})
+		})
+	})
+}
+
+func TestSortFilter(t *testing.T) {
+	eventFilterSubmitted := event.FilterSubmitted{
+		FilterID:   "whatever",
+		InstanceID: "460b5039-bb09-4038-b8eb-9091713f4497",
+		DatasetID:  "older-people-economic-activity",
+		Edition:    "time-series",
+		Version:    "1",
+	}
+
+	var pub = false
+
+	// The following test is to code cover the first return in SortFilter
+	Convey("Given a dimension of one, with a mock GetOptions", t, func() {
+		var dbFilter = observation.DimensionFilters{
+			Dimensions: []*observation.Dimension{
+				{
+					Name:    "economicactivity",
+					Options: []string{"economic-activity", "employment-rate"},
+				},
+			},
+			Published: &pub,
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetOptionsFunc: func(context.Context, string, string, string, string, string, string, string, *dataset.QueryParams) (dataset.Options, error) {
+				return dataset.Options{}, nil
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When SortFilter is called", func() {
+			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
+
+			Convey("The dimension sees no change", func() {
+				So(dbFilter.Dimensions[0].Name, ShouldEqual, "economicactivity")
+			})
+		})
+	})
+
+	Convey("Given a dimension of three, with a mock GetOptions that returns nil simulating error getting record from mongo", t, func() {
+		var dbFilter = observation.DimensionFilters{
+			Dimensions: []*observation.Dimension{
+				{
+					Name:    "economicactivity",
+					Options: []string{"economic-activity", "employment-rate"},
+				},
+				{
+					Name:    "geography",
+					Options: []string{"W92000004"},
+				},
+				{
+					Name:    "sex",
+					Options: []string{"people", "men"},
+				},
+			},
+			Published: &pub,
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetOptionsFunc: func(context.Context, string, string, string, string, string, string, string, *dataset.QueryParams) (dataset.Options, error) {
+				return dataset.Options{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When SortFilter is called", func() {
+			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
+
+			Convey("The dimension order puts 'geogrphy' first and the rest retain their order", func() {
+				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")
+				So(dbFilter.Dimensions[1].Name, ShouldEqual, "economicactivity")
+				So(dbFilter.Dimensions[2].Name, ShouldEqual, "sex")
+			})
+		})
+	})
+
+	Convey("Given a dimension of three, with a mock GetOptions that returns size of a Dimension", t, func() {
+		var dbFilter = observation.DimensionFilters{
+			Dimensions: []*observation.Dimension{
+				{
+					Name:    "economicactivity",
+					Options: []string{"economic-activity", "employment-rate"},
+				},
+				{
+					Name:    "geography",
+					Options: []string{"W92000004"},
+				},
+				{
+					Name:    "sex",
+					Options: []string{"people", "men"},
+				},
+			},
+			Published: &pub,
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetOptionsFunc: func(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (dataset.Options, error) {
+				fmt.Printf("\n=============\nhere\n=============\n")
+				switch dimension {
+				case "economicactivity":
+					return dataset.Options{TotalCount: 2}, nil // smallest
+				case "geography":
+					return dataset.Options{TotalCount: 383}, nil // largest
+				case "sex":
+					return dataset.Options{TotalCount: 3}, nil // in the middle
+				}
+				return dataset.Options{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When SortFilter is called", func() {
+			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
+
+			Convey("The dimension order is returned by largest dimension first to smallest last order", func() {
+				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")        // largest first
+				So(dbFilter.Dimensions[1].Name, ShouldEqual, "sex")              // in the middle
+				So(dbFilter.Dimensions[2].Name, ShouldEqual, "economicactivity") // smallest last
 			})
 		})
 	})
