@@ -109,14 +109,14 @@ func main() {
 	var sendCount int
 
 	for i := 0; i < 1; i++ {
-		var count int
+		//var count int
 		// launch a load (possibly: 269) of filter requests to do performance timings.
 		for _, item := range filterItems {
 			sendFilter(ctx, kafkaProducer, item.InstanceID, item.DatasetID, item.Edition, item.Version)
-			count++
-			if count >= 1 {
-				break
-			}
+			//count++
+			//if count >= 1 {
+			//	break
+			//}
 			sendCount++
 			fmt.Printf("sendCount: %d\n", sendCount)
 		}
