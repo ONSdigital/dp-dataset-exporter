@@ -20,7 +20,7 @@ type KafkaHandler struct {
 	messageProducer chan []byte
 }
 
-//NewKafkaHandler returns a new KafkaHandler that sends error messages
+// NewKafkaHandler returns a new KafkaHandler that sends error messages
 func NewKafkaHandler(messageProducer chan []byte) *KafkaHandler {
 	return &KafkaHandler{
 		messageProducer: messageProducer,
@@ -32,14 +32,14 @@ func (handler *KafkaHandler) Handle(ctx context.Context, filterID string, err er
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
 	log.Event(ctx, "an error occurred while processing a filter job", log.INFO, data)
 
-	error := Event{
+	errorStr := Event{
 		FilterID:    filterID,
 		EventType:   "error",
 		EventMsg:    err.Error(),
 		ServiceName: "dp-dataset-exporter",
 	}
 
-	errMsg, err := EventSchema.Marshal(error)
+	errMsg, err := EventSchema.Marshal(errorStr)
 	if err != nil {
 		log.Event(ctx, "failed to marshall error to event-reporter", data, log.ERROR, log.Error(err))
 		return

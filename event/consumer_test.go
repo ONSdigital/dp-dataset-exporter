@@ -52,8 +52,8 @@ func TestConsume_UnmarshallError(t *testing.T) {
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
 
-				event := mockEventHandler.HandleCalls()[0].FilterSubmittedEvent
-				So(event.FilterID, ShouldEqual, expectedEvent.FilterID)
+				eventStruct := mockEventHandler.HandleCalls()[0].FilterSubmittedEvent
+				So(eventStruct.FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 		})
 	})
@@ -85,8 +85,8 @@ func TestConsume(t *testing.T) {
 			Convey("A event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
 
-				event := mockEventHandler.HandleCalls()[0].FilterSubmittedEvent
-				So(event.FilterID, ShouldEqual, expectedEvent.FilterID)
+				eventStruct := mockEventHandler.HandleCalls()[0].FilterSubmittedEvent
+				So(eventStruct.FilterID, ShouldEqual, expectedEvent.FilterID)
 			})
 
 			Convey("The message is committed", func() {
@@ -102,7 +102,7 @@ func TestConsume_HandlerError(t *testing.T) {
 
 	Convey("Given an event consumer with a mock event handler that returns an error", t, func() {
 
-		expectedError := errors.New("Something bad happened in the event handler.")
+		expectedError := errors.New("something bad happened in the event handler")
 
 		mockConsumer := kafkatest.NewMessageConsumer(true)
 

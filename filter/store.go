@@ -36,10 +36,10 @@ type Event struct {
 var ErrFilterJobNotFound = errors.New("failed to find filter job")
 
 // ErrFilterAPIError returned when an unrecognised error occurs.
-var ErrFilterAPIError = errors.New("Internal error from the filter api")
+var ErrFilterAPIError = errors.New("internal error from the filter api")
 
 // ErrUnrecognisedAPIError returned when an unrecognised error occurs.
-var ErrUnrecognisedAPIError = errors.New("Unrecognised error from the filter api")
+var ErrUnrecognisedAPIError = errors.New("unrecognised error from the filter api")
 
 // NewStore returns a new instance of a filter store.
 func NewStore(cli Client, serviceAuthToken string) *Store {

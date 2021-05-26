@@ -10,14 +10,7 @@ import (
 	"sync"
 )
 
-var (
-	lockFilterStoreMockGetFilter       sync.RWMutex
-	lockFilterStoreMockPutCSVData      sync.RWMutex
-	lockFilterStoreMockPutStateAsEmpty sync.RWMutex
-	lockFilterStoreMockPutStateAsError sync.RWMutex
-)
-
-// Ensure, that FilterStoreMock does implement FilterStore.
+// Ensure, that FilterStoreMock does implement event.FilterStore.
 // If this is not the case, regenerate this file with moq.
 var _ event.FilterStore = &FilterStoreMock{}
 
@@ -91,6 +84,10 @@ type FilterStoreMock struct {
 			FilterJobID string
 		}
 	}
+	lockGetFilter       sync.RWMutex
+	lockPutCSVData      sync.RWMutex
+	lockPutStateAsEmpty sync.RWMutex
+	lockPutStateAsError sync.RWMutex
 }
 
 // GetFilter calls GetFilterFunc.
@@ -105,9 +102,9 @@ func (mock *FilterStoreMock) GetFilter(ctx context.Context, filterID string) (*f
 		Ctx:      ctx,
 		FilterID: filterID,
 	}
-	lockFilterStoreMockGetFilter.Lock()
+	mock.lockGetFilter.Lock()
 	mock.calls.GetFilter = append(mock.calls.GetFilter, callInfo)
-	lockFilterStoreMockGetFilter.Unlock()
+	mock.lockGetFilter.Unlock()
 	return mock.GetFilterFunc(ctx, filterID)
 }
 
@@ -122,9 +119,9 @@ func (mock *FilterStoreMock) GetFilterCalls() []struct {
 		Ctx      context.Context
 		FilterID string
 	}
-	lockFilterStoreMockGetFilter.RLock()
+	mock.lockGetFilter.RLock()
 	calls = mock.calls.GetFilter
-	lockFilterStoreMockGetFilter.RUnlock()
+	mock.lockGetFilter.RUnlock()
 	return calls
 }
 
@@ -142,9 +139,9 @@ func (mock *FilterStoreMock) PutCSVData(ctx context.Context, filterID string, do
 		FilterID:     filterID,
 		DownloadItem: downloadItem,
 	}
-	lockFilterStoreMockPutCSVData.Lock()
+	mock.lockPutCSVData.Lock()
 	mock.calls.PutCSVData = append(mock.calls.PutCSVData, callInfo)
-	lockFilterStoreMockPutCSVData.Unlock()
+	mock.lockPutCSVData.Unlock()
 	return mock.PutCSVDataFunc(ctx, filterID, downloadItem)
 }
 
@@ -161,9 +158,9 @@ func (mock *FilterStoreMock) PutCSVDataCalls() []struct {
 		FilterID     string
 		DownloadItem filter.Download
 	}
-	lockFilterStoreMockPutCSVData.RLock()
+	mock.lockPutCSVData.RLock()
 	calls = mock.calls.PutCSVData
-	lockFilterStoreMockPutCSVData.RUnlock()
+	mock.lockPutCSVData.RUnlock()
 	return calls
 }
 
@@ -179,9 +176,9 @@ func (mock *FilterStoreMock) PutStateAsEmpty(ctx context.Context, filterJobID st
 		Ctx:         ctx,
 		FilterJobID: filterJobID,
 	}
-	lockFilterStoreMockPutStateAsEmpty.Lock()
+	mock.lockPutStateAsEmpty.Lock()
 	mock.calls.PutStateAsEmpty = append(mock.calls.PutStateAsEmpty, callInfo)
-	lockFilterStoreMockPutStateAsEmpty.Unlock()
+	mock.lockPutStateAsEmpty.Unlock()
 	return mock.PutStateAsEmptyFunc(ctx, filterJobID)
 }
 
@@ -196,9 +193,9 @@ func (mock *FilterStoreMock) PutStateAsEmptyCalls() []struct {
 		Ctx         context.Context
 		FilterJobID string
 	}
-	lockFilterStoreMockPutStateAsEmpty.RLock()
+	mock.lockPutStateAsEmpty.RLock()
 	calls = mock.calls.PutStateAsEmpty
-	lockFilterStoreMockPutStateAsEmpty.RUnlock()
+	mock.lockPutStateAsEmpty.RUnlock()
 	return calls
 }
 
@@ -214,9 +211,9 @@ func (mock *FilterStoreMock) PutStateAsError(ctx context.Context, filterJobID st
 		Ctx:         ctx,
 		FilterJobID: filterJobID,
 	}
-	lockFilterStoreMockPutStateAsError.Lock()
+	mock.lockPutStateAsError.Lock()
 	mock.calls.PutStateAsError = append(mock.calls.PutStateAsError, callInfo)
-	lockFilterStoreMockPutStateAsError.Unlock()
+	mock.lockPutStateAsError.Unlock()
 	return mock.PutStateAsErrorFunc(ctx, filterJobID)
 }
 
@@ -231,8 +228,8 @@ func (mock *FilterStoreMock) PutStateAsErrorCalls() []struct {
 		Ctx         context.Context
 		FilterJobID string
 	}
-	lockFilterStoreMockPutStateAsError.RLock()
+	mock.lockPutStateAsError.RLock()
 	calls = mock.calls.PutStateAsError
-	lockFilterStoreMockPutStateAsError.RUnlock()
+	mock.lockPutStateAsError.RUnlock()
 	return calls
 }

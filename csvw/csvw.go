@@ -13,11 +13,11 @@ import (
 	"github.com/ONSdigital/log.go/log"
 )
 
-//CSVW provides a structure for describing a CSV through a JSON metadata file.
-//The JSON tags feature web vocabularies like Dublin Core, DCAT and Stat-DCAT
-//to help further contextualize and define the metadata being provided.
-//The URL field in the CSVW must reference a CSV file, and all other data
-//should describe that CSVs contents.
+// CSVW provides a structure for describing a CSV through a JSON metadata file.
+// The JSON tags feature web vocabularies like Dublin Core, DCAT and Stat-DCAT
+// to help further contextualize and define the metadata being provided.
+// The URL field in the CSVW must reference a CSV file, and all other data
+// should describe that CSVs contents.
 type CSVW struct {
 	Context     string    `json:"@context"`
 	URL         string    `json:"url"`
@@ -40,26 +40,26 @@ type Contact struct {
 	Email     string `json:"vcard:email"`
 }
 
-//Publisher defines the entity primarily responsible for the dataset
-//https://www.w3.org/TR/vocab-dcat/#class-catalog
+// Publisher defines the entity primarily responsible for the dataset
+// https://www.w3.org/TR/vocab-dcat/#class-catalog
 type Publisher struct {
 	Name string `json:"name,omitempty"`
 	Type string `json:"@type,omitempty"`
-	ID   string `json:"@id"` //a URL where more info is available
+	ID   string `json:"@id"` // a URL where more info is available
 }
 
-//Columns provides the nested structure expected within the tableSchema of a CSVW
+// Columns provides the nested structure expected within the tableSchema of a CSVW
 type Columns struct {
 	C     []Column `json:"columns"`
 	About string   `json:"aboutUrl"`
 }
 
-//Column provides the ability to define the JSON tags required specific
-//to each column within the CSVW
+// Column provides the ability to define the JSON tags required specific
+// to each column within the CSVW
 type Column map[string]interface{}
 
-//Note can include alerts, corrections or usage notes which exist in the
-//dataset metadata and help describe the contents of the CSV
+// Note can include alerts, corrections or usage notes which exist in the
+// dataset metadata and help describe the contents of the CSV
 type Note struct {
 	Type       string `json:"type"` // is this an enum?
 	Target     string `json:"target,omitempty"`
@@ -70,7 +70,7 @@ type Note struct {
 var errInvalidHeader = errors.New("invalid header row - no V4_X cell")
 var errMissingDimensions = errors.New("no dimensions in provided metadata")
 
-//New CSVW returned with top level fields populated based on provided metadata
+// New CSVW returned with top level fields populated based on provided metadata
 func New(m *dataset.Metadata, csvURL string) *CSVW {
 	csvw := &CSVW{
 		Context:     "http://www.w3.org/ns/csvw",
@@ -104,7 +104,7 @@ func New(m *dataset.Metadata, csvURL string) *CSVW {
 	return csvw
 }
 
-//Generate the CSVW structured metadata file to describe a CSV
+// Generate the CSVW structured metadata file to describe a CSV
 func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadURL, aboutURL, apiDomain string) ([]byte, error) {
 	if len(metadata.Dimensions) == 0 {
 		return nil, errMissingDimensions
@@ -123,7 +123,7 @@ func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadU
 	list = append(list, obs)
 	log.Event(ctx, "added observation column to csvw", log.INFO, log.Data{"column": obs})
 
-	//add data markings columns
+	// add data markings columns
 	if offset != 0 {
 		for i := 1; i <= offset; i++ {
 			c := newColumn(h[i], "")
@@ -135,8 +135,8 @@ func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadU
 	offset++
 	h = h[offset:]
 
-	//add dimension columns
-	for i := 0; i < len(h); i = i + 2 {
+	// add dimension columns
+	for i := 0; i < len(h); i += 2 {
 		c, l := newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
 		log.Event(ctx, "added pair of dimension columns to csvw", log.INFO, log.Data{"code_column": c, "label_column": l})
 		list = append(list, c, l)
@@ -174,12 +174,12 @@ func formatAboutURL(aboutURL, domain string) (string, error) {
 		return "", err
 	}
 
-	d.Path = d.Path + about.Path
+	d.Path += about.Path
 
 	return d.String(), nil
 }
 
-//AddNotes to CSVW from alerts or usage notes in provided metadata
+// AddNotes to CSVW from alerts or usage notes in provided metadata
 func (csvw *CSVW) AddNotes(metadata *dataset.Metadata, url string) {
 	if metadata.Alerts != nil {
 		for _, a := range *metadata.Alerts {
@@ -191,8 +191,8 @@ func (csvw *CSVW) AddNotes(metadata *dataset.Metadata, url string) {
 		}
 	}
 
-	if metadata.UsageNotes != nil {
-		for _, u := range *metadata.UsageNotes {
+	if metadata.DatasetDetails.UsageNotes != nil {
+		for _, u := range *metadata.DatasetDetails.UsageNotes {
 			csvw.Notes = append(csvw.Notes, Note{
 				Type: u.Title,
 				Body: u.Note,

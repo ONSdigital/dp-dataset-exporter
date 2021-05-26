@@ -9,12 +9,7 @@ import (
 	"sync"
 )
 
-var (
-	lockClientMockGetOutputBytes          sync.RWMutex
-	lockClientMockUpdateFilterOutputBytes sync.RWMutex
-)
-
-// Ensure, that ClientMock does implement Client.
+// Ensure, that ClientMock does implement filter.Client.
 // If this is not the case, regenerate this file with moq.
 var _ filter.Client = &ClientMock{}
 
@@ -76,6 +71,8 @@ type ClientMock struct {
 			B []byte
 		}
 	}
+	lockGetOutputBytes          sync.RWMutex
+	lockUpdateFilterOutputBytes sync.RWMutex
 }
 
 // GetOutputBytes calls GetOutputBytesFunc.
@@ -98,9 +95,9 @@ func (mock *ClientMock) GetOutputBytes(ctx context.Context, userAuthToken string
 		CollectionID:         collectionID,
 		FilterOutputID:       filterOutputID,
 	}
-	lockClientMockGetOutputBytes.Lock()
+	mock.lockGetOutputBytes.Lock()
 	mock.calls.GetOutputBytes = append(mock.calls.GetOutputBytes, callInfo)
-	lockClientMockGetOutputBytes.Unlock()
+	mock.lockGetOutputBytes.Unlock()
 	return mock.GetOutputBytesFunc(ctx, userAuthToken, serviceAuthToken, downloadServiceToken, collectionID, filterOutputID)
 }
 
@@ -123,9 +120,9 @@ func (mock *ClientMock) GetOutputBytesCalls() []struct {
 		CollectionID         string
 		FilterOutputID       string
 	}
-	lockClientMockGetOutputBytes.RLock()
+	mock.lockGetOutputBytes.RLock()
 	calls = mock.calls.GetOutputBytes
-	lockClientMockGetOutputBytes.RUnlock()
+	mock.lockGetOutputBytes.RUnlock()
 	return calls
 }
 
@@ -149,9 +146,9 @@ func (mock *ClientMock) UpdateFilterOutputBytes(ctx context.Context, userAuthTok
 		FilterJobID:          filterJobID,
 		B:                    b,
 	}
-	lockClientMockUpdateFilterOutputBytes.Lock()
+	mock.lockUpdateFilterOutputBytes.Lock()
 	mock.calls.UpdateFilterOutputBytes = append(mock.calls.UpdateFilterOutputBytes, callInfo)
-	lockClientMockUpdateFilterOutputBytes.Unlock()
+	mock.lockUpdateFilterOutputBytes.Unlock()
 	return mock.UpdateFilterOutputBytesFunc(ctx, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID, b)
 }
 
@@ -174,8 +171,8 @@ func (mock *ClientMock) UpdateFilterOutputBytesCalls() []struct {
 		FilterJobID          string
 		B                    []byte
 	}
-	lockClientMockUpdateFilterOutputBytes.RLock()
+	mock.lockUpdateFilterOutputBytes.RLock()
 	calls = mock.calls.UpdateFilterOutputBytes
-	lockClientMockUpdateFilterOutputBytes.RUnlock()
+	mock.lockUpdateFilterOutputBytes.RUnlock()
 	return calls
 }
