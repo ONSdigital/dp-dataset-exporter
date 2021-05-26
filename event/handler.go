@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -243,14 +242,15 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 				dimSizesMutex.Lock()
 				dimSizes = append(dimSizes, d)
 				dimSizesMutex.Unlock()
-				fmt.Printf("index %d. ID: %s, name %s, options.TotalCount: %d\n", i, event.FilterID, dimension.Name, options.TotalCount)
 			}
 		}(i, dimension)
 	}
 	wg.Wait()
 
 	if getErrorFlag != 0 {
-		// frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
+		// Frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
+		// and to retain compatibility with what the neptune dp-graph library was doing without access to information
+		// from mongo.
 		dimSizes = dimSizes[:0]
 		for i, dimension := range dbFilter.Dimensions {
 			if strings.ToLower(dimension.Name) == "geography" {
@@ -278,7 +278,6 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 	// Now copy the sorted dimensions back over the original
 	for i, dimension := range sortedDimensions {
 		*dbFilter.Dimensions[i] = dimension
-		fmt.Printf("index %d. ID: %s, name %s\n", i, event.FilterID, dimension.Name)
 	}
 }
 
@@ -356,50 +355,15 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	sortFilterDiff := sortFilterEndTime.Sub(sortFilterStartTime)
 	fd := sortFilterDiff.Microseconds()
-	quotient := fd / 1000000
-	remainder := fd % 1000000
-	sortFilterTime := fmt.Sprintf("%d.%d seconds", quotient, remainder)
+	seconds := fd / 1000000
+	microsecs := fd % 1000000
+	sortFilterTime := fmt.Sprintf("%d.%d seconds", seconds, microsecs)
 
 	totalDiff := totTime.Sub(startTime)
 	td := totalDiff.Microseconds()
-	quotient = td / 1000000
-	remainder = td % 1000000
-	totalTime := fmt.Sprintf("%d.%d seconds", quotient, remainder)
-
-	// =====
-	elapsed := totTime.Sub(startTime)
-	res := fmt.Sprintf("done: StreamCSVRows  %s -> %s\n", filterStruct.FilterID, elapsed)
-	fmt.Printf("\n%s", res)
-	e := fmt.Sprintf("%s", elapsed)
-	// reformulate the time that gets logged to file as microseconds to make after the event analysis python scripts job easier
-	if strings.Contains(e, "ms") {
-		e = e[0 : len(e)-2]
-		n, _ := strconv.ParseFloat(e, 64)
-		n *= 1000.0
-		parts := strings.Split(fmt.Sprintf("%f", n), ".")
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filterStruct.FilterID, parts[0])
-	} else if strings.Contains(e, "µs") {
-		parts := strings.Split(e, ".")
-		p := strings.Replace(parts[0], "µs", "", 1)
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filterStruct.FilterID, p)
-	} else {
-		e = e[0 : len(e)-1]
-		n, _ := strconv.ParseFloat(e, 64)
-		n *= 1000000.0
-		parts := strings.Split(fmt.Sprintf("%f", n), ".")
-		res = fmt.Sprintf("%s, %s, %s\n", fmt.Sprint(startTime.Format("15:04:05.000000")), filterStruct.FilterID, parts[0])
-	}
-	f, err := os.OpenFile("timings.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Printf("Can't access file: timings.txt\n")
-	} else {
-		defer f.Close()
-		_, err := f.WriteString(res)
-		if err != nil {
-			fmt.Printf("Can't write file: timings.txt\n")
-		}
-	}
-	// =====
+	seconds = td / 1000000
+	microsecs = td % 1000000
+	totalTime := fmt.Sprintf("%d.%d seconds", seconds, microsecs)
 
 	log.Event(ctx, "csv export completed", log.INFO,
 		log.Data{
