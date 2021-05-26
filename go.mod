@@ -2,11 +2,9 @@ module github.com/ONSdigital/dp-dataset-exporter
 
 go 1.16
 
-replace github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2 // this to fix nancy audit problem: CVE-2021-3121
-
 require (
 	github.com/ONSdigital/dp-api-clients-go v1.36.0
-	github.com/ONSdigital/dp-graph/v2 v2.12.1
+	github.com/ONSdigital/dp-graph/v2 v2.13.0
 	github.com/ONSdigital/dp-healthcheck v1.0.5
 	github.com/ONSdigital/dp-kafka/v2 v2.2.0
 	github.com/ONSdigital/dp-net v1.0.12
