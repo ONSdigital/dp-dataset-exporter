@@ -1079,7 +1079,13 @@ func TestSortFilter(t *testing.T) {
 			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
 
 			Convey("The dimension order puts 'geogrphy' first and the rest retain their order", func() {
-				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
+				// NOTE: As we are simulating mongo errors, depending on how fast the loop in SortFilter
+				// manages to run all 3 go routines for the 3 dimensions, sometimes the 1st go routine
+				// launched may return the expected error from simulated mongo and exit the loop before
+				// the 3rd go routine runs ...
+				// which means we can not check the value of GetOptionCalls() as elsewhere as it might
+				// return 2 or it might return 3
+				// So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")
 				So(dbFilter.Dimensions[1].Name, ShouldEqual, "economicactivity")
 				So(dbFilter.Dimensions[2].Name, ShouldEqual, "sex")
