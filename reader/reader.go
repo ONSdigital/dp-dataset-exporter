@@ -19,18 +19,18 @@ type wrappedReader struct {
 	totalBytesRead int
 }
 
-//New returns a new Reader whose first line can be read without advancing
-//the offset, allowing all of the data to still be read from Read
+// New returns a new Reader whose first line can be read without advancing
+// the offset, allowing all of the data to still be read from Read
 func New(r io.Reader) *wrappedReader {
 	return &wrappedReader{
 		r: r,
 	}
 }
 
-//Read reads data into p. It returns the number of bytes read into p.
-//The bytes are taken from at most one Read on the underlying Reader,
-//hence n may be less than len(p). At EOF, the count will be zero and
-//err will be io.EOF.
+// Read reads data into p. It returns the number of bytes read into p.
+// The bytes are taken from at most one Read on the underlying Reader,
+// hence n may be less than len(p). At EOF, the count will be zero and
+// err will be io.EOF.
 func (r *wrappedReader) Read(p []byte) (n int, err error) {
 	defer func() {
 		r.totalBytesRead += n
@@ -50,7 +50,7 @@ func (r *wrappedReader) Read(p []byte) (n int, err error) {
 	if n < len(p) {
 		l := io.LimitReader(r.bufR, int64(len(p)-n))
 		b, err := l.Read(p[n:])
-		n = n + b
+		n += b
 		if err != nil {
 			return n, err
 		}
@@ -76,7 +76,7 @@ func (r *wrappedReader) PeekBytes(delim byte) (string, error) {
 	return string(b[:len(b)-1]), nil
 }
 
-//TotalBytesRead returns the number of bytes which have so far been read
+// TotalBytesRead returns the number of bytes which have so far been read
 func (r *wrappedReader) TotalBytesRead() int {
 	return r.totalBytesRead
 }

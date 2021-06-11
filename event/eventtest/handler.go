@@ -9,11 +9,7 @@ import (
 	"sync"
 )
 
-var (
-	lockHandlerMockHandle sync.RWMutex
-)
-
-// Ensure, that HandlerMock does implement Handler.
+// Ensure, that HandlerMock does implement event.Handler.
 // If this is not the case, regenerate this file with moq.
 var _ event.Handler = &HandlerMock{}
 
@@ -46,6 +42,7 @@ type HandlerMock struct {
 			FilterSubmittedEvent *event.FilterSubmitted
 		}
 	}
+	lockHandle sync.RWMutex
 }
 
 // Handle calls HandleFunc.
@@ -60,9 +57,9 @@ func (mock *HandlerMock) Handle(ctx context.Context, filterSubmittedEvent *event
 		Ctx:                  ctx,
 		FilterSubmittedEvent: filterSubmittedEvent,
 	}
-	lockHandlerMockHandle.Lock()
+	mock.lockHandle.Lock()
 	mock.calls.Handle = append(mock.calls.Handle, callInfo)
-	lockHandlerMockHandle.Unlock()
+	mock.lockHandle.Unlock()
 	return mock.HandleFunc(ctx, filterSubmittedEvent)
 }
 
@@ -77,8 +74,8 @@ func (mock *HandlerMock) HandleCalls() []struct {
 		Ctx                  context.Context
 		FilterSubmittedEvent *event.FilterSubmitted
 	}
-	lockHandlerMockHandle.RLock()
+	mock.lockHandle.RLock()
 	calls = mock.calls.Handle
-	lockHandlerMockHandle.RUnlock()
+	mock.lockHandle.RUnlock()
 	return calls
 }

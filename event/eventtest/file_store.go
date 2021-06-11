@@ -10,11 +10,7 @@ import (
 	"sync"
 )
 
-var (
-	lockFileStoreMockPutFile sync.RWMutex
-)
-
-// Ensure, that FileStoreMock does implement FileStore.
+// Ensure, that FileStoreMock does implement event.FileStore.
 // If this is not the case, regenerate this file with moq.
 var _ event.FileStore = &FileStoreMock{}
 
@@ -51,6 +47,7 @@ type FileStoreMock struct {
 			IsPublished bool
 		}
 	}
+	lockPutFile sync.RWMutex
 }
 
 // PutFile calls PutFileFunc.
@@ -69,9 +66,9 @@ func (mock *FileStoreMock) PutFile(ctx context.Context, reader io.Reader, filena
 		Filename:    filename,
 		IsPublished: isPublished,
 	}
-	lockFileStoreMockPutFile.Lock()
+	mock.lockPutFile.Lock()
 	mock.calls.PutFile = append(mock.calls.PutFile, callInfo)
-	lockFileStoreMockPutFile.Unlock()
+	mock.lockPutFile.Unlock()
 	return mock.PutFileFunc(ctx, reader, filename, isPublished)
 }
 
@@ -90,8 +87,8 @@ func (mock *FileStoreMock) PutFileCalls() []struct {
 		Filename    string
 		IsPublished bool
 	}
-	lockFileStoreMockPutFile.RLock()
+	mock.lockPutFile.RLock()
 	calls = mock.calls.PutFile
-	lockFileStoreMockPutFile.RUnlock()
+	mock.lockPutFile.RUnlock()
 	return calls
 }

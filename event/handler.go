@@ -5,8 +5,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/filter"
@@ -54,6 +57,7 @@ type DatasetAPI interface {
 	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
 	GetMetadataURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.Metadata, err error)
+	GetOptions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (m dataset.Options, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -155,12 +159,12 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 }
 
 func (handler *ExportHandler) isFilterOutputPublished(ctx context.Context, event *FilterSubmitted) (bool, error) {
-	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
+	filterStruct, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return false, err
 	}
 
-	return filter.IsPublished == observation.Published, nil
+	return filterStruct.IsPublished == observation.Published, nil
 }
 
 func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *FilterSubmitted) (bool, error) {
@@ -183,17 +187,116 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 	return instance.State == publishedState, nil
 }
 
+// sortFilter by Dimension size, largest first, to make Neptune searches faster
+// The sort is done here because the sizes are retrieved from Mongo and
+// its best not to have the dp-graph library acquiring such coupling to its caller.
+var SortFilter = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, dbFilter *observation.DimensionFilters) {
+	nofDimensions := len(dbFilter.Dimensions)
+	if nofDimensions <= 1 {
+		return
+	}
+	// Create a slice of sorted dimension sizes
+	type dim struct {
+		index         int
+		dimensionSize int
+	}
+
+	dimSizes := make([]dim, 0, nofDimensions)
+	var dimSizesMutex sync.Mutex
+
+	// get info from mongo
+	var getErrorFlag int32
+	var concurrent = 10 // limit number of go routines so as to not put too much on heap
+	var semaphoreChan = make(chan struct{}, concurrent)
+	var wg sync.WaitGroup // number of working goroutines
+
+	for i, dimension := range dbFilter.Dimensions {
+		if atomic.LoadInt32(&getErrorFlag) != 0 {
+			break
+		}
+		semaphoreChan <- struct{}{} // block while full
+
+		wg.Add(1)
+
+		// Get dimension sizes in parallel
+		go func(i int, dimension *observation.Dimension) {
+			defer func() {
+				<-semaphoreChan // read to release a slot
+			}()
+
+			defer wg.Done()
+
+			// passing a 'Limit' of 0 makes GetOptions skip getting the documents
+			// and to return only what we are interested in: TotalCount
+			options, err := handler.datasetAPICli.GetOptions(ctx,
+				"", // userAuthToken
+				handler.serviceAuthToken,
+				"", // collectionID
+				event.DatasetID, event.Edition, event.Version, dimension.Name,
+				&dataset.QueryParams{Offset: 0, Limit: 0})
+
+			if err != nil {
+				atomic.AddInt32(&getErrorFlag, 1)
+			} else {
+				d := dim{dimensionSize: options.TotalCount, index: i}
+				dimSizesMutex.Lock()
+				dimSizes = append(dimSizes, d)
+				dimSizesMutex.Unlock()
+			}
+		}(i, dimension)
+	}
+	wg.Wait()
+
+	if getErrorFlag != 0 {
+		// Frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
+		// and to retain compatibility with what the neptune dp-graph library was doing without access to information
+		// from mongo.
+		dimSizes = dimSizes[:0]
+		for i, dimension := range dbFilter.Dimensions {
+			if strings.ToLower(dimension.Name) == "geography" {
+				d := dim{dimensionSize: 999999, index: i}
+				dimSizes = append(dimSizes, d)
+			} else {
+				// Set sizes of dimensions as largest first to retain list order to improve sort speed
+				d := dim{dimensionSize: nofDimensions - i, index: i}
+				dimSizes = append(dimSizes, d)
+			}
+		}
+	}
+
+	// sort slice by number of options per dimension, smallest first
+	sort.Slice(dimSizes, func(i, j int) bool {
+		return dimSizes[i].dimensionSize < dimSizes[j].dimensionSize
+	})
+
+	sortedDimensions := make([]observation.Dimension, 0, nofDimensions)
+
+	for i := nofDimensions - 1; i >= 0; i-- { // build required return structure, largest first
+		sortedDimensions = append(sortedDimensions, *dbFilter.Dimensions[dimSizes[i].index])
+	}
+
+	// Now copy the sorted dimensions back over the original
+	for i, dimension := range sortedDimensions {
+		*dbFilter.Dimensions[i] = dimension
+	}
+}
+
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
-	filter, err := handler.filterStore.GetFilter(ctx, event.FilterID)
+	startTime := time.Now()
+	filterStruct, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
 		return nil, err
 	}
 
-	dbFilter := mapFilter(filter)
+	dbFilter := mapFilter(filterStruct)
 
-	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filter.InstanceID, filter.FilterID, dbFilter, nil)
+	sortFilterStartTime := time.Now()
+	SortFilter(ctx, handler, event, dbFilter)
+	sortFilterEndTime := time.Now()
+
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, filterStruct.InstanceID, filterStruct.FilterID, dbFilter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -219,17 +322,17 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
-			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter})
-			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filter.FilterID)
+			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filterStruct.InstanceID,
+				"filter": filterStruct})
+			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filterStruct.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
 			return nil, err
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
-			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filter.InstanceID,
-				"filter": filter}, log.Error(err))
-			updateErr := handler.filterStore.PutStateAsError(ctx, filter.FilterID)
+			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filterStruct.InstanceID,
+				"filter": filterStruct}, log.Error(err))
+			updateErr := handler.filterStore.PutStateAsError(ctx, filterStruct.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
 			}
@@ -241,15 +344,36 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
 
 	// write url and file size to filter API
-	err = handler.filterStore.PutCSVData(ctx, filter.FilterID, csv)
+	err = handler.filterStore.PutCSVData(ctx, filterStruct.FilterID, csv)
 	if err != nil {
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
 
 	rowCount := reader.ObservationsCount()
 
-	log.Event(ctx, "csv export completed", log.INFO, log.Data{"filter_id": filter.FilterID, "file_url": fileURL, "row_count": rowCount})
-	return &CSVExported{FilterID: filter.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
+	totTime := time.Now()
+
+	sortFilterDiff := sortFilterEndTime.Sub(sortFilterStartTime)
+	fd := sortFilterDiff.Microseconds()
+	seconds := fd / 1000000
+	microsecs := fd % 1000000
+	sortFilterTime := fmt.Sprintf("%d.%d seconds", seconds, microsecs)
+
+	totalDiff := totTime.Sub(startTime)
+	td := totalDiff.Microseconds()
+	seconds = td / 1000000
+	microsecs = td % 1000000
+	totalTime := fmt.Sprintf("%d.%d seconds", seconds, microsecs)
+
+	log.Event(ctx, "csv export completed", log.INFO,
+		log.Data{
+			"filter_id":        filterStruct.FilterID,
+			"file_url":         fileURL,
+			"row_count":        rowCount,
+			"sort_filter_time": sortFilterTime,
+			"total_time":       totalTime,
+		})
+	return &CSVExported{FilterID: filterStruct.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
 func mapFilter(filter *filter.Model) *observation.DimensionFilters {

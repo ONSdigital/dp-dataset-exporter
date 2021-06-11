@@ -108,7 +108,7 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 		return nil
 	case <-ctx.Done():
 		log.Event(ctx, "shutdown context time exceeded, skipping graceful shutdown of event consumer", log.INFO)
-		return errs.New("Shutdown context timed out")
+		return errs.New("shutdown context timed out")
 	}
 }
 

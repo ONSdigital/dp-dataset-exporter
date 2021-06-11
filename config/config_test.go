@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 )
 
 func TestSpec(t *testing.T) {
+
+	os.Clearenv()
 
 	cfg, err := config.Get()
 
