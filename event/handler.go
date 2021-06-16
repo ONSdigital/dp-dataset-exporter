@@ -292,6 +292,8 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	dbFilter := mapFilter(filterStruct)
 
+	// !!! also need to check if filterStruct.FilterID is not empty and if so, call new function to go get all diemnsions
+
 	sortFilterStartTime := time.Now()
 	SortFilter(ctx, handler, event, dbFilter)
 	sortFilterEndTime := time.Now()
@@ -470,6 +472,11 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 }
 
 func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
+	// get all dimension  .. new work
+	GetVersionDimensions() from dp-api-clients ?
+
+	// call new sort of dimensions
+	// then change next call to take sorted dimensions
 	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, event.InstanceID, "", &observation.DimensionFilters{}, nil)
 	if err != nil {
 		return nil, "", "", 0, err
