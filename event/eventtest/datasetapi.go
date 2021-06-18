@@ -29,8 +29,14 @@ var _ event.DatasetAPI = &DatasetAPIMock{}
 //             GetOptionsFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string, dimension string, q *dataset.QueryParams) (dataset.Options, error) {
 // 	               panic("mock out the GetOptions method")
 //             },
+//             GetOptionsInBatchesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string, dimension string, batchSize int, maxWorkers int) (dataset.Options, error) {
+// 	               panic("mock out the GetOptionsInBatches method")
+//             },
 //             GetVersionFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceAuthToken string, collectionID string, datasetID string, edition string, version string) (dataset.Version, error) {
 // 	               panic("mock out the GetVersion method")
+//             },
+//             GetVersionDimensionsFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string) (dataset.VersionDimensions, error) {
+// 	               panic("mock out the GetVersionDimensions method")
 //             },
 //             GetVersionMetadataFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string) (dataset.Metadata, error) {
 // 	               panic("mock out the GetVersionMetadata method")
@@ -54,8 +60,14 @@ type DatasetAPIMock struct {
 	// GetOptionsFunc mocks the GetOptions method.
 	GetOptionsFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string, dimension string, q *dataset.QueryParams) (dataset.Options, error)
 
+	// GetOptionsInBatchesFunc mocks the GetOptionsInBatches method.
+	GetOptionsInBatchesFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string, dimension string, batchSize int, maxWorkers int) (dataset.Options, error)
+
 	// GetVersionFunc mocks the GetVersion method.
 	GetVersionFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceAuthToken string, collectionID string, datasetID string, edition string, version string) (dataset.Version, error)
+
+	// GetVersionDimensionsFunc mocks the GetVersionDimensions method.
+	GetVersionDimensionsFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string) (dataset.VersionDimensions, error)
 
 	// GetVersionMetadataFunc mocks the GetVersionMetadata method.
 	GetVersionMetadataFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string) (dataset.Metadata, error)
@@ -108,6 +120,29 @@ type DatasetAPIMock struct {
 			// Q is the q argument value.
 			Q *dataset.QueryParams
 		}
+		// GetOptionsInBatches holds details about calls to the GetOptionsInBatches method.
+		GetOptionsInBatches []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserAuthToken is the userAuthToken argument value.
+			UserAuthToken string
+			// ServiceAuthToken is the serviceAuthToken argument value.
+			ServiceAuthToken string
+			// CollectionID is the collectionID argument value.
+			CollectionID string
+			// ID is the id argument value.
+			ID string
+			// Edition is the edition argument value.
+			Edition string
+			// Version is the version argument value.
+			Version string
+			// Dimension is the dimension argument value.
+			Dimension string
+			// BatchSize is the batchSize argument value.
+			BatchSize int
+			// MaxWorkers is the maxWorkers argument value.
+			MaxWorkers int
+		}
 		// GetVersion holds details about calls to the GetVersion method.
 		GetVersion []struct {
 			// Ctx is the ctx argument value.
@@ -122,6 +157,23 @@ type DatasetAPIMock struct {
 			CollectionID string
 			// DatasetID is the datasetID argument value.
 			DatasetID string
+			// Edition is the edition argument value.
+			Edition string
+			// Version is the version argument value.
+			Version string
+		}
+		// GetVersionDimensions holds details about calls to the GetVersionDimensions method.
+		GetVersionDimensions []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// UserAuthToken is the userAuthToken argument value.
+			UserAuthToken string
+			// ServiceAuthToken is the serviceAuthToken argument value.
+			ServiceAuthToken string
+			// CollectionID is the collectionID argument value.
+			CollectionID string
+			// ID is the id argument value.
+			ID string
 			// Edition is the edition argument value.
 			Edition string
 			// Version is the version argument value.
@@ -164,12 +216,14 @@ type DatasetAPIMock struct {
 			M dataset.Version
 		}
 	}
-	lockGetInstance        sync.RWMutex
-	lockGetMetadataURL     sync.RWMutex
-	lockGetOptions         sync.RWMutex
-	lockGetVersion         sync.RWMutex
-	lockGetVersionMetadata sync.RWMutex
-	lockPutVersion         sync.RWMutex
+	lockGetInstance          sync.RWMutex
+	lockGetMetadataURL       sync.RWMutex
+	lockGetOptions           sync.RWMutex
+	lockGetOptionsInBatches  sync.RWMutex
+	lockGetVersion           sync.RWMutex
+	lockGetVersionDimensions sync.RWMutex
+	lockGetVersionMetadata   sync.RWMutex
+	lockPutVersion           sync.RWMutex
 }
 
 // GetInstance calls GetInstanceFunc.
@@ -321,6 +375,73 @@ func (mock *DatasetAPIMock) GetOptionsCalls() []struct {
 	return calls
 }
 
+// GetOptionsInBatches calls GetOptionsInBatchesFunc.
+func (mock *DatasetAPIMock) GetOptionsInBatches(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string, dimension string, batchSize int, maxWorkers int) (dataset.Options, error) {
+	if mock.GetOptionsInBatchesFunc == nil {
+		panic("DatasetAPIMock.GetOptionsInBatchesFunc: method is nil but DatasetAPI.GetOptionsInBatches was just called")
+	}
+	callInfo := struct {
+		Ctx              context.Context
+		UserAuthToken    string
+		ServiceAuthToken string
+		CollectionID     string
+		ID               string
+		Edition          string
+		Version          string
+		Dimension        string
+		BatchSize        int
+		MaxWorkers       int
+	}{
+		Ctx:              ctx,
+		UserAuthToken:    userAuthToken,
+		ServiceAuthToken: serviceAuthToken,
+		CollectionID:     collectionID,
+		ID:               id,
+		Edition:          edition,
+		Version:          version,
+		Dimension:        dimension,
+		BatchSize:        batchSize,
+		MaxWorkers:       maxWorkers,
+	}
+	mock.lockGetOptionsInBatches.Lock()
+	mock.calls.GetOptionsInBatches = append(mock.calls.GetOptionsInBatches, callInfo)
+	mock.lockGetOptionsInBatches.Unlock()
+	return mock.GetOptionsInBatchesFunc(ctx, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension, batchSize, maxWorkers)
+}
+
+// GetOptionsInBatchesCalls gets all the calls that were made to GetOptionsInBatches.
+// Check the length with:
+//     len(mockedDatasetAPI.GetOptionsInBatchesCalls())
+func (mock *DatasetAPIMock) GetOptionsInBatchesCalls() []struct {
+	Ctx              context.Context
+	UserAuthToken    string
+	ServiceAuthToken string
+	CollectionID     string
+	ID               string
+	Edition          string
+	Version          string
+	Dimension        string
+	BatchSize        int
+	MaxWorkers       int
+} {
+	var calls []struct {
+		Ctx              context.Context
+		UserAuthToken    string
+		ServiceAuthToken string
+		CollectionID     string
+		ID               string
+		Edition          string
+		Version          string
+		Dimension        string
+		BatchSize        int
+		MaxWorkers       int
+	}
+	mock.lockGetOptionsInBatches.RLock()
+	calls = mock.calls.GetOptionsInBatches
+	mock.lockGetOptionsInBatches.RUnlock()
+	return calls
+}
+
 // GetVersion calls GetVersionFunc.
 func (mock *DatasetAPIMock) GetVersion(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceAuthToken string, collectionID string, datasetID string, edition string, version string) (dataset.Version, error) {
 	if mock.GetVersionFunc == nil {
@@ -377,6 +498,61 @@ func (mock *DatasetAPIMock) GetVersionCalls() []struct {
 	mock.lockGetVersion.RLock()
 	calls = mock.calls.GetVersion
 	mock.lockGetVersion.RUnlock()
+	return calls
+}
+
+// GetVersionDimensions calls GetVersionDimensionsFunc.
+func (mock *DatasetAPIMock) GetVersionDimensions(ctx context.Context, userAuthToken string, serviceAuthToken string, collectionID string, id string, edition string, version string) (dataset.VersionDimensions, error) {
+	if mock.GetVersionDimensionsFunc == nil {
+		panic("DatasetAPIMock.GetVersionDimensionsFunc: method is nil but DatasetAPI.GetVersionDimensions was just called")
+	}
+	callInfo := struct {
+		Ctx              context.Context
+		UserAuthToken    string
+		ServiceAuthToken string
+		CollectionID     string
+		ID               string
+		Edition          string
+		Version          string
+	}{
+		Ctx:              ctx,
+		UserAuthToken:    userAuthToken,
+		ServiceAuthToken: serviceAuthToken,
+		CollectionID:     collectionID,
+		ID:               id,
+		Edition:          edition,
+		Version:          version,
+	}
+	mock.lockGetVersionDimensions.Lock()
+	mock.calls.GetVersionDimensions = append(mock.calls.GetVersionDimensions, callInfo)
+	mock.lockGetVersionDimensions.Unlock()
+	return mock.GetVersionDimensionsFunc(ctx, userAuthToken, serviceAuthToken, collectionID, id, edition, version)
+}
+
+// GetVersionDimensionsCalls gets all the calls that were made to GetVersionDimensions.
+// Check the length with:
+//     len(mockedDatasetAPI.GetVersionDimensionsCalls())
+func (mock *DatasetAPIMock) GetVersionDimensionsCalls() []struct {
+	Ctx              context.Context
+	UserAuthToken    string
+	ServiceAuthToken string
+	CollectionID     string
+	ID               string
+	Edition          string
+	Version          string
+} {
+	var calls []struct {
+		Ctx              context.Context
+		UserAuthToken    string
+		ServiceAuthToken string
+		CollectionID     string
+		ID               string
+		Edition          string
+		Version          string
+	}
+	mock.lockGetVersionDimensions.RLock()
+	calls = mock.calls.GetVersionDimensions
+	mock.lockGetVersionDimensions.RUnlock()
 	return calls
 }
 

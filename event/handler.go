@@ -12,6 +12,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	dprequest "github.com/ONSdigital/dp-net/request"
+
 	"github.com/ONSdigital/dp-api-clients-go/filter"
 
 	"github.com/pkg/errors"
@@ -58,6 +60,8 @@ type DatasetAPI interface {
 	GetMetadataURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.Metadata, err error)
 	GetOptions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (m dataset.Options, err error)
+	GetVersionDimensions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.VersionDimensions, err error)
+	GetOptionsInBatches(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, batchSize, maxWorkers int) (m dataset.Options, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -281,6 +285,61 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 	}
 }
 
+var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+	var userAuthToken string
+
+	if dprequest.IsFlorenceIdentityPresent(ctx) {
+		userAuthToken = ctx.Value(dprequest.FlorenceIdentityKey).(string)
+	}
+
+	// Get the names of the dimensions for the DatasetID
+	dimensions, err := handler.datasetAPICli.GetVersionDimensions(ctx,
+		userAuthToken,
+		handler.serviceAuthToken,
+		"",
+		event.DatasetID, event.Edition, event.Version)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var dbFilterDimensions []*observation.Dimension
+
+	for _, dim := range dimensions.Items {
+		// Get the names of the options for a dimension
+		opts, err := handler.datasetAPICli.GetOptionsInBatches(ctx,
+			userAuthToken,
+			handler.serviceAuthToken,
+			"",
+			event.DatasetID, event.Edition, event.Version, dim.Name,
+			100,
+			10)
+		if err != nil {
+			return nil, err
+		}
+
+		var options []string
+		for _, opt := range opts.Items {
+			options = append(options, opt.Option)
+		}
+
+		// Build info to create filter later
+		dbFilterDimensions = append(dbFilterDimensions, &observation.Dimension{
+			Name:    dim.Name,
+			Options: options,
+		})
+	}
+
+	// Create filter that has ALL dimensions with ALL options for each dimension
+	// for sorting
+	dbFilter := &observation.DimensionFilters{
+		Dimensions: dbFilterDimensions,
+		Published:  &isPublished,
+	}
+
+	return dbFilter, nil
+}
+
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
@@ -292,7 +351,12 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	dbFilter := mapFilter(filterStruct)
 
-	// !!! also need to check if filterStruct.FilterID is not empty and if so, call new function to go get all diemnsions
+	if dbFilter.IsEmpty() {
+		dbFilter, err = CreateFilterForAll(ctx, handler, event, isPublished)
+		if err != nil {
+			return nil, errors.Wrap(err, "error while creating filter for all")
+		}
+	}
 
 	sortFilterStartTime := time.Now()
 	SortFilter(ctx, handler, event, dbFilter)
@@ -376,6 +440,26 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 			"total_time":       totalTime,
 		})
 	return &CSVExported{FilterID: filterStruct.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
+}
+
+//!!! change following to take dimension info, etc and then loop for each dimension getting its options to build result up
+func mapDimensions(filter *filter.Model) *observation.DimensionFilters {
+
+	var dbFilterDimensions []*observation.Dimension
+
+	for _, dimension := range filter.Dimensions {
+		dbFilterDimensions = append(dbFilterDimensions, &observation.Dimension{
+			Name:    dimension.Name,
+			Options: dimension.Options,
+		})
+	}
+
+	dbFilter := &observation.DimensionFilters{
+		Dimensions: dbFilterDimensions,
+		Published:  &filter.IsPublished,
+	}
+
+	return dbFilter
 }
 
 func mapFilter(filter *filter.Model) *observation.DimensionFilters {
@@ -472,12 +556,13 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 }
 
 func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
-	// get all dimension  .. new work
-	GetVersionDimensions() from dp-api-clients ?
+	dbFilter, err := CreateFilterForAll(ctx, handler, event, isPublished)
+	if err != nil {
+		return nil, "", "", 0, errors.Wrap(err, "error while creating filter for all")
+	}
+	SortFilter(ctx, handler, event, dbFilter)
 
-	// call new sort of dimensions
-	// then change next call to take sorted dimensions
-	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, event.InstanceID, "", &observation.DimensionFilters{}, nil)
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, event.InstanceID, "", dbFilter, nil)
 	if err != nil {
 		return nil, "", "", 0, err
 	}
