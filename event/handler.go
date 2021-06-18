@@ -442,26 +442,6 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	return &CSVExported{FilterID: filterStruct.FilterID, DatasetID: event.DatasetID, Edition: event.Edition, Version: event.Version, FileURL: fileURL, RowCount: rowCount}, nil
 }
 
-//!!! change following to take dimension info, etc and then loop for each dimension getting its options to build result up
-func mapDimensions(filter *filter.Model) *observation.DimensionFilters {
-
-	var dbFilterDimensions []*observation.Dimension
-
-	for _, dimension := range filter.Dimensions {
-		dbFilterDimensions = append(dbFilterDimensions, &observation.Dimension{
-			Name:    dimension.Name,
-			Options: dimension.Options,
-		})
-	}
-
-	dbFilter := &observation.DimensionFilters{
-		Dimensions: dbFilterDimensions,
-		Published:  &filter.IsPublished,
-	}
-
-	return dbFilter
-}
-
 func mapFilter(filter *filter.Model) *observation.DimensionFilters {
 
 	dbFilterDimensions := mapFilterDimensions(filter)
