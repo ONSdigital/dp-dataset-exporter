@@ -866,7 +866,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		Convey("when handle is called", func() {
 			err := handler.Handle(ctx, e)
 
-			Convey("then no is returned", func() {
+			Convey("then no error is returned", func() {
 				So(err, ShouldBeNil)
 			})
 
@@ -1132,6 +1132,154 @@ func TestSortFilter(t *testing.T) {
 			event.SortFilter(ctx, handler, &eventFilterSubmitted, &dbFilter)
 
 			Convey("The dimension order is returned by largest dimension first to smallest last order", func() {
+				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
+				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")        // largest first
+				So(dbFilter.Dimensions[1].Name, ShouldEqual, "sex")              // in the middle
+				So(dbFilter.Dimensions[2].Name, ShouldEqual, "economicactivity") // smallest last
+			})
+		})
+	})
+}
+
+func TestCreateFilterForAll(t *testing.T) {
+	eventFilterSubmitted := event.FilterSubmitted{
+		FilterID:   "whatever",
+		InstanceID: "460b5039-bb09-4038-b8eb-9091713f4497",
+		DatasetID:  "older-people-economic-activity",
+		Edition:    "time-series",
+		Version:    "1",
+	}
+
+	//var pub = false
+
+	// The following test is to code cover the first error return in CreateFilterForAll
+	Convey("With a mock GetVersionDimensions that returns nil simulating error getting record from mongo", t, func() {
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return dataset.VersionDimensions{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When CreateFilterForAll is called", func() {
+			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false) //!!! the isPublished parameter may need to be 'true'
+
+			Convey("then the expected error is returned", func() {
+				So(err.Error(), ShouldResemble, "can't find record")
+			})
+		})
+	})
+
+	// The following test is to code cover the second error return in CreateFilterForAll
+	Convey("Given a dimension of one, with a mock GetOptionsInBatches that returns nil simulating error getting record from mongo (GetVersionDimensions returns a good value)", t, func() {
+		var versionDimensions = dataset.VersionDimensions{
+			Items: []dataset.VersionDimension{
+				{
+					Name: "economicactivity",
+					Links: dataset.Links{
+						Self: dataset.Link{
+							URL: "api/versions/self",
+						},
+					},
+					Description: "areas included in dataset",
+					Label:       "Economic activity",
+				},
+			},
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return versionDimensions, nil
+			},
+			GetOptionsInBatchesFunc: func(context.Context, string, string, string, string, string, string, string, int, int) (dataset.Options, error) {
+				return dataset.Options{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When CreateFilterForAll is called", func() {
+			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false) //!!! the isPublished parameter may need to be 'true'
+
+			Convey("then the expected error is returned", func() {
+				So(err.Error(), ShouldResemble, "can't find record")
+			})
+		})
+	})
+
+	// The following test is to code cover the happy path in CreateFilterForAll
+	Convey("Given a dimension of one, with a good GetOptionsInBatches and good GetVersionDimensions", t, func() {
+		/*		var dbFilter = observation.DimensionFilters{
+				Dimensions: []*observation.Dimension{
+					{
+						Name:    "economicactivity",
+						Options: []string{"economic-activity", "employment-rate"},
+					},
+					{
+						Name:    "geography",
+						Options: []string{"W92000004"},
+					},
+					{
+						Name:    "sex",
+						Options: []string{"people", "men"},
+					},
+				},
+				Published: &pub,
+			}*/
+
+		var versionDimensions = dataset.VersionDimensions{
+			Items: []dataset.VersionDimension{
+				{
+					Name: "economicactivity",
+					Links: dataset.Links{
+						Self: dataset.Link{
+							URL: "api/versions/self",
+						},
+					},
+					Description: "areas included in dataset",
+					Label:       "Economic activity",
+				},
+			},
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetOptionsFunc: func(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (dataset.Options, error) {
+				switch dimension {
+				case "economicactivity":
+					return dataset.Options{TotalCount: 2}, nil // smallest
+				case "geography":
+					return dataset.Options{TotalCount: 383}, nil // largest
+				case "sex":
+					return dataset.Options{
+						TotalCount: 2,
+						Items: []dataset.Option{
+							{
+								Option: "people",
+							},
+							{
+								Option: "men",
+							},
+						},
+					}, nil // in the middle
+				}
+				return dataset.Options{}, errors.New("can't find record")
+			},
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return versionDimensions, nil
+			},
+			GetOptionsInBatchesFunc: func(context.Context, string, string, string, string, string, string, string, int, int) (dataset.Options, error) {
+				return dataset.Options{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When SortFilter is called", func() {
+			dbFilter, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false) //!!! the isPublished parameter may need to be 'true'
+
+			Convey("The expected dimension filter is returned", func() {
+				So(err.Error(), ShouldBeNil)
 				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")        // largest first
 				So(dbFilter.Dimensions[1].Name, ShouldEqual, "sex")              // in the middle
