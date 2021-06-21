@@ -12,6 +12,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-graph/v2/observation"
 	"github.com/ONSdigital/dp-graph/v2/observation/observationtest"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -1150,8 +1151,6 @@ func TestCreateFilterForAll(t *testing.T) {
 		Version:    "1",
 	}
 
-	//var pub = false
-
 	// The following test is to code cover the first error return in CreateFilterForAll
 	Convey("With a mock GetVersionDimensions that returns nil simulating error getting record from mongo", t, func() {
 		datasetAPIMock := &eventtest.DatasetAPIMock{
@@ -1163,7 +1162,7 @@ func TestCreateFilterForAll(t *testing.T) {
 		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
 
 		Convey("When CreateFilterForAll is called", func() {
-			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false) //!!! the isPublished parameter may need to be 'true'
+			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
 
 			Convey("then the expected error is returned", func() {
 				So(err.Error(), ShouldResemble, "can't find record")
@@ -1200,7 +1199,7 @@ func TestCreateFilterForAll(t *testing.T) {
 		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
 
 		Convey("When CreateFilterForAll is called", func() {
-			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false) //!!! the isPublished parameter may need to be 'true'
+			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
 
 			Convey("then the expected error is returned", func() {
 				So(err.Error(), ShouldResemble, "can't find record")
@@ -1210,24 +1209,6 @@ func TestCreateFilterForAll(t *testing.T) {
 
 	// The following test is to code cover the happy path in CreateFilterForAll
 	Convey("Given a dimension of one, with a good GetOptionsInBatches and good GetVersionDimensions", t, func() {
-		/*		var dbFilter = observation.DimensionFilters{
-				Dimensions: []*observation.Dimension{
-					{
-						Name:    "economicactivity",
-						Options: []string{"economic-activity", "employment-rate"},
-					},
-					{
-						Name:    "geography",
-						Options: []string{"W92000004"},
-					},
-					{
-						Name:    "sex",
-						Options: []string{"people", "men"},
-					},
-				},
-				Published: &pub,
-			}*/
-
 		var versionDimensions = dataset.VersionDimensions{
 			Items: []dataset.VersionDimension{
 				{
@@ -1244,46 +1225,74 @@ func TestCreateFilterForAll(t *testing.T) {
 		}
 
 		datasetAPIMock := &eventtest.DatasetAPIMock{
-			GetOptionsFunc: func(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (dataset.Options, error) {
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return versionDimensions, nil
+			},
+			GetOptionsInBatchesFunc: func(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, batchSize int, maxWorkers int) (dataset.Options, error) {
 				switch dimension {
 				case "economicactivity":
-					return dataset.Options{TotalCount: 2}, nil // smallest
-				case "geography":
-					return dataset.Options{TotalCount: 383}, nil // largest
-				case "sex":
 					return dataset.Options{
 						TotalCount: 2,
 						Items: []dataset.Option{
 							{
-								Option: "people",
+								Option: "economic-activity",
 							},
 							{
-								Option: "men",
+								Option: "employment-rate",
 							},
 						},
-					}, nil // in the middle
+					}, nil // smallest
+					/*	case "geography":
+							return dataset.Options{
+								TotalCount: 4,
+								Items: []dataset.Option{
+									{
+										Option: "E06000001",
+									},
+									{
+										Option: "E06000002",
+									},
+									{
+										Option: "E06000003",
+									},
+									{
+										Option: "W92000004",
+									},
+								},
+							}, nil // largest
+						case "sex":
+							return dataset.Options{
+								TotalCount: 3,
+								Items: []dataset.Option{
+									{
+										Option: "people",
+									},
+									{
+										Option: "men",
+									},
+									{
+										Option: "women",
+									},
+								},
+							}, nil // in the middle*/
 				}
-				return dataset.Options{}, errors.New("can't find record")
-			},
-			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
-				return versionDimensions, nil
-			},
-			GetOptionsInBatchesFunc: func(context.Context, string, string, string, string, string, string, string, int, int) (dataset.Options, error) {
 				return dataset.Options{}, errors.New("can't find record")
 			},
 		}
 
 		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
 
-		Convey("When SortFilter is called", func() {
-			dbFilter, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false) //!!! the isPublished parameter may need to be 'true'
+		Convey("When CreateFilterForAll is called", func() {
+			dbFilter, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
+
+			spew.Dump(dbFilter)
+			spew.Dump(err)
 
 			Convey("The expected dimension filter is returned", func() {
 				So(err.Error(), ShouldBeNil)
-				So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
-				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")        // largest first
-				So(dbFilter.Dimensions[1].Name, ShouldEqual, "sex")              // in the middle
-				So(dbFilter.Dimensions[2].Name, ShouldEqual, "economicactivity") // smallest last
+				So(dbFilter.Dimensions[0].Name, ShouldEqual, "economicactivity")
+				So(dbFilter.Dimensions[0].Options[0], ShouldEqual, "economic-activity")
+				So(dbFilter.Dimensions[0].Options[1], ShouldEqual, "employment-rate")
 			})
 		})
 	})
