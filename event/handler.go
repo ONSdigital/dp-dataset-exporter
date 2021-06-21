@@ -12,8 +12,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	dprequest "github.com/ONSdigital/dp-net/request"
-
 	"github.com/ONSdigital/dp-api-clients-go/filter"
 
 	"github.com/pkg/errors"
@@ -286,17 +284,11 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 }
 
 var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
-	var userAuthToken string
-
-	if dprequest.IsFlorenceIdentityPresent(ctx) {
-		userAuthToken = ctx.Value(dprequest.FlorenceIdentityKey).(string)
-	}
-
 	// Get the names of the dimensions for the DatasetID
 	dimensions, err := handler.datasetAPICli.GetVersionDimensions(ctx,
-		userAuthToken,
+		"", // userAuthToken
 		handler.serviceAuthToken,
-		"",
+		"", // collectionID
 		event.DatasetID, event.Edition, event.Version)
 
 	if err != nil {
@@ -308,9 +300,9 @@ var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event
 	for _, dim := range dimensions.Items {
 		// Get the names of the options for a dimension
 		opts, err := handler.datasetAPICli.GetOptionsInBatches(ctx,
-			userAuthToken,
+			"", // userAuthToken
 			handler.serviceAuthToken,
-			"",
+			"", // collectionID
 			event.DatasetID, event.Edition, event.Version, dim.Name,
 			100,
 			10)
