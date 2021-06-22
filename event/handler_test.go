@@ -12,7 +12,6 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-graph/v2/observation"
 	"github.com/ONSdigital/dp-graph/v2/observation/observationtest"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -1176,13 +1175,6 @@ func TestCreateFilterForAll(t *testing.T) {
 			Items: []dataset.VersionDimension{
 				{
 					Name: "economicactivity",
-					Links: dataset.Links{
-						Self: dataset.Link{
-							URL: "api/versions/self",
-						},
-					},
-					Description: "areas included in dataset",
-					Label:       "Economic activity",
 				},
 			},
 		}
@@ -1211,16 +1203,7 @@ func TestCreateFilterForAll(t *testing.T) {
 	Convey("Given a dimension of one, with a good GetOptionsInBatches and good GetVersionDimensions", t, func() {
 		var versionDimensions = dataset.VersionDimensions{
 			Items: []dataset.VersionDimension{
-				{
-					Name: "economicactivity",
-					Links: dataset.Links{
-						Self: dataset.Link{
-							URL: "api/versions/self",
-						},
-					},
-					Description: "areas included in dataset",
-					Label:       "Economic activity",
-				},
+				{Name: "economicactivity"}, {Name: "sex"},
 			},
 		}
 
@@ -1234,47 +1217,16 @@ func TestCreateFilterForAll(t *testing.T) {
 					return dataset.Options{
 						TotalCount: 2,
 						Items: []dataset.Option{
-							{
-								Option: "economic-activity",
-							},
-							{
-								Option: "employment-rate",
-							},
+							{Option: "economic-activity"}, {Option: "employment-rate"},
 						},
-					}, nil // smallest
-					/*	case "geography":
-							return dataset.Options{
-								TotalCount: 4,
-								Items: []dataset.Option{
-									{
-										Option: "E06000001",
-									},
-									{
-										Option: "E06000002",
-									},
-									{
-										Option: "E06000003",
-									},
-									{
-										Option: "W92000004",
-									},
-								},
-							}, nil // largest
-						case "sex":
-							return dataset.Options{
-								TotalCount: 3,
-								Items: []dataset.Option{
-									{
-										Option: "people",
-									},
-									{
-										Option: "men",
-									},
-									{
-										Option: "women",
-									},
-								},
-							}, nil // in the middle*/
+					}, nil
+				case "sex":
+					return dataset.Options{
+						TotalCount: 3,
+						Items: []dataset.Option{
+							{Option: "people"}, {Option: "men"}, {Option: "women"},
+						},
+					}, nil
 				}
 				return dataset.Options{}, errors.New("can't find record")
 			},
@@ -1285,14 +1237,17 @@ func TestCreateFilterForAll(t *testing.T) {
 		Convey("When CreateFilterForAll is called", func() {
 			dbFilter, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
 
-			spew.Dump(dbFilter)
-			spew.Dump(err)
-
 			Convey("The expected dimension filter is returned", func() {
-				So(err.Error(), ShouldBeNil)
+				So(err, ShouldBeNil)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "economicactivity")
+				So(len(dbFilter.Dimensions), ShouldEqual, 2)
+				So(len(dbFilter.Dimensions[0].Options), ShouldEqual, 2)
 				So(dbFilter.Dimensions[0].Options[0], ShouldEqual, "economic-activity")
 				So(dbFilter.Dimensions[0].Options[1], ShouldEqual, "employment-rate")
+				So(len(dbFilter.Dimensions[1].Options), ShouldEqual, 3)
+				So(dbFilter.Dimensions[1].Options[0], ShouldEqual, "people")
+				So(dbFilter.Dimensions[1].Options[1], ShouldEqual, "men")
+				So(dbFilter.Dimensions[1].Options[2], ShouldEqual, "women")
 			})
 		})
 	})

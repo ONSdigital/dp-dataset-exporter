@@ -13,8 +13,7 @@ require (
 	github.com/ONSdigital/go-ns v0.0.0-20210410105122-6d6a140e952e
 	github.com/ONSdigital/log.go v1.0.1
 	github.com/Shopify/sarama v1.29.0 // indirect
-	github.com/aws/aws-sdk-go v1.38.63
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/aws/aws-sdk-go v1.38.65
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
