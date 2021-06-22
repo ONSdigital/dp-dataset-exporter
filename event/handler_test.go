@@ -605,7 +605,6 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 	Convey("Given a handler with a mocked dependencies", t, func() {
-
 		datasetAPIMock := &eventtest.DatasetAPIMock{
 			GetVersionFunc: func(context.Context, string, string, string, string, string, string, string) (dataset.Version, error) {
 				return associatedDataset, nil
@@ -650,6 +649,18 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			},
 		}
 
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
+		}
+
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
@@ -660,7 +671,6 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The dataset API is called with the correct version parameters", func() {
-
 				So(datasetAPIMock.GetVersionCalls(), ShouldHaveLength, 1)
 
 				getVersionCall := datasetAPIMock.GetVersionCalls()[0]
@@ -677,7 +687,6 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The file store is called with the reader returned from the observation store.", func() {
-
 				So(mockedFileStore.PutFileCalls(), ShouldHaveLength, 2)
 
 				actual := mockedFileStore.PutFileCalls()[0].Reader
@@ -685,12 +694,10 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The file store is called with a filename containing the configured prefix.", func() {
-
 				So(mockedFileStore.PutFileCalls()[0].Filename, ShouldStartWith, fullDatasetFilePrefix)
 			})
 
 			Convey("The filter store is called with file FileURL returned from the file store.", func() {
-
 				So(datasetAPIMock.PutVersionCalls(), ShouldHaveLength, 1)
 
 				So(datasetAPIMock.PutVersionCalls()[0].DatasetID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
@@ -699,7 +706,6 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The event producer is called with the filter ID.", func() {
-
 				So(mockedEventProducer.CSVExportedCalls(), ShouldHaveLength, 1)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.DatasetID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.Edition, ShouldEqual, fullFileDownloadSubmittedEvent.Edition)
@@ -752,6 +758,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return metadata, nil
 		}
 
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
+		}
+
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
@@ -794,6 +812,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		fileStockMock.PutFileFunc = func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "", mockErr
+		}
+
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
@@ -861,6 +891,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
+		}
+
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
@@ -910,6 +952,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, instanceID string, filterID string, filters *observation.DimensionFilters, limit *int) (reader observation.StreamRowReader, err error) {
 			return csvRowReaderMock, nil
+		}
+
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
@@ -974,6 +1028,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		producerMock.CSVExportedFunc = func(e *event.CSVExported) error {
 			return nil
+		}
+
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
