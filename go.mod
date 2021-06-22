@@ -20,8 +20,6 @@ require (
 	github.com/hashicorp/go-hclog v0.15.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
-	github.com/hashicorp/vault/api v1.1.0 // indirect
-	github.com/hashicorp/vault/sdk v0.2.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
