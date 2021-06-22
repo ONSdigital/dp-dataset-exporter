@@ -289,8 +289,8 @@ var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event
 		"", // userAuthToken
 		handler.serviceAuthToken,
 		"", // collectionID
-		event.DatasetID, event.Edition, event.Version)
-
+		event.DatasetID, event.Edition, event.Version,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,8 @@ var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event
 			"", // collectionID
 			event.DatasetID, event.Edition, event.Version, dim.Name,
 			100,
-			10)
+			10,
+		)
 		if err != nil {
 			return nil, err
 		}
