@@ -605,7 +605,6 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 	Convey("Given a handler with a mocked dependencies", t, func() {
-
 		datasetAPIMock := &eventtest.DatasetAPIMock{
 			GetVersionFunc: func(context.Context, string, string, string, string, string, string, string) (dataset.Version, error) {
 				return associatedDataset, nil
@@ -650,6 +649,18 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			},
 		}
 
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
+		}
+
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
@@ -660,7 +671,6 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The dataset API is called with the correct version parameters", func() {
-
 				So(datasetAPIMock.GetVersionCalls(), ShouldHaveLength, 1)
 
 				getVersionCall := datasetAPIMock.GetVersionCalls()[0]
@@ -677,7 +687,6 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The file store is called with the reader returned from the observation store.", func() {
-
 				So(mockedFileStore.PutFileCalls(), ShouldHaveLength, 2)
 
 				actual := mockedFileStore.PutFileCalls()[0].Reader
@@ -685,12 +694,10 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The file store is called with a filename containing the configured prefix.", func() {
-
 				So(mockedFileStore.PutFileCalls()[0].Filename, ShouldStartWith, fullDatasetFilePrefix)
 			})
 
 			Convey("The filter store is called with file FileURL returned from the file store.", func() {
-
 				So(datasetAPIMock.PutVersionCalls(), ShouldHaveLength, 1)
 
 				So(datasetAPIMock.PutVersionCalls()[0].DatasetID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
@@ -699,7 +706,6 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 			})
 
 			Convey("The event producer is called with the filter ID.", func() {
-
 				So(mockedEventProducer.CSVExportedCalls(), ShouldHaveLength, 1)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.DatasetID, ShouldEqual, fullFileDownloadSubmittedEvent.DatasetID)
 				So(mockedEventProducer.CSVExportedCalls()[0].E.Edition, ShouldEqual, fullFileDownloadSubmittedEvent.Edition)
@@ -752,6 +758,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return metadata, nil
 		}
 
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
+		}
+
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
@@ -794,6 +812,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		fileStockMock.PutFileFunc = func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
 			return "", mockErr
+		}
+
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
@@ -861,12 +891,24 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
+		}
+
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
 			err := handler.Handle(ctx, e)
 
-			Convey("then no is returned", func() {
+			Convey("then no error is returned", func() {
 				So(err, ShouldBeNil)
 			})
 
@@ -910,6 +952,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, instanceID string, filterID string, filters *observation.DimensionFilters, limit *int) (reader observation.StreamRowReader, err error) {
 			return csvRowReaderMock, nil
+		}
+
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
@@ -974,6 +1028,18 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 
 		producerMock.CSVExportedFunc = func(e *event.CSVExported) error {
 			return nil
+		}
+
+		originalSortFunc := event.SortFilter
+		originalFilterFunc := event.CreateFilterForAll
+		defer func() {
+			event.SortFilter = originalSortFunc
+			event.CreateFilterForAll = originalFilterFunc
+		}()
+		event.SortFilter = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, dbFilter *observation.DimensionFilters) {
+		}
+		event.CreateFilterForAll = func(ctx context.Context, handler *event.ExportHandler, event *event.FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+			return &observation.DimensionFilters{}, nil
 		}
 
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
@@ -1136,6 +1202,118 @@ func TestSortFilter(t *testing.T) {
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")        // largest first
 				So(dbFilter.Dimensions[1].Name, ShouldEqual, "sex")              // in the middle
 				So(dbFilter.Dimensions[2].Name, ShouldEqual, "economicactivity") // smallest last
+			})
+		})
+	})
+}
+
+func TestCreateFilterForAll(t *testing.T) {
+	eventFilterSubmitted := event.FilterSubmitted{
+		FilterID:   "whatever",
+		InstanceID: "460b5039-bb09-4038-b8eb-9091713f4497",
+		DatasetID:  "older-people-economic-activity",
+		Edition:    "time-series",
+		Version:    "1",
+	}
+
+	// The following test is to code cover the first error return in CreateFilterForAll
+	Convey("With a mock GetVersionDimensions that returns nil simulating error getting record from mongo", t, func() {
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return dataset.VersionDimensions{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When CreateFilterForAll is called", func() {
+			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
+
+			Convey("then the expected error is returned", func() {
+				So(err.Error(), ShouldResemble, "can't find record")
+			})
+		})
+	})
+
+	// The following test is to code cover the second error return in CreateFilterForAll
+	Convey("Given a dimension of one, with a mock GetOptionsInBatches that returns nil simulating error getting record from mongo (GetVersionDimensions returns a good value)", t, func() {
+		var versionDimensions = dataset.VersionDimensions{
+			Items: []dataset.VersionDimension{
+				{
+					Name: "economicactivity",
+				},
+			},
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return versionDimensions, nil
+			},
+			GetOptionsInBatchesFunc: func(context.Context, string, string, string, string, string, string, string, int, int) (dataset.Options, error) {
+				return dataset.Options{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When CreateFilterForAll is called", func() {
+			_, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
+
+			Convey("then the expected error is returned", func() {
+				So(err.Error(), ShouldResemble, "can't find record")
+			})
+		})
+	})
+
+	// The following test is to code cover the happy path in CreateFilterForAll
+	Convey("Given a dimension of one, with a good GetOptionsInBatches and good GetVersionDimensions", t, func() {
+		var versionDimensions = dataset.VersionDimensions{
+			Items: []dataset.VersionDimension{
+				{Name: "economicactivity"}, {Name: "sex"},
+			},
+		}
+
+		datasetAPIMock := &eventtest.DatasetAPIMock{
+			GetVersionDimensionsFunc: func(context.Context, string, string, string, string, string, string) (dataset.VersionDimensions, error) {
+				return versionDimensions, nil
+			},
+			GetOptionsInBatchesFunc: func(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, batchSize int, maxWorkers int) (dataset.Options, error) {
+				switch dimension {
+				case "economicactivity":
+					return dataset.Options{
+						TotalCount: 2,
+						Items: []dataset.Option{
+							{Option: "economic-activity"}, {Option: "employment-rate"},
+						},
+					}, nil
+				case "sex":
+					return dataset.Options{
+						TotalCount: 3,
+						Items: []dataset.Option{
+							{Option: "people"}, {Option: "men"}, {Option: "women"},
+						},
+					}, nil
+				}
+				return dataset.Options{}, errors.New("can't find record")
+			},
+		}
+
+		handler := event.NewExportHandler(nil, nil, nil, nil, datasetAPIMock, cfg)
+
+		Convey("When CreateFilterForAll is called", func() {
+			dbFilter, err := event.CreateFilterForAll(ctx, handler, &eventFilterSubmitted, false)
+
+			Convey("The expected dimension filter is returned", func() {
+				So(err, ShouldBeNil)
+				So(dbFilter.Dimensions[0].Name, ShouldEqual, "economicactivity")
+				So(len(dbFilter.Dimensions), ShouldEqual, 2)
+				So(len(dbFilter.Dimensions[0].Options), ShouldEqual, 2)
+				So(dbFilter.Dimensions[0].Options[0], ShouldEqual, "economic-activity")
+				So(dbFilter.Dimensions[0].Options[1], ShouldEqual, "employment-rate")
+				So(len(dbFilter.Dimensions[1].Options), ShouldEqual, 3)
+				So(dbFilter.Dimensions[1].Options[0], ShouldEqual, "people")
+				So(dbFilter.Dimensions[1].Options[1], ShouldEqual, "men")
+				So(dbFilter.Dimensions[1].Options[2], ShouldEqual, "women")
 			})
 		})
 	})

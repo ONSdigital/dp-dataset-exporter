@@ -58,6 +58,8 @@ type DatasetAPI interface {
 	GetMetadataURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.Metadata, err error)
 	GetOptions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (m dataset.Options, err error)
+	GetVersionDimensions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.VersionDimensions, err error)
+	GetOptionsInBatches(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, batchSize, maxWorkers int) (m dataset.Options, err error)
 }
 
 // NewExportHandler returns a new instance using the given dependencies.
@@ -205,13 +207,13 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 	var dimSizesMutex sync.Mutex
 
 	// get info from mongo
-	var getErrorFlag int32
+	var getErrorCount int32
 	var concurrent = 10 // limit number of go routines so as to not put too much on heap
 	var semaphoreChan = make(chan struct{}, concurrent)
 	var wg sync.WaitGroup // number of working goroutines
 
 	for i, dimension := range dbFilter.Dimensions {
-		if atomic.LoadInt32(&getErrorFlag) != 0 {
+		if atomic.LoadInt32(&getErrorCount) != 0 {
 			break
 		}
 		semaphoreChan <- struct{}{} // block while full
@@ -236,7 +238,12 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 				&dataset.QueryParams{Offset: 0, Limit: 0})
 
 			if err != nil {
-				atomic.AddInt32(&getErrorFlag, 1)
+				if atomic.AddInt32(&getErrorCount, 1) <= 2 {
+					// only show a few of possibly hundreds of errors, as once someone
+					// looks into the one error they may fix all associated errors
+					logData := log.Data{"dataset_id": event.DatasetID, "edition": event.Edition, "version": event.Version, "dimension name": dimension.Name}
+					log.Event(ctx, "SortFilter: GetOptions failed for dataset and dimension", log.INFO, logData)
+				}
 			} else {
 				d := dim{dimensionSize: options.TotalCount, index: i}
 				dimSizesMutex.Lock()
@@ -247,7 +254,9 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 	}
 	wg.Wait()
 
-	if getErrorFlag != 0 {
+	if getErrorCount != 0 {
+		logData := log.Data{"dataset_id": event.DatasetID, "edition": event.Edition, "version": event.Version}
+		log.Event(ctx, fmt.Sprintf("SortFilter: GetOptions failed for dataset %d times, sorting by default of 'geography' first", getErrorCount), log.INFO, logData)
 		// Frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
 		// and to retain compatibility with what the neptune dp-graph library was doing without access to information
 		// from mongo.
@@ -281,6 +290,56 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 	}
 }
 
+var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
+	// Get the names of the dimensions for the DatasetID
+	dimensions, err := handler.datasetAPICli.GetVersionDimensions(ctx,
+		"", // userAuthToken
+		handler.serviceAuthToken,
+		"", // collectionID
+		event.DatasetID, event.Edition, event.Version,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var dbFilterDimensions []*observation.Dimension
+
+	for _, dim := range dimensions.Items {
+		// Get the names of the options for a dimension
+		opts, err := handler.datasetAPICli.GetOptionsInBatches(ctx,
+			"", // userAuthToken
+			handler.serviceAuthToken,
+			"", // collectionID
+			event.DatasetID, event.Edition, event.Version, dim.Name,
+			100,
+			10,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		var options []string
+		for _, opt := range opts.Items {
+			options = append(options, opt.Option)
+		}
+
+		// Build info to create filter later
+		dbFilterDimensions = append(dbFilterDimensions, &observation.Dimension{
+			Name:    dim.Name,
+			Options: options,
+		})
+	}
+
+	// Create filter that has ALL dimensions with ALL options for each dimension
+	// for sorting
+	dbFilter := &observation.DimensionFilters{
+		Dimensions: dbFilterDimensions,
+		Published:  &isPublished,
+	}
+
+	return dbFilter, nil
+}
+
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
 	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
@@ -291,6 +350,13 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	}
 
 	dbFilter := mapFilter(filterStruct)
+
+	if dbFilter.IsEmpty() {
+		dbFilter, err = CreateFilterForAll(ctx, handler, event, isPublished)
+		if err != nil {
+			return nil, errors.Wrap(err, "error while creating filter for all")
+		}
+	}
 
 	sortFilterStartTime := time.Now()
 	SortFilter(ctx, handler, event, dbFilter)
@@ -470,7 +536,13 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 }
 
 func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *FilterSubmitted, filename string, isPublished bool) (*dataset.Download, string, string, int32, error) {
-	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, event.InstanceID, "", &observation.DimensionFilters{}, nil)
+	dbFilter, err := CreateFilterForAll(ctx, handler, event, isPublished)
+	if err != nil {
+		return nil, "", "", 0, errors.Wrap(err, "error while creating filter for all")
+	}
+	SortFilter(ctx, handler, event, dbFilter)
+
+	csvRowReader, err := handler.observationStore.StreamCSVRows(ctx, event.InstanceID, "", dbFilter, nil)
 	if err != nil {
 		return nil, "", "", 0, err
 	}
