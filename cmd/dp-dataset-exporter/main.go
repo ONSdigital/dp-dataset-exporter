@@ -66,7 +66,7 @@ func main() {
 	var serviceList initialise.ExternalServiceList
 
 	// Create kafka Consumer - exit on channel validation error. Non-initialised consumers will not error at creation time.
-	kafkaConsumer, err := serviceList.GetConsumer(ctx, cfg)
+	kafkaConsumer, err := serviceList.GetLegacyConsumer(ctx, cfg)
 	exitIfError(ctx, err)
 
 	// Create kafka Producer - exit on channel validation error. Non-initialised producers will not error at creation time.
@@ -75,6 +75,7 @@ func main() {
 		cfg.KafkaAddr,
 		cfg.CSVExportedProducerTopic,
 		cfg.KafkaVersion,
+		cfg.KafkaSecProtocol, cfg.KafkaSecCACerts, cfg.KafkaSecClientCert, cfg.KafkaSecClientKey, cfg.KafkaSecSkipVerify,
 		initialise.CSVExported,
 	)
 	exitIfError(ctx, err)
@@ -82,9 +83,10 @@ func main() {
 	// Create kafka ErrorProducer - exit on channel validation error. Non-initialised producers will not error at creation time.
 	kafkaErrorProducer, err := serviceList.GetProducer(
 		ctx,
-		cfg.KafkaAddr,
+		cfg.KafkaLegacyAddr,
 		cfg.ErrorProducerTopic,
-		cfg.KafkaVersion,
+		cfg.KafkaLegacyVersion,
+		"", "", "", "", false,
 		initialise.Error,
 	)
 	exitIfError(ctx, err)
