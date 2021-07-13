@@ -10,8 +10,15 @@ import (
 // Config values for the application.
 type Config struct {
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
+	KafkaLegacyAddr            []string      `envconfig:"LEGACY_KAFKA_ADDR"`
+	KafkaLegacyVersion         string        `envconfig:"LEGACY_KAFKA_VERSION"`
 	KafkaAddr                  []string      `envconfig:"KAFKA_ADDR"`
 	KafkaVersion               string        `envconfig:"KAFKA_VERSION"`
+	KafkaSecProtocol           string        `envconfig:"KAFKA_SEC_PROTO"`
+	KafkaSecCACerts            string        `envconfig:"KAFKA_SEC_CA_CERTS"`
+	KafkaSecClientCert         string        `envconfig:"KAFKA_SEC_CLIENT_CERT"`
+	KafkaSecClientKey          string        `envconfig:"KAFKA_SEC_CLIENT_KEY" json:"-"`
+	KafkaSecSkipVerify         bool          `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
 	KafkaConsumerWorkers       int           `envconfig:"KAFKA_CONSUMER_WORKERS"`
 	FilterConsumerGroup        string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic        string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
@@ -43,8 +50,10 @@ func Get() (*Config, error) {
 
 	cfg := &Config{
 		BindAddr:                   ":22500",
-		KafkaAddr:                  []string{"localhost:9092"},
-		KafkaVersion:               "1.0.2",
+		KafkaLegacyAddr:            []string{"localhost:9092"},
+		KafkaLegacyVersion:         "1.0.2",
+		KafkaAddr:                  []string{"localhost:9094"},
+		KafkaVersion:               "2.6.1",
 		KafkaConsumerWorkers:       1,
 		FilterConsumerTopic:        "filter-job-submitted",
 		FilterConsumerGroup:        "dp-dataset-exporter",
