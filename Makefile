@@ -35,7 +35,7 @@ generate:
 
 .PHONY: audit
 audit:
-	go list -m all | nancy sleuth --exclude-vulnerability-file ./.nancy-ignore
+	go list -m all | nancy sleuth
 
 .PHONY: build
 build:
