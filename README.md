@@ -25,10 +25,8 @@ environment variables, or with a link to a configuration guide.
 | Environment variable         | Default (example)                    | Description
 | ---------------------------- | ------------------------------------ | -----------
 | BIND_ADDR                    | :22500                               | The host and port to bind to
-| LEGACY_KAFKA_ADDR            | `localhost:9092`                     | The address of Kafka brokers (non-TLS)
-| LEGACY_KAFKA_VERSION         | `1.0.2`                              | The version of Kafka consumer (non-TLS)
-| KAFKA_ADDR                   | `localhost:9094`                     | The address of (TLS-ready) Kafka brokers (comma-separated values)
-| KAFKA_VERSION                | `2.6.1`                              | The version of (TLS-ready) Kafka
+| KAFKA_ADDR                   | `localhost:9092`                     | The address of (TLS-ready) Kafka brokers (comma-separated values)
+| KAFKA_VERSION                | `1.0.2`                              | The version of (TLS-ready) Kafka
 | KAFKA_SEC_PROTO              | _unset_               (only `TLS`)   | if set to `TLS`, kafka connections will use TLS
 | KAFKA_SEC_CLIENT_KEY         | _unset_                              | PEM [2] for the client key (optional, used for client auth) [1]
 | KAFKA_SEC_CLIENT_CERT        | _unset_                              | PEM [2] for the client certificate (optional, used for client auth) [1]
