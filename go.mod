@@ -31,5 +31,3 @@ require (
 	golang.org/x/time v0.0.0-20210611083556-38a9dc6acbc6 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
-
-replace github.com/ONSdigital/dp-api-clients-go => ../dp-api-clients-go
