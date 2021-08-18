@@ -68,26 +68,6 @@ func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Confi
 	return
 }
 
-// GetLegacyConsumer returns a legacy (non-TLS) kafka consumer, which might not be initialised
-func (e *ExternalServiceList) GetLegacyConsumer(ctx context.Context, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
-	cConfig := &kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaLegacyVersion}
-	kafkaConsumer, err = kafka.NewConsumerGroup(
-		ctx,
-		cfg.KafkaLegacyAddr,
-		cfg.FilterConsumerTopic,
-		cfg.FilterConsumerGroup,
-		kafka.CreateConsumerGroupChannels(cfg.KafkaConsumerWorkers),
-		cConfig,
-	)
-	if err != nil {
-		return
-	}
-
-	e.Consumer = true
-
-	return
-}
-
 // GetFileStore returns an initialised connection to file store
 func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
 	fileStore, err = file.NewStore(

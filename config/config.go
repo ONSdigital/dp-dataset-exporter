@@ -10,8 +10,6 @@ import (
 // Config values for the application.
 type Config struct {
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
-	KafkaLegacyAddr            []string      `envconfig:"LEGACY_KAFKA_ADDR"`
-	KafkaLegacyVersion         string        `envconfig:"LEGACY_KAFKA_VERSION"`
 	KafkaAddr                  []string      `envconfig:"KAFKA_ADDR"`
 	KafkaVersion               string        `envconfig:"KAFKA_VERSION"`
 	KafkaSecProtocol           string        `envconfig:"KAFKA_SEC_PROTO"`
@@ -50,10 +48,8 @@ func Get() (*Config, error) {
 
 	cfg := &Config{
 		BindAddr:                   ":22500",
-		KafkaLegacyAddr:            []string{"localhost:9092"},
-		KafkaLegacyVersion:         "1.0.2",
-		KafkaAddr:                  []string{"localhost:9094"},
-		KafkaVersion:               "2.6.1",
+		KafkaAddr:                  []string{"localhost:9092"},
+		KafkaVersion:               "1.0.2",
 		KafkaConsumerWorkers:       1,
 		FilterConsumerTopic:        "filter-job-submitted",
 		FilterConsumerGroup:        "dp-dataset-exporter",
