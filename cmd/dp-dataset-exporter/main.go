@@ -75,6 +75,7 @@ func main() {
 		cfg.KafkaAddr,
 		cfg.CSVExportedProducerTopic,
 		cfg.KafkaVersion,
+		cfg.KafkaSecProtocol, cfg.KafkaSecCACerts, cfg.KafkaSecClientCert, cfg.KafkaSecClientKey, cfg.KafkaSecSkipVerify,
 		initialise.CSVExported,
 	)
 	exitIfError(ctx, err)
@@ -85,6 +86,7 @@ func main() {
 		cfg.KafkaAddr,
 		cfg.ErrorProducerTopic,
 		cfg.KafkaVersion,
+		cfg.KafkaSecProtocol, cfg.KafkaSecCACerts, cfg.KafkaSecClientCert, cfg.KafkaSecClientKey, cfg.KafkaSecSkipVerify,
 		initialise.Error,
 	)
 	exitIfError(ctx, err)

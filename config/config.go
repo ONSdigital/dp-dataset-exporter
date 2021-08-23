@@ -12,6 +12,11 @@ type Config struct {
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
 	KafkaAddr                  []string      `envconfig:"KAFKA_ADDR"`
 	KafkaVersion               string        `envconfig:"KAFKA_VERSION"`
+	KafkaSecProtocol           string        `envconfig:"KAFKA_SEC_PROTO"`
+	KafkaSecCACerts            string        `envconfig:"KAFKA_SEC_CA_CERTS"`
+	KafkaSecClientCert         string        `envconfig:"KAFKA_SEC_CLIENT_CERT"`
+	KafkaSecClientKey          string        `envconfig:"KAFKA_SEC_CLIENT_KEY" json:"-"`
+	KafkaSecSkipVerify         bool          `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
 	KafkaConsumerWorkers       int           `envconfig:"KAFKA_CONSUMER_WORKERS"`
 	FilterConsumerGroup        string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic        string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`

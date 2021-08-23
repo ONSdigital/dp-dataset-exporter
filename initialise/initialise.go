@@ -42,13 +42,22 @@ func (k KafkaProducerName) String() string {
 
 // GetConsumer returns a kafka consumer, which might not be initialised
 func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
+	cConfig := &kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaVersion}
+	if cfg.KafkaSecProtocol == "TLS" {
+		cConfig.SecurityConfig = kafka.GetSecurityConfig(
+			cfg.KafkaSecCACerts,
+			cfg.KafkaSecClientCert,
+			cfg.KafkaSecClientKey,
+			cfg.KafkaSecSkipVerify,
+		)
+	}
 	kafkaConsumer, err = kafka.NewConsumerGroup(
 		ctx,
 		cfg.KafkaAddr,
 		cfg.FilterConsumerTopic,
 		cfg.FilterConsumerGroup,
 		kafka.CreateConsumerGroupChannels(cfg.KafkaConsumerWorkers),
-		&kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaVersion},
+		cConfig,
 	)
 	if err != nil {
 		return
@@ -91,13 +100,29 @@ func (e *ExternalServiceList) GetObservationStore(ctx context.Context) (observat
 }
 
 // GetProducer returns a kafka producer, which might no be initialised
-func (e *ExternalServiceList) GetProducer(ctx context.Context, kafkaBrokers []string, topic, kafkaVersion string, name KafkaProducerName) (kafkaProducer *kafka.Producer, err error) {
+func (e *ExternalServiceList) GetProducer(
+	ctx context.Context,
+	kafkaBrokers []string,
+	topic, kafkaVersion string,
+	kafkaSecProtocol, kafkaSecCACerts, kafkaSecClientCert, kafkaSecClientKey string, kafkaSecSkipVerify bool,
+	name KafkaProducerName,
+) (kafkaProducer *kafka.Producer, err error) {
+	pConfig := &kafka.ProducerConfig{KafkaVersion: &kafkaVersion}
+
+	if kafkaSecProtocol == "TLS" {
+		pConfig.SecurityConfig = kafka.GetSecurityConfig(
+			kafkaSecCACerts,
+			kafkaSecClientCert,
+			kafkaSecClientKey,
+			kafkaSecSkipVerify,
+		)
+	}
 	kafkaProducer, err = kafka.NewProducer(
 		ctx,
 		kafkaBrokers,
 		topic,
 		kafka.CreateProducerChannels(),
-		&kafka.ProducerConfig{KafkaVersion: &kafkaVersion},
+		pConfig,
 	)
 	if err != nil {
 		return
