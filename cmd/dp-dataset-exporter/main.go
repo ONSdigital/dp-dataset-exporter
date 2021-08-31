@@ -17,7 +17,7 @@ import (
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	kafka "github.com/ONSdigital/dp-kafka/v2"
 	vault "github.com/ONSdigital/dp-vault"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
@@ -49,7 +49,7 @@ var (
 func main() {
 	ctx := context.Background()
 	log.Namespace = "dp-dataset-exporter"
-	log.Event(ctx, "starting dataset exporter", log.INFO)
+	log.Info(ctx, "starting dataset exporter")
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
@@ -57,7 +57,7 @@ func main() {
 	cfg, err := config.Get()
 	exitIfError(ctx, err)
 
-	log.Event(ctx, "loaded config", log.INFO, log.Data{"config": cfg})
+	log.Info(ctx, "loaded config", log.Data{"config": cfg})
 
 	// a channel used to signal when an exit is required
 	errorChannel := make(chan error)
@@ -131,7 +131,7 @@ func main() {
 	// Create healthcheck object with versionInfo
 	hc, err := serviceList.GetHealthCheck(cfg, BuildTime, GitCommit, Version)
 	if err != nil {
-		log.Event(ctx, "failed to create service version information", log.FATAL, log.Error(err))
+		log.Fatal(ctx, "failed to create service version information", err)
 		os.Exit(1)
 	}
 
@@ -171,7 +171,7 @@ func main() {
 				}
 				// Kafka initialised and dataset client got datasets -> Start consuming
 				serviceList.EventConsumer = true
-				log.Event(ctx, "starting to consume messages", log.INFO)
+				log.Info(ctx, "starting to consume messages")
 				eventConsumer.Consume(kafkaConsumer, eventHandler, errorHandler)
 				return
 			}
@@ -187,7 +187,7 @@ func main() {
 		for {
 			select {
 			case err := <-errorChannel:
-				log.Event(ctx, "error channel", log.ERROR, log.Error(err))
+				log.Error(ctx, "error channel", err)
 			}
 		}
 	}()
@@ -195,10 +195,10 @@ func main() {
 	// block until a fatal error / OS signal occurs
 	select {
 	case <-signals:
-		log.Event(ctx, "os signal received", log.INFO)
+		log.Info(ctx, "os signal received")
 	}
 
-	log.Event(ctx, "gracefully shutting down", log.INFO, log.Data{"graceful_shutdown_timeout": cfg.GracefulShutdownTimeout})
+	log.Info(ctx, "gracefully shutting down", log.Data{"graceful_shutdown_timeout": cfg.GracefulShutdownTimeout})
 	shutdownCtx, cancel := context.WithTimeout(ctx, cfg.GracefulShutdownTimeout)
 
 	// Gracefully shutdown the application closing any open resources
@@ -208,43 +208,43 @@ func main() {
 		// Health Checker should always be closed first as it relies on other
 		// services (clients) to exist - prevents DATA RACE
 		if serviceList.HealthCheck {
-			log.Event(shutdownCtx, "stopping health checker", log.INFO)
+			log.Info(shutdownCtx, "stopping health checker")
 			hc.Stop()
 		}
 
-		log.Event(shutdownCtx, "shutting down http server", log.INFO)
+		log.Info(shutdownCtx, "shutting down http server")
 		logIfError(shutdownCtx, httpServer.Shutdown(shutdownCtx))
 
 		if serviceList.Consumer {
-			log.Event(shutdownCtx, "stop listening to consumer", log.INFO)
+			log.Info(shutdownCtx, "stop listening to consumer")
 			logIfError(shutdownCtx, kafkaConsumer.StopListeningToConsumer(shutdownCtx))
 		}
 
 		if serviceList.CSVExportedProducer {
-			log.Event(shutdownCtx, "closing csv exporter producer", log.INFO)
+			log.Info(shutdownCtx, "closing csv exporter producer")
 			logIfError(shutdownCtx, kafkaProducer.Close(shutdownCtx))
 		}
 
 		if serviceList.ErrorProducer {
-			log.Event(shutdownCtx, "closing error producer", log.INFO)
+			log.Info(shutdownCtx, "closing error producer")
 			logIfError(shutdownCtx, kafkaErrorProducer.Close(shutdownCtx))
 		}
 
 		if serviceList.EventConsumer {
-			log.Event(shutdownCtx, "closing event consumer", log.INFO)
+			log.Info(shutdownCtx, "closing event consumer")
 			logIfError(shutdownCtx, eventConsumer.Close(shutdownCtx))
 		}
 
 		if serviceList.Consumer {
-			log.Event(shutdownCtx, "closing consumer", log.INFO)
+			log.Info(shutdownCtx, "closing consumer")
 			logIfError(shutdownCtx, kafkaConsumer.Close(shutdownCtx))
 		}
 
 		if serviceList.ObservationStore {
-			log.Event(shutdownCtx, "closing observation store", log.INFO)
+			log.Info(shutdownCtx, "closing observation store")
 			logIfError(shutdownCtx, observationStore.Close(shutdownCtx))
 
-			log.Event(shutdownCtx, "closing graph db error consumer", log.INFO)
+			log.Info(shutdownCtx, "closing graph db error consumer")
 			logIfError(shutdownCtx, graphErrorConsumer.Close(shutdownCtx))
 		}
 	}()
@@ -252,7 +252,7 @@ func main() {
 	// wait for shutdown success (via cancel) or failure (timeout)
 	<-shutdownCtx.Done()
 
-	log.Event(shutdownCtx, "shutdown complete", log.INFO, log.Data{"ctx": shutdownCtx.Err()})
+	log.Info(shutdownCtx, "shutdown complete", log.Data{"ctx": shutdownCtx.Err()})
 	os.Exit(0)
 }
 
@@ -268,7 +268,7 @@ func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr
 
 	go func() {
 		if err := httpServer.ListenAndServe(); err != nil {
-			log.Event(ctx, "httpServer error", log.ERROR, log.Error(err))
+			log.Error(ctx, "httpServer error", err)
 		}
 	}()
 	return httpServer
@@ -281,52 +281,52 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck, kafkaPro
 
 	if err = hc.AddCheck("Kafka Producer", kafkaProducer.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for kafka producer", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for kafka producer", err)
 	}
 
 	if err = hc.AddCheck("Kafka Error Producer", kafkaErrorProducer.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for kafka error producer", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for kafka error producer", err)
 	}
 
 	if err = hc.AddCheck("Kafka Consumer", kafkaConsumer.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for kafka consumer", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for kafka consumer", err)
 	}
 
 	if err = hc.AddCheck("Vault", vaultClient.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for vault", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for vault", err)
 	}
 
 	if err = hc.AddCheck("Filter API", filterAPICli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for filter api", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for filter api", err)
 	}
 
 	if err = hc.AddCheck("Dataset API", datasetAPICli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for dataset api", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for dataset api", err)
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s bucket", publicUploader.BucketName()), publicUploader.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for public s3 bucket", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for public s3 bucket", err)
 	}
 
 	if err = hc.AddCheck(fmt.Sprintf("S3 %s private bucket", privateUploader.BucketName()), privateUploader.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for private s3 bucket", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for private s3 bucket", err)
 	}
 
 	if err = hc.AddCheck("Zebedee", zebedeeCli.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for zebedee", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for zebedee", err)
 	}
 
 	if err = hc.AddCheck("Graph DB", graphDB.Checker); err != nil {
 		hasErrors = true
-		log.Event(ctx, "error adding check for graph db", log.ERROR, log.Error(err))
+		log.Error(ctx, "error adding check for graph db", err)
 	}
 
 	if hasErrors {
@@ -337,14 +337,14 @@ func registerCheckers(ctx context.Context, hc *healthcheck.HealthCheck, kafkaPro
 
 func logIfError(ctx context.Context, err error) {
 	if err != nil {
-		log.Event(ctx, "error", log.ERROR, log.Error(err))
+		log.Error(ctx, "error", err)
 		return
 	}
 }
 
 func exitIfError(ctx context.Context, err error) {
 	if err != nil {
-		log.Event(ctx, "fatal error", log.FATAL, log.Error(err))
+		log.Fatal(ctx, "fatal error", err)
 		os.Exit(1)
 	}
 }

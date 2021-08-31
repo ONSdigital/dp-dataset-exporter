@@ -7,7 +7,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -53,7 +53,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 			err := eventProducer.CSVExported(event)
 
 			Convey("The expected event is available on the output channel", func() {
-				log.Event(ctx, "error is:", log.INFO, log.Data{"error": err})
+				log.Info(ctx, "error is:", log.Data{"error": err})
 				So(err, ShouldBeNil)
 
 				messageBytes := <-outputChannel

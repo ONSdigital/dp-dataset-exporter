@@ -12,6 +12,7 @@ require (
 	github.com/ONSdigital/dp-vault v1.1.2
 	github.com/ONSdigital/go-ns v0.0.0-20210410105122-6d6a140e952e
 	github.com/ONSdigital/log.go v1.1.0
+	github.com/ONSdigital/log.go/v2 v2.0.9
 	github.com/aws/aws-sdk-go v1.38.70
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/mux v1.8.0

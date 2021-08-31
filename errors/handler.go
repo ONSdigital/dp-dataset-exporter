@@ -3,7 +3,7 @@ package errors
 import (
 	"context"
 
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 )
 
 //go:generate moq -out errorstest/handler.go -pkg errorstest . Handler
@@ -30,7 +30,7 @@ func NewKafkaHandler(messageProducer chan []byte) *KafkaHandler {
 // Handle logs the error to the error handler via a kafka message
 func (handler *KafkaHandler) Handle(ctx context.Context, filterID string, err error) {
 	data := log.Data{"filter_id": filterID, "error": err.Error()}
-	log.Event(ctx, "an error occurred while processing a filter job", log.INFO, data)
+	log.Info(ctx, "an error occurred while processing a filter job", data)
 
 	errorStr := Event{
 		FilterID:    filterID,
@@ -41,7 +41,7 @@ func (handler *KafkaHandler) Handle(ctx context.Context, filterID string, err er
 
 	errMsg, err := EventSchema.Marshal(errorStr)
 	if err != nil {
-		log.Event(ctx, "failed to marshall error to event-reporter", data, log.ERROR, log.Error(err))
+		log.Error(ctx, "failed to marshall error to event-reporter", err, data)
 		return
 	}
 	handler.messageProducer <- errMsg

@@ -9,7 +9,7 @@ import (
 
 	"github.com/ONSdigital/dp-api-clients-go/filter"
 
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 )
 
 //go:generate moq -out filtertest/client.go -pkg filtertest . Client
@@ -124,7 +124,7 @@ func handleInvalidFilterAPIResponse(ctx context.Context, err error) error {
 		case http.StatusInternalServerError:
 			return ErrFilterAPIError
 		default:
-			log.Event(ctx, "unrecognised status code returned from the filter api", log.INFO,
+			log.Info(ctx, "unrecognised status code returned from the filter api",
 				log.Data{
 					"status_code": statusErr.Code(),
 				})

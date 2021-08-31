@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 )
 
 // CSVW provides a structure for describing a CSV through a JSON metadata file.
@@ -114,21 +114,21 @@ func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadU
 	if err != nil {
 		return nil, err
 	}
-	log.Event(ctx, "header split for csvw generation", log.INFO, log.Data{"header": header, "column_offset": strconv.Itoa(offset)})
+	log.Info(ctx, "header split for csvw generation", log.Data{"header": header, "column_offset": strconv.Itoa(offset)})
 
 	csvw := New(metadata, downloadURL)
 
 	var list []Column
 	obs := newObservationColumn(ctx, h[0], metadata.UnitOfMeasure)
 	list = append(list, obs)
-	log.Event(ctx, "added observation column to csvw", log.INFO, log.Data{"column": obs})
+	log.Info(ctx, "added observation column to csvw", log.Data{"column": obs})
 
 	// add data markings columns
 	if offset != 0 {
 		for i := 1; i <= offset; i++ {
 			c := newColumn(h[i], "")
 			list = append(list, c)
-			log.Event(ctx, "added observation metadata column to csvw", log.INFO, log.Data{"column": c})
+			log.Info(ctx, "added observation metadata column to csvw", log.Data{"column": c})
 		}
 	}
 
@@ -138,7 +138,7 @@ func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadU
 	// add dimension columns
 	for i := 0; i < len(h); i += 2 {
 		c, l := newCodeAndLabelColumns(i, apiDomain, h, metadata.Dimensions)
-		log.Event(ctx, "added pair of dimension columns to csvw", log.INFO, log.Data{"code_column": c, "label_column": l})
+		log.Info(ctx, "added pair of dimension columns to csvw", log.Data{"code_column": c, "label_column": l})
 		list = append(list, c, l)
 	}
 
@@ -152,7 +152,7 @@ func Generate(ctx context.Context, metadata *dataset.Metadata, header, downloadU
 		C:     list,
 	}
 
-	log.Event(ctx, "all columns added to csvw", log.INFO, log.Data{"number_of_columns": strconv.Itoa(len(list))})
+	log.Info(ctx, "all columns added to csvw", log.Data{"number_of_columns": strconv.Itoa(len(list))})
 	csvw.AddNotes(metadata, downloadURL)
 
 	b, err := json.Marshal(csvw)
@@ -224,7 +224,7 @@ func newObservationColumn(ctx context.Context, title, name string) Column {
 
 	c["datatype"] = "string"
 
-	log.Event(ctx, "adding observations column", log.INFO, log.Data{"column": c})
+	log.Info(ctx, "adding observations column", log.Data{"column": c})
 	return c
 }
 

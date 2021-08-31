@@ -12,7 +12,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	kafka "github.com/ONSdigital/dp-kafka/v2"
 	"github.com/ONSdigital/dp-kafka/v2/kafkatest"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -192,12 +192,12 @@ func waitForMessageToBeCommitted(message *kafkatest.Message) {
 	timeout := start.Add(time.Millisecond * 500)
 	for {
 		if len(message.CommitAndReleaseCalls()) > 0 {
-			log.Event(ctx, "message has been committed", log.INFO)
+			log.Info(ctx, "message has been committed")
 			break
 		}
 
 		if time.Now().After(timeout) {
-			log.Event(ctx, "timeout hit", log.INFO)
+			log.Info(ctx, "timeout hit")
 			break
 		}
 
