@@ -20,7 +20,7 @@ type wrappedReader struct {
 }
 
 // New returns a new Reader whose first line can be read without advancing
-// the offset, allowing all of the data to still be read from Read
+// the offset, allowing all the data to still be read from Read
 func New(r io.Reader) *wrappedReader {
 	return &wrappedReader{
 		r: r,

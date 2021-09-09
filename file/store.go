@@ -100,7 +100,10 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			"name":   filename,
 		})
 
-		psk := createPSK()
+		psk, err := createPSK()
+		if err != nil {
+			return "", err
+		}
 		vaultPath := store.VaultPath + "/" + path.Base(filename)
 		vaultKey := "key"
 
@@ -129,9 +132,9 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 	return url.PathUnescape(result.Location)
 }
 
-func createPSK() []byte {
+func createPSK() ([]byte, error) {
 	key := make([]byte, 16)
-	rand.Read(key)
+	_, err := rand.Read(key)
 
-	return key
+	return key, err
 }

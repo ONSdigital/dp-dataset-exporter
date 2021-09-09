@@ -41,7 +41,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 		})
 
 		Convey("When CSVExported is called on the event producer", func() {
-			event := &event.CSVExported{
+			csvEvent := &event.CSVExported{
 				DatasetID:  "",
 				InstanceID: "",
 				Edition:    "",
@@ -50,7 +50,7 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 				Filename:   "",
 				RowCount:   0,
 			}
-			err := eventProducer.CSVExported(event)
+			err := eventProducer.CSVExported(csvEvent)
 
 			Convey("The expected event is available on the output channel", func() {
 				log.Info(ctx, "error is:", log.Data{"error": err})
@@ -66,8 +66,8 @@ func TestAvroProducer_CSVExported(t *testing.T) {
 
 // Unmarshal converts observation events to []byte.
 func unmarshal(bytes []byte) *event.CSVExported {
-	event := &event.CSVExported{}
-	err := schema.CSVExportedEvent.Unmarshal(bytes, event)
+	csvEvent := &event.CSVExported{}
+	err := schema.CSVExportedEvent.Unmarshal(bytes, csvEvent)
 	So(err, ShouldBeNil)
-	return event
+	return csvEvent
 }

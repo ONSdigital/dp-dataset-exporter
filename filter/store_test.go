@@ -50,14 +50,14 @@ func TestStore_GetFilter(t *testing.T) {
 
 		Convey("When GetFilter is called", func() {
 
-			filter, err := filterStore.GetFilter(ctx, filterOutputID)
+			filterData, err := filterStore.GetFilter(ctx, filterOutputID)
 
 			Convey("The expected filter data is returned", func() {
 				So(err, ShouldBeNil)
 
-				So(filter.FilterID, ShouldEqual, filterOutputID)
-				So(filter.Dimensions[0].Name, ShouldEqual, "Sex")
-				So(filter.Dimensions[0].Options, ShouldResemble, []string{"male"})
+				So(filterData.FilterID, ShouldEqual, filterOutputID)
+				So(filterData.Dimensions[0].Name, ShouldEqual, "Sex")
+				So(filterData.Dimensions[0].Options, ShouldResemble, []string{"male"})
 			})
 
 			Convey("Filter client is called with the valid serviceAuthToken", func() {
