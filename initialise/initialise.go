@@ -99,7 +99,7 @@ func (e *ExternalServiceList) GetObservationStore(ctx context.Context) (observat
 	return
 }
 
-// GetProducer returns a kafka producer, which might no be initialised
+// GetProducer returns a kafka producer, which might not be initialised
 func (e *ExternalServiceList) GetProducer(
 	ctx context.Context,
 	kafkaBrokers []string,

@@ -189,7 +189,7 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 	return instance.State == publishedState, nil
 }
 
-// sortFilter by Dimension size, largest first, to make Neptune searches faster
+// SortFilter by Dimension size. Largest first, to make Neptune searches faster
 // The sort is done here because the sizes are retrieved from Mongo and
 // its best not to have the dp-graph library acquiring such coupling to its caller.
 var SortFilter = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, dbFilter *observation.DimensionFilters) {
@@ -208,7 +208,7 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 
 	// get info from mongo
 	var getErrorCount int32
-	var concurrent = 10 // limit number of go routines so as to not put too much on heap
+	var concurrent = 10 // limit number of go routines to not put too much on heap
 	var semaphoreChan = make(chan struct{}, concurrent)
 	var wg sync.WaitGroup // number of working goroutines
 
@@ -266,21 +266,21 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 				d := dim{dimensionSize: 999999, index: i}
 				dimSizes = append(dimSizes, d)
 			} else {
-				// Set sizes of dimensions as largest first to retain list order to improve sort speed
+				// Set sizes of dimensions as largest first to retain list order, to improve sort speed
 				d := dim{dimensionSize: nofDimensions - i, index: i}
 				dimSizes = append(dimSizes, d)
 			}
 		}
 	}
 
-	// sort slice by number of options per dimension, smallest first
+	// sort slice by number of options per dimension. Smallest first
 	sort.Slice(dimSizes, func(i, j int) bool {
 		return dimSizes[i].dimensionSize < dimSizes[j].dimensionSize
 	})
 
 	sortedDimensions := make([]observation.Dimension, 0, nofDimensions)
 
-	for i := nofDimensions - 1; i >= 0; i-- { // build required return structure, largest first
+	for i := nofDimensions - 1; i >= 0; i-- { // build required return structure. Largest first
 		sortedDimensions = append(sortedDimensions, *dbFilter.Dimensions[dimSizes[i].index])
 	}
 
@@ -367,9 +367,9 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
-	reader := observation.NewReader(csvRowReader)
+	exporterReader := observation.NewReader(csvRowReader)
 	defer func() {
-		closeErr := reader.Close(ctx)
+		closeErr := exporterReader.Close(ctx)
 		if closeErr != nil {
 			log.Error(ctx, "error closing reader", closeErr)
 		}
@@ -385,7 +385,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
+	fileURL, err := handler.fileStore.PutFile(ctx, exporterReader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
 			log.Info(ctx, "empty results from filter job", log.Data{"instance_id": filterStruct.InstanceID,
@@ -406,7 +406,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
-	csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
+	csv := createCSVDownloadData(handler, event, isPublished, exporterReader, fileURL)
 
 	// write url and file size to filter API
 	err = handler.filterStore.PutCSVData(ctx, filterStruct.FilterID, csv)
@@ -414,7 +414,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
 
-	rowCount := reader.ObservationsCount()
+	rowCount := exporterReader.ObservationsCount()
 
 	totTime := time.Now()
 

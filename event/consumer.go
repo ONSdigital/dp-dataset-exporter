@@ -138,7 +138,7 @@ func processMessage(ctx context.Context, message kafka.Message, handler Handler,
 	return err
 }
 
-// unmarshal converts a event instance to []byte.
+// unmarshal converts an event instance to []byte.
 func unmarshal(message kafka.Message) (*FilterSubmitted, error) {
 	var event FilterSubmitted
 	err := schema.FilterSubmittedEvent.Unmarshal(message.GetData(), &event)
