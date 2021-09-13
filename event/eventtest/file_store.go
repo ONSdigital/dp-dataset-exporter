@@ -16,19 +16,19 @@ var _ event.FileStore = &FileStoreMock{}
 
 // FileStoreMock is a mock implementation of event.FileStore.
 //
-//     func TestSomethingThatUsesFileStore(t *testing.T) {
+// 	func TestSomethingThatUsesFileStore(t *testing.T) {
 //
-//         // make and configure a mocked event.FileStore
-//         mockedFileStore := &FileStoreMock{
-//             PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
-// 	               panic("mock out the PutFile method")
-//             },
-//         }
+// 		// make and configure a mocked event.FileStore
+// 		mockedFileStore := &FileStoreMock{
+// 			PutFileFunc: func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error) {
+// 				panic("mock out the PutFile method")
+// 			},
+// 		}
 //
-//         // use mockedFileStore in code that requires event.FileStore
-//         // and then make assertions.
+// 		// use mockedFileStore in code that requires event.FileStore
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type FileStoreMock struct {
 	// PutFileFunc mocks the PutFile method.
 	PutFileFunc func(ctx context.Context, reader io.Reader, filename string, isPublished bool) (string, error)

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ONSdigital/dp-api-clients-go/filter"
+	"github.com/ONSdigital/dp-api-clients-go/v2/filter"
 
 	"github.com/ONSdigital/log.go/v2/log"
 )

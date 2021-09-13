@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ONSdigital/dp-api-clients-go/dataset"
+	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
@@ -191,8 +191,8 @@ func (csvw *CSVW) AddNotes(metadata *dataset.Metadata, url string) {
 		}
 	}
 
-	if metadata.Version.UsageNotes != nil {
-		for _, u := range *metadata.Version.UsageNotes {
+	if metadata.UsageNotes != nil {
+		for _, u := range *metadata.UsageNotes {
 			csvw.Notes = append(csvw.Notes, Note{
 				Type: u.Title,
 				Body: u.Note,

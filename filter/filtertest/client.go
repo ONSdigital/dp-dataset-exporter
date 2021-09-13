@@ -15,22 +15,22 @@ var _ filter.Client = &ClientMock{}
 
 // ClientMock is a mock implementation of filter.Client.
 //
-//     func TestSomethingThatUsesClient(t *testing.T) {
+// 	func TestSomethingThatUsesClient(t *testing.T) {
 //
-//         // make and configure a mocked filter.Client
-//         mockedClient := &ClientMock{
-//             GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
-// 	               panic("mock out the GetOutputBytes method")
-//             },
-//             UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
-// 	               panic("mock out the UpdateFilterOutputBytes method")
-//             },
-//         }
+// 		// make and configure a mocked filter.Client
+// 		mockedClient := &ClientMock{
+// 			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+// 				panic("mock out the GetOutputBytes method")
+// 			},
+// 			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+// 				panic("mock out the UpdateFilterOutputBytes method")
+// 			},
+// 		}
 //
-//         // use mockedClient in code that requires filter.Client
-//         // and then make assertions.
+// 		// use mockedClient in code that requires filter.Client
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type ClientMock struct {
 	// GetOutputBytesFunc mocks the GetOutputBytes method.
 	GetOutputBytesFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error)

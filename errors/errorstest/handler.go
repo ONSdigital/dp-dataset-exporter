@@ -15,19 +15,19 @@ var _ errors.Handler = &HandlerMock{}
 
 // HandlerMock is a mock implementation of errors.Handler.
 //
-//     func TestSomethingThatUsesHandler(t *testing.T) {
+// 	func TestSomethingThatUsesHandler(t *testing.T) {
 //
-//         // make and configure a mocked errors.Handler
-//         mockedHandler := &HandlerMock{
-//             HandleFunc: func(ctx context.Context, filterID string, err error)  {
-// 	               panic("mock out the Handle method")
-//             },
-//         }
+// 		// make and configure a mocked errors.Handler
+// 		mockedHandler := &HandlerMock{
+// 			HandleFunc: func(ctx context.Context, filterID string, err error)  {
+// 				panic("mock out the Handle method")
+// 			},
+// 		}
 //
-//         // use mockedHandler in code that requires errors.Handler
-//         // and then make assertions.
+// 		// use mockedHandler in code that requires errors.Handler
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type HandlerMock struct {
 	// HandleFunc mocks the Handle method.
 	HandleFunc func(ctx context.Context, filterID string, err error)
