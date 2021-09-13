@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
+	filterCli "github.com/ONSdigital/dp-api-clients-go/v2/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/filter/filtertest"
 	. "github.com/smartystreets/goconvey/convey"

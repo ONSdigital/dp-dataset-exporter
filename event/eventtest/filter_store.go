@@ -5,7 +5,7 @@ package eventtest
 
 import (
 	"context"
-	"github.com/ONSdigital/dp-api-clients-go/filter"
+	"github.com/ONSdigital/dp-api-clients-go/v2/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"sync"
 )
@@ -16,28 +16,28 @@ var _ event.FilterStore = &FilterStoreMock{}
 
 // FilterStoreMock is a mock implementation of event.FilterStore.
 //
-//     func TestSomethingThatUsesFilterStore(t *testing.T) {
+// 	func TestSomethingThatUsesFilterStore(t *testing.T) {
 //
-//         // make and configure a mocked event.FilterStore
-//         mockedFilterStore := &FilterStoreMock{
-//             GetFilterFunc: func(ctx context.Context, filterID string) (*filter.Model, error) {
-// 	               panic("mock out the GetFilter method")
-//             },
-//             PutCSVDataFunc: func(ctx context.Context, filterID string, downloadItem filter.Download) error {
-// 	               panic("mock out the PutCSVData method")
-//             },
-//             PutStateAsEmptyFunc: func(ctx context.Context, filterJobID string) error {
-// 	               panic("mock out the PutStateAsEmpty method")
-//             },
-//             PutStateAsErrorFunc: func(ctx context.Context, filterJobID string) error {
-// 	               panic("mock out the PutStateAsError method")
-//             },
-//         }
+// 		// make and configure a mocked event.FilterStore
+// 		mockedFilterStore := &FilterStoreMock{
+// 			GetFilterFunc: func(ctx context.Context, filterID string) (*filter.Model, error) {
+// 				panic("mock out the GetFilter method")
+// 			},
+// 			PutCSVDataFunc: func(ctx context.Context, filterID string, downloadItem filter.Download) error {
+// 				panic("mock out the PutCSVData method")
+// 			},
+// 			PutStateAsEmptyFunc: func(ctx context.Context, filterJobID string) error {
+// 				panic("mock out the PutStateAsEmpty method")
+// 			},
+// 			PutStateAsErrorFunc: func(ctx context.Context, filterJobID string) error {
+// 				panic("mock out the PutStateAsError method")
+// 			},
+// 		}
 //
-//         // use mockedFilterStore in code that requires event.FilterStore
-//         // and then make assertions.
+// 		// use mockedFilterStore in code that requires event.FilterStore
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type FilterStoreMock struct {
 	// GetFilterFunc mocks the GetFilter method.
 	GetFilterFunc func(ctx context.Context, filterID string) (*filter.Model, error)

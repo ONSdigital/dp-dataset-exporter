@@ -18,31 +18,31 @@ var _ file.Uploader = &UploaderMock{}
 
 // UploaderMock is a mock implementation of file.Uploader.
 //
-//     func TestSomethingThatUsesUploader(t *testing.T) {
+// 	func TestSomethingThatUsesUploader(t *testing.T) {
 //
-//         // make and configure a mocked file.Uploader
-//         mockedUploader := &UploaderMock{
-//             BucketNameFunc: func() string {
-// 	               panic("mock out the BucketName method")
-//             },
-//             CheckerFunc: func(ctx context.Context, state *healthcheck.CheckState) error {
-// 	               panic("mock out the Checker method")
-//             },
-//             SessionFunc: func() *session.Session {
-// 	               panic("mock out the Session method")
-//             },
-//             UploadFunc: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-// 	               panic("mock out the Upload method")
-//             },
-//             UploadWithPSKFunc: func(input *s3manager.UploadInput, psk []byte) (*s3manager.UploadOutput, error) {
-// 	               panic("mock out the UploadWithPSK method")
-//             },
-//         }
+// 		// make and configure a mocked file.Uploader
+// 		mockedUploader := &UploaderMock{
+// 			BucketNameFunc: func() string {
+// 				panic("mock out the BucketName method")
+// 			},
+// 			CheckerFunc: func(ctx context.Context, state *healthcheck.CheckState) error {
+// 				panic("mock out the Checker method")
+// 			},
+// 			SessionFunc: func() *session.Session {
+// 				panic("mock out the Session method")
+// 			},
+// 			UploadFunc: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
+// 				panic("mock out the Upload method")
+// 			},
+// 			UploadWithPSKFunc: func(input *s3manager.UploadInput, psk []byte) (*s3manager.UploadOutput, error) {
+// 				panic("mock out the UploadWithPSK method")
+// 			},
+// 		}
 //
-//         // use mockedUploader in code that requires file.Uploader
-//         // and then make assertions.
+// 		// use mockedUploader in code that requires file.Uploader
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type UploaderMock struct {
 	// BucketNameFunc mocks the BucketName method.
 	BucketNameFunc func() string

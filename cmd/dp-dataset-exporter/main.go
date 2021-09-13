@@ -11,9 +11,9 @@ import (
 
 	"github.com/ONSdigital/dp-graph/v2/graph"
 
-	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
-	"github.com/ONSdigital/dp-api-clients-go/health"
+	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
+	filterCli "github.com/ONSdigital/dp-api-clients-go/v2/filter"
+	"github.com/ONSdigital/dp-api-clients-go/v2/health"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	kafka "github.com/ONSdigital/dp-kafka/v2"
 	vault "github.com/ONSdigital/dp-vault"
