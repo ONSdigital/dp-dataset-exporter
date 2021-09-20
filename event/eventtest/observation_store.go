@@ -16,19 +16,19 @@ var _ event.ObservationStore = &ObservationStoreMock{}
 
 // ObservationStoreMock is a mock implementation of event.ObservationStore.
 //
-//     func TestSomethingThatUsesObservationStore(t *testing.T) {
+// 	func TestSomethingThatUsesObservationStore(t *testing.T) {
 //
-//         // make and configure a mocked event.ObservationStore
-//         mockedObservationStore := &ObservationStoreMock{
-//             StreamCSVRowsFunc: func(ctx context.Context, instanceID string, filterID string, filters *observation.DimensionFilters, limit *int) (observation.StreamRowReader, error) {
-// 	               panic("mock out the StreamCSVRows method")
-//             },
-//         }
+// 		// make and configure a mocked event.ObservationStore
+// 		mockedObservationStore := &ObservationStoreMock{
+// 			StreamCSVRowsFunc: func(ctx context.Context, instanceID string, filterID string, filters *observation.DimensionFilters, limit *int) (observation.StreamRowReader, error) {
+// 				panic("mock out the StreamCSVRows method")
+// 			},
+// 		}
 //
-//         // use mockedObservationStore in code that requires event.ObservationStore
-//         // and then make assertions.
+// 		// use mockedObservationStore in code that requires event.ObservationStore
+// 		// and then make assertions.
 //
-//     }
+// 	}
 type ObservationStoreMock struct {
 	// StreamCSVRowsFunc mocks the StreamCSVRows method.
 	StreamCSVRowsFunc func(ctx context.Context, instanceID string, filterID string, filters *observation.DimensionFilters, limit *int) (observation.StreamRowReader, error)

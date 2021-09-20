@@ -12,7 +12,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ONSdigital/dp-api-clients-go/filter"
+	"github.com/ONSdigital/dp-api-clients-go/v2/filter"
+	"github.com/ONSdigital/dp-api-clients-go/v2/headers"
 
 	"github.com/pkg/errors"
 
@@ -21,8 +22,8 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/reader"
 	"github.com/ONSdigital/dp-graph/v2/observation"
 
-	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
+	"github.com/ONSdigital/log.go/v2/log"
 )
 
 //go:generate moq -out eventtest/filter_store.go -pkg eventtest . FilterStore
@@ -54,7 +55,7 @@ type ExportHandler struct {
 type DatasetAPI interface {
 	PutVersion(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, datasetID, edition, version string, m dataset.Version) error
 	GetVersion(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceAuthToken, collectionID, datasetID, edition, version string) (m dataset.Version, err error)
-	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID string) (m dataset.Instance, err error)
+	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID, ifMatch string) (m dataset.Instance, eTag string, err error)
 	GetMetadataURL(id, edition, version string) (url string)
 	GetVersionMetadata(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.Metadata, err error)
 	GetOptions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (m dataset.Options, err error)
@@ -127,10 +128,10 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 			"version":    event.Version,
 			"published":  isPublished}
 
-		log.Event(ctx, "filter job identified", log.INFO, logData)
+		log.Info(ctx, "filter job identified", logData)
 		csvExported, err = handler.filterJob(ctx, event, isPublished)
 		if err != nil {
-			log.Event(ctx, "error handling filter job", log.ERROR, logData, log.Error(err))
+			log.Error(ctx, "error handling filter job", err, logData)
 			return err
 		}
 	} else {
@@ -145,10 +146,10 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 			"version":    event.Version,
 			"published":  isPublished}
 
-		log.Event(ctx, "dataset download job identified", log.INFO, logData)
+		log.Info(ctx, "dataset download job identified", logData)
 		csvExported, err = handler.fullDownload(ctx, event, isPublished)
 		if err != nil {
-			log.Event(ctx, "error handling dataset download job", log.ERROR, logData, log.Error(err))
+			log.Error(ctx, "error handling dataset download job", err, logData)
 			return err
 		}
 	}
@@ -181,7 +182,7 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 		return version.State == publishedState, nil
 	}
 
-	instance, err := handler.datasetAPICli.GetInstance(ctx, "", handler.serviceAuthToken, "", event.InstanceID)
+	instance, _, err := handler.datasetAPICli.GetInstance(ctx, "", handler.serviceAuthToken, "", event.InstanceID, headers.IfMatchAnyETag)
 	if err != nil {
 		return false, err
 	}
@@ -189,7 +190,7 @@ func (handler *ExportHandler) isVersionPublished(ctx context.Context, event *Fil
 	return instance.State == publishedState, nil
 }
 
-// sortFilter by Dimension size, largest first, to make Neptune searches faster
+// SortFilter by Dimension size. Largest first, to make Neptune searches faster
 // The sort is done here because the sizes are retrieved from Mongo and
 // its best not to have the dp-graph library acquiring such coupling to its caller.
 var SortFilter = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, dbFilter *observation.DimensionFilters) {
@@ -208,7 +209,7 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 
 	// get info from mongo
 	var getErrorCount int32
-	var concurrent = 10 // limit number of go routines so as to not put too much on heap
+	var concurrent = 10 // limit number of go routines to not put too much on heap
 	var semaphoreChan = make(chan struct{}, concurrent)
 	var wg sync.WaitGroup // number of working goroutines
 
@@ -242,7 +243,7 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 					// only show a few of possibly hundreds of errors, as once someone
 					// looks into the one error they may fix all associated errors
 					logData := log.Data{"dataset_id": event.DatasetID, "edition": event.Edition, "version": event.Version, "dimension name": dimension.Name}
-					log.Event(ctx, "SortFilter: GetOptions failed for dataset and dimension", log.INFO, logData)
+					log.Info(ctx, "SortFilter: GetOptions failed for dataset and dimension", logData)
 				}
 			} else {
 				d := dim{dimensionSize: options.TotalCount, index: i}
@@ -256,7 +257,7 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 
 	if getErrorCount != 0 {
 		logData := log.Data{"dataset_id": event.DatasetID, "edition": event.Edition, "version": event.Version}
-		log.Event(ctx, fmt.Sprintf("SortFilter: GetOptions failed for dataset %d times, sorting by default of 'geography' first", getErrorCount), log.INFO, logData)
+		log.Info(ctx, fmt.Sprintf("SortFilter: GetOptions failed for dataset %d times, sorting by default of 'geography' first", getErrorCount), logData)
 		// Frig dimension sizes and if geography is present, make it the largest (because it typically is the largest)
 		// and to retain compatibility with what the neptune dp-graph library was doing without access to information
 		// from mongo.
@@ -266,21 +267,21 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 				d := dim{dimensionSize: 999999, index: i}
 				dimSizes = append(dimSizes, d)
 			} else {
-				// Set sizes of dimensions as largest first to retain list order to improve sort speed
+				// Set sizes of dimensions as largest first to retain list order, to improve sort speed
 				d := dim{dimensionSize: nofDimensions - i, index: i}
 				dimSizes = append(dimSizes, d)
 			}
 		}
 	}
 
-	// sort slice by number of options per dimension, smallest first
+	// sort slice by number of options per dimension. Smallest first
 	sort.Slice(dimSizes, func(i, j int) bool {
 		return dimSizes[i].dimensionSize < dimSizes[j].dimensionSize
 	})
 
 	sortedDimensions := make([]observation.Dimension, 0, nofDimensions)
 
-	for i := nofDimensions - 1; i >= 0; i-- { // build required return structure, largest first
+	for i := nofDimensions - 1; i >= 0; i-- { // build required return structure. Largest first
 		sortedDimensions = append(sortedDimensions, *dbFilter.Dimensions[dimSizes[i].index])
 	}
 
@@ -342,7 +343,7 @@ var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event
 
 func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
 
-	log.Event(ctx, "handling filter job", log.INFO, log.Data{"filter_id": event.FilterID})
+	log.Info(ctx, "handling filter job", log.Data{"filter_id": event.FilterID})
 	startTime := time.Now()
 	filterStruct, err := handler.filterStore.GetFilter(ctx, event.FilterID)
 	if err != nil {
@@ -367,11 +368,11 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
-	reader := observation.NewReader(csvRowReader)
+	exporterReader := observation.NewReader(csvRowReader)
 	defer func() {
-		closeErr := reader.Close(ctx)
+		closeErr := exporterReader.Close(ctx)
 		if closeErr != nil {
-			log.Event(ctx, "error closing reader", log.ERROR, log.Error(closeErr))
+			log.Error(ctx, "error closing reader", closeErr)
 		}
 	}()
 
@@ -379,16 +380,16 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	s := strings.Split(timestamp, "+")                                               // Strip off timezone data
 	name := event.FilterID + "/" + event.DatasetID + "-" + event.Edition + "-v" + event.Version + "-filtered-" + s[0]
 
-	log.Event(ctx, "storing filtered dataset file", log.INFO, log.Data{"name": name})
+	log.Info(ctx, "storing filtered dataset file", log.Data{"name": name})
 
 	filename := handler.filteredDatasetFilePrefix + name + ".csv"
 
 	// When getting the data from the reader, this will call the neo4j driver to start streaming the data
 	// into the S3 library. We can only tell if data is present by reading the stream.
-	fileURL, err := handler.fileStore.PutFile(ctx, reader, filename, isPublished)
+	fileURL, err := handler.fileStore.PutFile(ctx, exporterReader, filename, isPublished)
 	if err != nil {
 		if strings.Contains(err.Error(), observation.ErrNoResultsFound.Error()) {
-			log.Event(ctx, "empty results from filter job", log.INFO, log.Data{"instance_id": filterStruct.InstanceID,
+			log.Info(ctx, "empty results from filter job", log.Data{"instance_id": filterStruct.InstanceID,
 				"filter": filterStruct})
 			updateErr := handler.filterStore.PutStateAsEmpty(ctx, filterStruct.FilterID)
 			if updateErr != nil {
@@ -396,8 +397,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 			}
 			return nil, err
 		} else if strings.Contains(err.Error(), observation.ErrNoInstanceFound.Error()) {
-			log.Event(ctx, "instance not found", log.ERROR, log.Data{"instance_id": filterStruct.InstanceID,
-				"filter": filterStruct}, log.Error(err))
+			log.Error(ctx, "instance not found", err, log.Data{"instance_id": filterStruct.InstanceID, "filter": filterStruct})
 			updateErr := handler.filterStore.PutStateAsError(ctx, filterStruct.FilterID)
 			if updateErr != nil {
 				return nil, updateErr
@@ -407,7 +407,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, err
 	}
 
-	csv := createCSVDownloadData(handler, event, isPublished, reader, fileURL)
+	csv := createCSVDownloadData(handler, event, isPublished, exporterReader, fileURL)
 
 	// write url and file size to filter API
 	err = handler.filterStore.PutCSVData(ctx, filterStruct.FilterID, csv)
@@ -415,7 +415,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 		return nil, errors.Wrap(err, "error while putting CSV in filter store")
 	}
 
-	rowCount := reader.ObservationsCount()
+	rowCount := exporterReader.ObservationsCount()
 
 	totTime := time.Now()
 
@@ -431,7 +431,7 @@ func (handler *ExportHandler) filterJob(ctx context.Context, event *FilterSubmit
 	microsecs = td % 1000000
 	totalTime := fmt.Sprintf("%d.%d seconds", seconds, microsecs)
 
-	log.Event(ctx, "csv export completed", log.INFO,
+	log.Info(ctx, "csv export completed",
 		log.Data{
 			"filter_id":        filterStruct.FilterID,
 			"file_url":         fileURL,
@@ -483,7 +483,7 @@ func createCSVDownloadData(handler *ExportHandler, event *FilterSubmitted, isPub
 }
 
 func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSubmitted, isPublished bool) (*CSVExported, error) {
-	log.Event(ctx, "handling pre canned job", log.INFO, log.Data{
+	log.Info(ctx, "handling pre canned job", log.Data{
 		"instance_id": event.InstanceID,
 		"dataset_id":  event.DatasetID,
 		"edition":     event.Edition,
@@ -491,7 +491,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 	})
 
 	name := event.DatasetID + "-" + event.Edition + "-v" + event.Version
-	log.Event(ctx, "storing pre-publish file", log.INFO, log.Data{"name": name})
+	log.Info(ctx, "storing pre-publish file", log.Data{"name": name})
 
 	filename := handler.fullDatasetFilePrefix + name + ".csv"
 
@@ -516,7 +516,7 @@ func (handler *ExportHandler) fullDownload(ctx context.Context, event *FilterSub
 		return nil, err
 	}
 
-	log.Event(ctx, "pre publish version csv download file generation completed", log.INFO, log.Data{
+	log.Info(ctx, "pre publish version csv download file generation completed", log.Data{
 		"dataset_id":        event.DatasetID,
 		"edition":           event.Edition,
 		"version":           event.Version,
@@ -551,7 +551,7 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 	defer func() (*dataset.Download, string, string, int32, error) {
 		closeErr := rReader.Close(ctx)
 		if closeErr != nil {
-			log.Event(ctx, "error closing observation reader", log.ERROR, log.Error(closeErr))
+			log.Error(ctx, "error closing observation reader", closeErr)
 		}
 		return nil, "", "", 0, closeErr
 	}()
@@ -563,7 +563,7 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 		return nil, "", "", 0, errors.Wrap(err, "could not peek")
 	}
 
-	log.Event(ctx, "header extracted from csv", log.INFO, log.Data{"header": header})
+	log.Info(ctx, "header extracted from csv", log.Data{"header": header})
 
 	url, err := handler.fileStore.PutFile(ctx, hReader, filename, isPublished)
 	if err != nil {
@@ -621,7 +621,7 @@ func (handler *ExportHandler) updateVersionLinks(ctx context.Context, event *Fil
 	csv.URL = downloadURL
 	md.URL = downloadURL + metadataExtension
 
-	log.Event(ctx, "updating dataset api with download link", log.INFO, log.Data{
+	log.Info(ctx, "updating dataset api with download link", log.Data{
 		"isPublished":      isPublished,
 		"csvDownload":      csv,
 		"metadataDownload": md,

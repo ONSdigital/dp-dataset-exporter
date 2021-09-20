@@ -14,7 +14,7 @@ import (
 
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	s3client "github.com/ONSdigital/dp-s3"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 )
 
 //go:generate moq -out filetest/uploader.go -pkg filetest . Uploader
@@ -78,7 +78,7 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 	var result *s3manager.UploadOutput
 
 	if isPublished {
-		log.Event(ctx, "uploading public file to S3", log.INFO, log.Data{
+		log.Info(ctx, "uploading public file to S3", log.Data{
 			"bucket": store.PublicBucket,
 			"name":   filename,
 		})
@@ -95,16 +95,19 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			return fmt.Sprintf("%s/%s", store.PublicURL, filename), nil
 		}
 	} else {
-		log.Event(ctx, "uploading private file to S3", log.INFO, log.Data{
+		log.Info(ctx, "uploading private file to S3", log.Data{
 			"bucket": store.privateBucket,
 			"name":   filename,
 		})
 
-		psk := createPSK()
+		psk, err := createPSK()
+		if err != nil {
+			return "", err
+		}
 		vaultPath := store.VaultPath + "/" + path.Base(filename)
 		vaultKey := "key"
 
-		log.Event(ctx, "writing key to vault", log.INFO, log.Data{
+		log.Info(ctx, "writing key to vault", log.Data{
 			"vault_path": vaultPath,
 		})
 		if err := store.VaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
@@ -120,7 +123,7 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			return "", err
 		}
 
-		log.Event(ctx, "writing key to vault", log.INFO, log.Data{
+		log.Info(ctx, "writing key to vault", log.Data{
 			"result.Location": result.Location,
 			"vault_path":      vaultPath,
 		})
@@ -129,9 +132,9 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 	return url.PathUnescape(result.Location)
 }
 
-func createPSK() []byte {
+func createPSK() ([]byte, error) {
 	key := make([]byte, 16)
-	rand.Read(key)
+	_, err := rand.Read(key)
 
-	return key
+	return key, err
 }

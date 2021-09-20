@@ -5,8 +5,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/ONSdigital/dp-api-clients-go/dataset"
-	filterCli "github.com/ONSdigital/dp-api-clients-go/filter"
+	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
+	filterCli "github.com/ONSdigital/dp-api-clients-go/v2/filter"
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
@@ -747,8 +747,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		observationStoreMock.StreamCSVRowsFunc = func(ctx context.Context, instanceID string, filterID string, filters *observation.DimensionFilters, limit *int) (reader observation.StreamRowReader, err error) {
 			return nil, mockErr
 		}
-		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string) (dataset.Instance, error) {
-			return dataset.Instance{Version: associatedDataset}, nil
+		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string, string) (dataset.Instance, string, error) {
+			return dataset.Instance{Version: associatedDataset}, "", nil
 		}
 		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
 			return "/metadata"
@@ -793,8 +793,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 	Convey("given filestore put file returns an error", t, func() {
 		observationStoreMock, filterStoreMock, fileStockMock, producerMock, datasetApiMock := mocks()
 
-		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string) (dataset.Instance, error) {
-			return dataset.Instance{Version: associatedDataset}, nil
+		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string, string) (dataset.Instance, string, error) {
+			return dataset.Instance{Version: associatedDataset}, "", nil
 		}
 
 		csvRowReaderMock := &observationtest.StreamRowReaderMock{
@@ -853,8 +853,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 	Convey("given there are no errors", t, func() {
 		observationStoreMock, filterStoreMock, fileStockMock, producerMock, datasetApiMock := mocks()
 
-		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string) (dataset.Instance, error) {
-			return dataset.Instance{Version: associatedDataset}, nil
+		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string, string) (dataset.Instance, string, error) {
+			return dataset.Instance{Version: associatedDataset}, "", nil
 		}
 
 		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
@@ -937,8 +937,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 	Convey("given datasetapi.getinstance returns an error", t, func() {
 		observationStoreMock, filterStoreMock, fileStockMock, producerMock, datasetApiMock := mocks()
 
-		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string) (dataset.Instance, error) {
-			return dataset.Instance{}, errors.New("dataset instances error")
+		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string, string) (dataset.Instance, string, error) {
+			return dataset.Instance{}, "", errors.New("dataset instances error")
 		}
 
 		csvRowReaderMock := &observationtest.StreamRowReaderMock{
@@ -992,8 +992,8 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 	Convey("given datasetapi.putversion returns an error", t, func() {
 		observationStoreMock, filterStoreMock, fileStockMock, producerMock, datasetApiMock := mocks()
 
-		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string) (dataset.Instance, error) {
-			return dataset.Instance{Version: associatedDataset}, nil
+		datasetApiMock.GetInstanceFunc = func(context.Context, string, string, string, string, string) (dataset.Instance, string, error) {
+			return dataset.Instance{Version: associatedDataset}, "", nil
 		}
 
 		datasetApiMock.GetMetadataURLFunc = func(string, string, string) string {
@@ -1150,7 +1150,7 @@ func TestSortFilter(t *testing.T) {
 				// launched may return the expected error from simulated mongo and exit the loop before
 				// the 3rd go routine runs ...
 				// which means we can not check the value of GetOptionCalls() as elsewhere as it might
-				// return 2 or it might return 3
+				// return 2, or it might return 3
 				// So(len(datasetAPIMock.GetOptionsCalls()), ShouldEqual, 3)
 				So(dbFilter.Dimensions[0].Name, ShouldEqual, "geography")
 				So(dbFilter.Dimensions[1].Name, ShouldEqual, "economicactivity")

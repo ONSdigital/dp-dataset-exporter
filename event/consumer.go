@@ -8,7 +8,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	kafka "github.com/ONSdigital/dp-kafka/v2"
-	"github.com/ONSdigital/log.go/log"
+	"github.com/ONSdigital/log.go/v2/log"
 )
 
 //go:generate moq -out eventtest/handler.go -pkg eventtest . Handler
@@ -63,19 +63,19 @@ func (consumer *Consumer) Consume(messageConsumer MessageConsumer, handler Handl
 				logData := log.Data{"message_offset": message.Offset(), "worker": workerNum}
 				err := processMessage(ctx, message, handler, errorHandler)
 				if err != nil {
-					log.Event(ctx, "failed to process message", log.ERROR, log.Error(err), logData)
+					log.Error(ctx, "failed to process message", err, logData)
 				} else {
-					log.Event(ctx, "event processed - committing message", log.INFO, logData)
+					log.Info(ctx, "event processed - committing message", logData)
 				}
 
 				message.CommitAndRelease()
-				log.Event(ctx, "message committed and released", log.INFO, logData)
+				log.Info(ctx, "message committed and released", logData)
 
 			case event, ok := <-consumer.closing:
 				if !ok {
 					return // 'closing' channel already closed
 				}
-				log.Event(event.ctx, "closing event consumer loop", log.INFO)
+				log.Info(event.ctx, "closing event consumer loop")
 				close(consumer.closing)
 				return
 			}
@@ -104,10 +104,10 @@ func (consumer *Consumer) Close(ctx context.Context) (err error) {
 
 	select {
 	case <-consumer.closed:
-		log.Event(ctx, "successfully closed event consumer", log.INFO)
+		log.Info(ctx, "successfully closed event consumer")
 		return nil
 	case <-ctx.Done():
-		log.Event(ctx, "shutdown context time exceeded, skipping graceful shutdown of event consumer", log.INFO)
+		log.Info(ctx, "shutdown context time exceeded, skipping graceful shutdown of event consumer")
 		return errs.New("shutdown context timed out")
 	}
 }
@@ -119,26 +119,26 @@ func processMessage(ctx context.Context, message kafka.Message, handler Handler,
 	event, err := unmarshal(message)
 	if err != nil {
 		logData["message_error"] = "failed to unmarshal event"
-		log.Event(ctx, "error processing message", log.ERROR, logData, log.Error(err))
+		log.Error(ctx, "error processing message", err, logData)
 		// return nil here to commit message because this message will never succeed
 		return nil
 	}
 
 	logData["event"] = event
 
-	log.Event(ctx, "event received", log.INFO, logData)
+	log.Info(ctx, "event received", logData)
 
 	err = handler.Handle(ctx, event)
 	if err != nil {
 		errorHandler.Handle(ctx, event.FilterID, err)
 		logData["message_error"] = "failed to handle event"
-		log.Event(ctx, "handle error", log.ERROR, logData, log.Error(err))
+		log.Error(ctx, "handle error", err, logData)
 	}
 
 	return err
 }
 
-// unmarshal converts a event instance to []byte.
+// unmarshal converts an event instance to []byte.
 func unmarshal(message kafka.Message) (*FilterSubmitted, error) {
 	var event FilterSubmitted
 	err := schema.FilterSubmittedEvent.Unmarshal(message.GetData(), &event)
