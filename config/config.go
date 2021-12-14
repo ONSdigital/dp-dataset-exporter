@@ -48,7 +48,7 @@ func Get() (*Config, error) {
 
 	cfg := &Config{
 		BindAddr:                   ":22500",
-		KafkaAddr:                  []string{"localhost:9092"},
+		KafkaAddr:                  []string{"localhost:9092", "localhost:9093", "localhost:9094"},
 		KafkaVersion:               "1.0.2",
 		KafkaConsumerWorkers:       1,
 		FilterConsumerTopic:        "filter-job-submitted",
