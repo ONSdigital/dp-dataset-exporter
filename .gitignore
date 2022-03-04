@@ -8,3 +8,5 @@ build
 timings.txt
 ft.py
 .vscode/launch.json
+
+.go/
