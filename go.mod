@@ -10,6 +10,9 @@ replace github.com/go-ldap/ldap/v3 v3.1.10 => github.com/go-ldap/ldap/v3 v3.4.3
 
 replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1
 
+//to avoid  [CVE-2022-29153] CWE-918: Server-Side Request Forgery (SSRF) 
+exclude github.com/hashicorp/consul/api v1.1.0
+
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.254.0
 	github.com/ONSdigital/dp-graph/v2 v2.13.1
