@@ -10,12 +10,12 @@ replace github.com/go-ldap/ldap/v3 v3.1.10 => github.com/go-ldap/ldap/v3 v3.4.3
 
 replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1
 
-//to avoid  [CVE-2022-29153] CWE-918: Server-Side Request Forgery (SSRF) 
+//to avoid  [CVE-2022-29153] CWE-918: Server-Side Request Forgery (SSRF)
 exclude github.com/hashicorp/consul/api v1.1.0
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.254.0
-	github.com/ONSdigital/dp-graph/v2 v2.13.1
+	github.com/ONSdigital/dp-graph/v2 v2.16.1
 	github.com/ONSdigital/dp-healthcheck v1.6.1
 	github.com/ONSdigital/dp-kafka/v2 v2.8.0
 	github.com/ONSdigital/dp-net v1.5.0
@@ -44,8 +44,8 @@ require (
 	github.com/ONSdigital/dp-api-clients-go v1.43.0 // indirect
 	github.com/ONSdigital/dp-net/v2 v2.9.1 // indirect
 	github.com/ONSdigital/golang-neo4j-bolt-driver v0.0.0-20210408132126-c2323ff08bf1 // indirect
-	github.com/ONSdigital/graphson v0.2.0 // indirect
-	github.com/ONSdigital/gremgo-neptune v1.0.2 // indirect
+	github.com/ONSdigital/graphson v0.3.0 // indirect
+	github.com/ONSdigital/gremgo-neptune v1.0.3 // indirect
 	github.com/ONSdigital/log.go v1.1.0 // indirect
 	github.com/ONSdigital/s3crypto v0.0.0-20180725145621-f8943119a487 // indirect
 	github.com/Shopify/sarama v1.30.1 // indirect
@@ -58,12 +58,12 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-avro/avro v0.0.0-20171219232920-444163702c11 // indirect
-	github.com/gofrs/uuid v4.0.0+incompatible // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.4 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect

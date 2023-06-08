@@ -59,6 +59,8 @@ github.com/ONSdigital/dp-api-clients-go/v2 v2.254.0/go.mod h1:N/8TXJmmDpa9YA9oQj
 github.com/ONSdigital/dp-frontend-models v1.1.0/go.mod h1:TT96P7Mi69N3Tc/jFNdbjiwG4GAaMjP26HLotFQ6BPw=
 github.com/ONSdigital/dp-graph/v2 v2.13.1 h1:txp2WOtmA/S3g4BzcZ2uxcSvp0nBUtZTzWjkbDrSHqs=
 github.com/ONSdigital/dp-graph/v2 v2.13.1/go.mod h1:goNf7IF+hJATF9F8DD8QAHNF38s/0wRMzgHxzOamDKo=
+github.com/ONSdigital/dp-graph/v2 v2.16.1 h1:L08XphQ7Oi9P9z5vF9ElFTHuoiktqHloFuPbnAuVCTY=
+github.com/ONSdigital/dp-graph/v2 v2.16.1/go.mod h1:n1CIgH1xZACDheP3CWzIxFsAph0tyMdOiVkqDACy9jA=
 github.com/ONSdigital/dp-healthcheck v0.0.0-20200131122546-9db6d3f0494e/go.mod h1:zighxZ/0m5u7zo0eAr8XFlA+Dz2ic7A1vna6YXvhCjQ=
 github.com/ONSdigital/dp-healthcheck v1.0.5/go.mod h1:2wbVAUHMl9+4tWhUlxYUuA1dnf2+NrwzC+So5f5BMLk=
 github.com/ONSdigital/dp-healthcheck v1.1.0/go.mod h1:vZwyjMJiCHjp/sJ2R1ZEqzZT0rJ0+uHVGwxqdP4J5vg=
@@ -105,8 +107,12 @@ github.com/ONSdigital/golang-neo4j-bolt-driver v0.0.0-20210408132126-c2323ff08bf
 github.com/ONSdigital/graphson v0.0.0-20190718134034-c13ceacd109d/go.mod h1:zQ+8pTnCLGuy4eUek81pWUxZo4/f71ri3VYz97Wby+4=
 github.com/ONSdigital/graphson v0.2.0 h1:NxyMTa8oyxxj/u2Ee95wdBkru91jO7aMyXxz4G9i95U=
 github.com/ONSdigital/graphson v0.2.0/go.mod h1:b+Xb2Tp3/Q6BelIgYLQTM1dO10i2jDwIOtTKt5KPcOI=
+github.com/ONSdigital/graphson v0.3.0 h1:s59Qx6RgC4IlqIvjXLD1NWpMGQ8tKIUaJGqnjuy8Zxk=
+github.com/ONSdigital/graphson v0.3.0/go.mod h1:CimOliQd5p4nPFoncFl4uXguGczYzjHIfdf8YxFm1BQ=
 github.com/ONSdigital/gremgo-neptune v1.0.2 h1:ajPGx85CBI0wcxunkluLzkNBixTKxS0CI9LH1zMmQpM=
 github.com/ONSdigital/gremgo-neptune v1.0.2/go.mod h1:JLBHc0OPvJaw7e1+UuR2fQ3aeG7Co8MBFVREOAbhAXY=
+github.com/ONSdigital/gremgo-neptune v1.0.3 h1:EPeEwSY7wI+FFDLczgwcyKDuon0FWF35KiWu3RhjSHI=
+github.com/ONSdigital/gremgo-neptune v1.0.3/go.mod h1:OC8qe/RRo+5Grdmrb3bcjEKntBEKH+SGmp1yG3twn5Y=
 github.com/ONSdigital/log.go v0.0.0-20191127134126-2a610b254f20/go.mod h1:BD7D8FWP1fzwUWsrCopEG72jl9cchCaVNIGSz6YvL+Y=
 github.com/ONSdigital/log.go v1.0.0/go.mod h1:UnGu9Q14gNC+kz0DOkdnLYGoqugCvnokHBRBxFRpVoQ=
 github.com/ONSdigital/log.go v1.0.1-0.20200805084515-ee61165ea36a/go.mod h1:dDnQATFXCBOknvj6ZQuKfmDhbOWf3e8mtV+dPEfWJqs=
@@ -222,6 +228,8 @@ github.com/godbus/dbus/v5 v5.0.4/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5x
 github.com/gofrs/uuid v3.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/gofrs/uuid v4.0.0+incompatible h1:1SD/1F5pU8p29ybwgQSwpQk+mwdRrXCYuPhW6m+TnJw=
 github.com/gofrs/uuid v4.0.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
+github.com/gofrs/uuid v4.4.0+incompatible h1:3qXRTX8/NbyulANqlc0lchS1gqAVxRgsuW1YrTJupqA=
+github.com/gofrs/uuid v4.4.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
@@ -303,6 +311,8 @@ github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB7
 github.com/gorilla/schema v1.1.0/go.mod h1:kgLaKoK1FELgZqMAVxx/5cbj0kT+57qxUrAlIO2eleU=
 github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
+github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
 github.com/hashicorp/consul/api v1.1.0/go.mod h1:VmuI/Lkw1nC05EYQWNKwWGbkg+FbDBtguAZLlVdkD9Q=
 github.com/hashicorp/consul/sdk v0.1.1/go.mod h1:VKf9jXwCTEY1QZP2MOLRhb5i/I/ssyNV1vwHyQBF0x8=
