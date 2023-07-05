@@ -46,7 +46,6 @@ require (
 	github.com/ONSdigital/golang-neo4j-bolt-driver v0.0.0-20210408132126-c2323ff08bf1 // indirect
 	github.com/ONSdigital/graphson v0.3.0 // indirect
 	github.com/ONSdigital/gremgo-neptune v1.0.3 // indirect
-	github.com/ONSdigital/log.go v1.1.0 // indirect
 	github.com/ONSdigital/s3crypto v0.0.0-20180725145621-f8943119a487 // indirect
 	github.com/Shopify/sarama v1.30.1 // indirect
 	github.com/armon/go-metrics v0.4.0 // indirect
@@ -102,7 +101,7 @@ require (
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
-	google.golang.org/genproto v0.0.0-20220624142145-8cd45d7dbd1f // indirect
-	google.golang.org/grpc v1.47.0 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/grpc v1.53.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )
