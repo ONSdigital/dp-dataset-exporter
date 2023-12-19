@@ -41,6 +41,9 @@ type Config struct {
 	ZebedeeURL                 string        `envconfig:"ZEBEDEE_URL"`
 	FullDatasetFilePrefix      string        `envconfig:"FULL_DATASET_FILE_PREFIX"`
 	FilteredDatasetFilePrefix  string        `envconfig:"FILTERED_DATASET_FILE_PREFIX"`
+	OTExporterOTLPEndpoint     string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	OTServiceName              string        `envconfig:"OTEL_SERVICE_NAME"`
+	OTBatchTimeout             time.Duration `envconfig:"OTEL_BATCH_TIMEOUT"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -74,6 +77,9 @@ func Get() (*Config, error) {
 		ZebedeeURL:                 "http://localhost:8082",
 		FullDatasetFilePrefix:      "full-datasets/",
 		FilteredDatasetFilePrefix:  "filtered-datasets/",
+		OTExporterOTLPEndpoint:     "localhost:4317",
+		OTServiceName:              "dp-dataset-exporter",
+		OTBatchTimeout:             5 * time.Second,
 	}
 
 	err := envconfig.Process("", cfg)
