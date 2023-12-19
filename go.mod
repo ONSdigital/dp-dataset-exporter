@@ -19,12 +19,15 @@ require (
 	github.com/ONSdigital/dp-healthcheck v1.6.1
 	github.com/ONSdigital/dp-kafka/v2 v2.8.0
 	github.com/ONSdigital/dp-net v1.5.0
+	github.com/ONSdigital/dp-otel-go v0.0.6
 	github.com/ONSdigital/dp-s3 v1.6.0
 	github.com/ONSdigital/dp-vault v1.3.0
 	github.com/ONSdigital/go-ns v0.0.0-20210410105122-6d6a140e952e
 	github.com/ONSdigital/log.go/v2 v2.4.1
 	github.com/aws/aws-sdk-go v1.44.76
 	github.com/gorilla/mux v1.8.1
+	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.46.1
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.2.1 // indirect
@@ -38,12 +41,6 @@ require (
 	github.com/smartystreets/goconvey v1.8.0
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
-)
-
-require (
-	github.com/ONSdigital/dp-otel-go v0.0.6
-	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.46.1
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1
 )
 
 require (
