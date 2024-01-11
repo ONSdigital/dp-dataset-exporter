@@ -10,7 +10,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
@@ -31,16 +31,20 @@ func main() {
 	log.Info(ctx, "loaded config", log.Data{"config": config})
 
 	// Create Kafka Producer
-	pChannels := kafka.CreateProducerChannels()
-	pConfig := &kafka.ProducerConfig{KafkaVersion: &config.KafkaVersion}
-	kafkaProducer, err := kafka.NewProducer(ctx, config.KafkaAddr, config.FilterConsumerTopic, pChannels, pConfig)
+	pConfig := &kafka.ProducerConfig{
+		KafkaVersion: &config.KafkaVersion,
+		Topic:        config.FilterConsumerTopic,
+		BrokerAddrs:  config.KafkaAddr,
+	}
+
+	kafkaProducer, err := kafka.NewProducer(ctx, pConfig)
 	if err != nil {
 		log.Fatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": config.FilterConsumerTopic})
 		os.Exit(1)
 	}
 
 	// kafka error logging go-routines
-	kafkaProducer.Channels().LogErrors(ctx, "kafka producer")
+	kafkaProducer.LogErrors(ctx)
 
 	type KafakaQuerry struct {
 		InstanceID string `avro:"instance_id"`
@@ -150,5 +154,5 @@ func sendFilter(ctx context.Context, kafkaProducer *kafka.Producer, filterID, da
 
 	// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
 	kafkaProducer.Initialise(ctx)
-	kafkaProducer.Channels().Output <- bytes
+	kafkaProducer.Channels().Output <- kafka.BytesMessage{Value: bytes, Context: ctx}
 }

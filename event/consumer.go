@@ -7,7 +7,7 @@ import (
 
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 

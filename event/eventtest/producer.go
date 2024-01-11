@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"sync"
 )
@@ -43,7 +44,7 @@ type ProducerMock struct {
 }
 
 // CSVExported calls CSVExportedFunc.
-func (mock *ProducerMock) CSVExported(e *event.CSVExported) error {
+func (mock *ProducerMock) CSVExported(ctx context.Context, e *event.CSVExported) error {
 	if mock.CSVExportedFunc == nil {
 		panic("ProducerMock.CSVExportedFunc: method is nil but Producer.CSVExported was just called")
 	}

@@ -15,12 +15,12 @@ import (
 	filterCli "github.com/ONSdigital/dp-api-clients-go/v2/filter"
 	"github.com/ONSdigital/dp-api-clients-go/v2/health"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
+	dpotelgo "github.com/ONSdigital/dp-otel-go"
 	vault "github.com/ONSdigital/dp-vault"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-	"github.com/ONSdigital/dp-otel-go"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
@@ -199,9 +199,9 @@ func main() {
 	}()
 
 	// kafka error logging go-routines
-	kafkaConsumer.Channels().LogErrors(ctx, "kafka consumer")
-	kafkaProducer.Channels().LogErrors(ctx, "kafka result producer")
-	kafkaErrorProducer.Channels().LogErrors(ctx, "kafka error producer")
+	kafkaConsumer.LogErrors(ctx)
+	kafkaProducer.LogErrors(ctx)
+	kafkaErrorProducer.LogErrors(ctx)
 	// error logging go-routine for errorChannel and httpServerDoneChannels
 	go func() {
 		for {
@@ -237,7 +237,7 @@ func main() {
 
 		if serviceList.Consumer {
 			log.Info(shutdownCtx, "stop listening to consumer")
-			logIfError(shutdownCtx, kafkaConsumer.StopListeningToConsumer(shutdownCtx))
+			logIfError(shutdownCtx, kafkaConsumer.Stop())
 		}
 
 		if serviceList.CSVExportedProducer {

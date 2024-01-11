@@ -2,7 +2,6 @@ package event_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -10,9 +9,10 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/event/eventtest"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
-	"github.com/ONSdigital/dp-kafka/v2/kafkatest"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
+	"github.com/ONSdigital/dp-kafka/v4/kafkatest"
 	"github.com/ONSdigital/log.go/v2/log"
+	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -22,14 +22,12 @@ func TestConsume_UnmarshallError(t *testing.T) {
 	Convey("Given an event consumer with an invalid schema and a valid schema", t, func() {
 
 		// Create mock kafka consumer with upstream channel with 2 buffered messages
-		mockConsumer := kafkatest.NewMessageConsumerWithChannels(
-			&kafka.ConsumerGroupChannels{
-				Upstream: make(chan kafka.Message, 2),
-				Errors:   make(chan error),
-				Ready:    make(chan struct{}),
-				Closer:   make(chan struct{}),
-				Closed:   make(chan struct{}),
-			}, true)
+		channels := kafka.CreateConsumerGroupChannels(2, 1)
+		mockConsumer := kafkatest.IConsumerGroupMock{
+			ChannelsFunc: func() *kafka.ConsumerGroupChannels {
+				return channels
+			},
+		}
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -39,15 +37,23 @@ func TestConsume_UnmarshallError(t *testing.T) {
 
 		expectedEvent := getExampleEvent()
 
-		mockConsumer.Channels().Upstream <- kafkatest.NewMessage([]byte("invalid schema"), 1)
-		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
-		mockConsumer.Channels().Upstream <- message
+		unexpectedMessage, err := kafkatest.NewMessage([]byte("invalid schema"), 1)
+		if err != nil {
+			t.Errorf("unable to create new message")
+		}
+		mockConsumer.Channels().Upstream <- unexpectedMessage
+
+		expectedMessage, err := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		if err != nil {
+			t.Errorf("unable to create new message")
+		}
+		mockConsumer.Channels().Upstream <- expectedMessage
 
 		consumer := event.NewConsumer(cfg.KafkaConsumerWorkers)
 
 		Convey("When consume messages is called", func() {
-			consumer.Consume(mockConsumer, mockEventHandler, nil)
-			waitForMessageToBeCommitted(message)
+			consumer.Consume(&mockConsumer, mockEventHandler, nil)
+			waitForMessageToBeCommitted(expectedMessage)
 
 			Convey("Only the valid event is sent to the mockEventHandler ", func() {
 				So(len(mockEventHandler.HandleCalls()), ShouldEqual, 1)
@@ -63,7 +69,18 @@ func TestConsume(t *testing.T) {
 
 	Convey("Given an event consumer with a valid schema", t, func() {
 
-		mockConsumer := kafkatest.NewMessageConsumer(true)
+		mockConsumer, err := kafkatest.NewConsumer(
+			context.Background(),
+			&kafka.ConsumerGroupConfig{
+				BrokerAddrs:  []string{"localhost"},
+				Topic:        "test-topic",
+				GroupName:    "test-group",
+			}, 
+			nil,
+		)
+		if err != nil {
+			t.Errorf("unable to create consumer")
+		}
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -72,14 +89,17 @@ func TestConsume(t *testing.T) {
 		}
 
 		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		message, err := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		if err != nil {
+			t.Errorf("unable to create new message")
+		}
 
-		mockConsumer.Channels().Upstream <- message
+		mockConsumer.Mock.Channels().Upstream <- message
 
 		consumer := event.NewConsumer(1)
 
 		Convey("When consume is called", func() {
-			consumer.Consume(mockConsumer, mockEventHandler, nil)
+			consumer.Consume(mockConsumer.Mock, mockEventHandler, nil)
 			waitForMessageToBeCommitted(message)
 
 			Convey("A event is sent to the mockEventHandler ", func() {
@@ -104,7 +124,18 @@ func TestConsume_HandlerError(t *testing.T) {
 
 		expectedError := errors.New("something bad happened in the event handler")
 
-		mockConsumer := kafkatest.NewMessageConsumer(true)
+		mockConsumer, err := kafkatest.NewConsumer(
+			context.Background(),
+			&kafka.ConsumerGroupConfig{
+				BrokerAddrs:  []string{"localhost"},
+				Topic:        "test-topic",
+				GroupName:    "test-group",
+			}, 
+			nil,
+		)
+		if err != nil {
+			t.Errorf("unable to create consumer")
+		}
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -120,13 +151,16 @@ func TestConsume_HandlerError(t *testing.T) {
 
 		expectedEvent := getExampleEvent()
 
-		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
-		mockConsumer.Channels().Upstream <- message
+		message, err := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		if err != nil {
+			t.Errorf("unable to create new message")
+		}
+		mockConsumer.Mock.Channels().Upstream <- message
 
 		consumer := event.NewConsumer(1)
 
 		Convey("When consume is called", func() {
-			consumer.Consume(mockConsumer, mockEventHandler, mockErrorHandler)
+			consumer.Consume(mockConsumer.Mock, mockEventHandler, mockErrorHandler)
 			waitForMessageToBeCommitted(message)
 
 			Convey("Then the error handler is given the error returned from the event handler", func() {
@@ -147,7 +181,18 @@ func TestConsume_HandlerError(t *testing.T) {
 func TestClose(t *testing.T) {
 	Convey("Given a consumer", t, func() {
 
-		mockConsumer := kafkatest.NewMessageConsumer(true)
+		mockConsumer, err := kafkatest.NewConsumer(
+			context.Background(),
+			&kafka.ConsumerGroupConfig{
+				BrokerAddrs:  []string{"localhost"},
+				Topic:        "test-topic",
+				GroupName:    "test-group",
+			}, 
+			nil,
+		)
+		if err != nil {
+			t.Errorf("unable to create consumer")
+		}
 
 		mockEventHandler := &eventtest.HandlerMock{
 			HandleFunc: func(ctx context.Context, filterJobSubmittedEvent *event.FilterSubmitted) error {
@@ -156,12 +201,15 @@ func TestClose(t *testing.T) {
 		}
 
 		expectedEvent := getExampleEvent()
-		message := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		message, err := kafkatest.NewMessage(marshal(*expectedEvent), 1)
+		if err != nil {
+			t.Errorf("unable to create new message")
+		}
 
-		mockConsumer.Channels().Upstream <- message
+		mockConsumer.Mock.Channels().Upstream <- message
 
 		consumer := event.NewConsumer(1)
-		consumer.Consume(mockConsumer, mockEventHandler, nil)
+		consumer.Consume(mockConsumer.Mock, mockEventHandler, nil)
 		Convey("When close is called", func() {
 
 			err := consumer.Close(ctx)

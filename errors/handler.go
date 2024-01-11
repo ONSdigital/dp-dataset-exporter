@@ -3,6 +3,7 @@ package errors
 import (
 	"context"
 
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
@@ -17,11 +18,11 @@ type Handler interface {
 
 // KafkaHandler provides an error handler that writes to the kafka error topic
 type KafkaHandler struct {
-	messageProducer chan []byte
+	messageProducer chan kafka.BytesMessage
 }
 
 // NewKafkaHandler returns a new KafkaHandler that sends error messages
-func NewKafkaHandler(messageProducer chan []byte) *KafkaHandler {
+func NewKafkaHandler(messageProducer chan kafka.BytesMessage) *KafkaHandler {
 	return &KafkaHandler{
 		messageProducer: messageProducer,
 	}
@@ -44,5 +45,5 @@ func (handler *KafkaHandler) Handle(ctx context.Context, filterID string, err er
 		log.Error(ctx, "failed to marshall error to event-reporter", err, data)
 		return
 	}
-	handler.messageProducer <- errMsg
+	handler.messageProducer <- kafka.BytesMessage{Value: errMsg, Context: ctx}
 }
