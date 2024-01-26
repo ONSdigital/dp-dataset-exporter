@@ -107,7 +107,7 @@ type FileStore interface {
 
 // Producer handles producing output events.
 type Producer interface {
-	CSVExported(e *CSVExported) error
+	CSVExported(ctx context.Context, e *CSVExported) error
 }
 
 // Handle the export of a single filter output.
@@ -154,7 +154,7 @@ func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted
 		}
 	}
 
-	if err := handler.eventProducer.CSVExported(csvExported); err != nil {
+	if err := handler.eventProducer.CSVExported(ctx, csvExported); err != nil {
 		return errors.Wrap(err, "error while attempting to send csv exported event to producer")
 	}
 

@@ -8,7 +8,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/file"
 	"github.com/ONSdigital/dp-graph/v2/graph"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	vault "github.com/ONSdigital/dp-vault"
 )
 
@@ -42,7 +42,13 @@ func (k KafkaProducerName) String() string {
 
 // GetConsumer returns a kafka consumer, which might not be initialised
 func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
-	cConfig := &kafka.ConsumerGroupConfig{KafkaVersion: &cfg.KafkaVersion}
+	cConfig := &kafka.ConsumerGroupConfig{
+		KafkaVersion: &cfg.KafkaVersion,
+		BrokerAddrs:  cfg.KafkaAddr,
+		Topic:        cfg.FilterConsumerTopic,
+		GroupName:    cfg.FilterConsumerGroup,
+	}
+
 	if cfg.KafkaSecProtocol == "TLS" {
 		cConfig.SecurityConfig = kafka.GetSecurityConfig(
 			cfg.KafkaSecCACerts,
@@ -53,10 +59,6 @@ func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Confi
 	}
 	kafkaConsumer, err = kafka.NewConsumerGroup(
 		ctx,
-		cfg.KafkaAddr,
-		cfg.FilterConsumerTopic,
-		cfg.FilterConsumerGroup,
-		kafka.CreateConsumerGroupChannels(cfg.KafkaConsumerWorkers),
 		cConfig,
 	)
 	if err != nil {
@@ -107,7 +109,11 @@ func (e *ExternalServiceList) GetProducer(
 	kafkaSecProtocol, kafkaSecCACerts, kafkaSecClientCert, kafkaSecClientKey string, kafkaSecSkipVerify bool,
 	name KafkaProducerName,
 ) (kafkaProducer *kafka.Producer, err error) {
-	pConfig := &kafka.ProducerConfig{KafkaVersion: &kafkaVersion}
+	pConfig := &kafka.ProducerConfig{
+		KafkaVersion: &kafkaVersion,
+		BrokerAddrs:  kafkaBrokers,
+		Topic:        topic,
+	}
 
 	if kafkaSecProtocol == "TLS" {
 		pConfig.SecurityConfig = kafka.GetSecurityConfig(
@@ -119,9 +125,6 @@ func (e *ExternalServiceList) GetProducer(
 	}
 	kafkaProducer, err = kafka.NewProducer(
 		ctx,
-		kafkaBrokers,
-		topic,
-		kafka.CreateProducerChannels(),
 		pConfig,
 	)
 	if err != nil {

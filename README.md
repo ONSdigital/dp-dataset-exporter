@@ -57,6 +57,9 @@ environment variables, or with a link to a configuration guide.
 | AWS_SECRET_ACCESS_KEY        | -                                    | The AWS secret key credential
 | FULL_DATASET_FILE_PREFIX     | full-datasets                        | The prefix added to full dataset download files
 | FILTERED_DATASET_FILE_PREFIX | filtered-dataset                     | The prefix added to filtered dataset download files
+| OTEL_EXPORTER_OTLP_ENDPOINT  | localhost:4317                       | Endpoint for OpenTelemetry service
+| OTEL_SERVICE_NAME            | dp-dataset-exporter                  | Label of service for OpenTelemetry service
+| OTEL_BATCH_TIMEOUT           | 5s                                   | Timeout for OpenTelemetry
 
 Notes:
 

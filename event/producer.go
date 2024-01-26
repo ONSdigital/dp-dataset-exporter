@@ -1,6 +1,9 @@
 package event
 
 import (
+	"context"
+
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	"github.com/pkg/errors"
 )
 
@@ -8,7 +11,7 @@ import (
 
 // AvroProducer of output events.
 type AvroProducer struct {
-	messageProducer chan []byte
+	messageProducer chan kafka.BytesMessage
 	marshaller      Marshaller
 }
 
@@ -18,7 +21,7 @@ type Marshaller interface {
 }
 
 // NewAvroProducer returns a new instance of AvroProducer.
-func NewAvroProducer(messageProducer chan []byte, marshaller Marshaller) *AvroProducer {
+func NewAvroProducer(messageProducer chan kafka.BytesMessage, marshaller Marshaller) *AvroProducer {
 	return &AvroProducer{
 		messageProducer: messageProducer,
 		marshaller:      marshaller,
@@ -26,7 +29,7 @@ func NewAvroProducer(messageProducer chan []byte, marshaller Marshaller) *AvroPr
 }
 
 // CSVExported produces a new CSV exported event for the given filter output ID.
-func (producer *AvroProducer) CSVExported(event *CSVExported) error {
+func (producer *AvroProducer) CSVExported(ctx context.Context, event *CSVExported) error {
 	if event == nil {
 		return errors.New("event required but was nil")
 	}
@@ -35,7 +38,7 @@ func (producer *AvroProducer) CSVExported(event *CSVExported) error {
 		return err
 	}
 
-	producer.messageProducer <- bytes
+	producer.messageProducer <- kafka.BytesMessage{Value: bytes, Context: ctx}
 
 	return nil
 }

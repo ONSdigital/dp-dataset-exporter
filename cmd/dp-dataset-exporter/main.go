@@ -15,10 +15,12 @@ import (
 	filterCli "github.com/ONSdigital/dp-api-clients-go/v2/filter"
 	"github.com/ONSdigital/dp-api-clients-go/v2/health"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
+	dpotelgo "github.com/ONSdigital/dp-otel-go"
 	vault "github.com/ONSdigital/dp-vault"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
@@ -28,6 +30,7 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/initialise"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	dphttp "github.com/ONSdigital/dp-net/http"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var (
@@ -58,6 +61,23 @@ func main() {
 	exitIfError(ctx, err)
 
 	log.Info(ctx, "loaded config", log.Data{"config": cfg})
+
+	// Set up OpenTelemetry
+	otelConfig := dpotelgo.Config{
+		OtelServiceName:          cfg.OTServiceName,
+		OtelExporterOtlpEndpoint: cfg.OTExporterOTLPEndpoint,
+		OtelBatchTimeout:         cfg.OTBatchTimeout,
+	}
+
+	otelShutdown, err := dpotelgo.SetupOTelSDK(ctx, otelConfig)
+
+	if err != nil {
+		log.Error(ctx, "error setting up OpenTelemetry - hint: ensure OTEL_EXPORTER_OTLP_ENDPOINT is set", err)
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errs.Join(err, otelShutdown(context.Background()))
+	}()
 
 	// a channel used to signal when an exit is required
 	errorChannel := make(chan error)
@@ -179,9 +199,9 @@ func main() {
 	}()
 
 	// kafka error logging go-routines
-	kafkaConsumer.Channels().LogErrors(ctx, "kafka consumer")
-	kafkaProducer.Channels().LogErrors(ctx, "kafka result producer")
-	kafkaErrorProducer.Channels().LogErrors(ctx, "kafka error producer")
+	kafkaConsumer.LogErrors(ctx)
+	kafkaProducer.LogErrors(ctx)
+	kafkaErrorProducer.LogErrors(ctx)
 	// error logging go-routine for errorChannel and httpServerDoneChannels
 	go func() {
 		for {
@@ -217,7 +237,7 @@ func main() {
 
 		if serviceList.Consumer {
 			log.Info(shutdownCtx, "stop listening to consumer")
-			logIfError(shutdownCtx, kafkaConsumer.StopListeningToConsumer(shutdownCtx))
+			logIfError(shutdownCtx, kafkaConsumer.Stop())
 		}
 
 		if serviceList.CSVExportedProducer {
@@ -258,12 +278,15 @@ func main() {
 
 // startHealthCheck sets up the Handler, starts the healthcheck and the http server that serves healthcheck endpoint
 func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr string) *dphttp.Server {
+	cfg, _ := config.Get()
 
 	router := mux.NewRouter()
+	router.Use(otelmux.Middleware(cfg.OTServiceName))
 	router.Path("/health").HandlerFunc(hc.Handler)
 	hc.Start(ctx)
 
-	httpServer := dphttp.NewServer(bindAddr, router)
+	otelHandler := otelhttp.NewHandler(router, "/")
+	httpServer := dphttp.NewServer(bindAddr, otelHandler)
 	httpServer.HandleOSSignals = false
 
 	go func() {
