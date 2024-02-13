@@ -62,22 +62,24 @@ func main() {
 
 	log.Info(ctx, "loaded config", log.Data{"config": cfg})
 
-	// Set up OpenTelemetry
-	otelConfig := dpotelgo.Config{
-		OtelServiceName:          cfg.OTServiceName,
-		OtelExporterOtlpEndpoint: cfg.OTExporterOTLPEndpoint,
-		OtelBatchTimeout:         cfg.OTBatchTimeout,
-	}
+	if cfg.OtelEnabled {
+		// Set up OpenTelemetry
+		otelConfig := dpotelgo.Config{
+			OtelServiceName:          cfg.OTServiceName,
+			OtelExporterOtlpEndpoint: cfg.OTExporterOTLPEndpoint,
+			OtelBatchTimeout:         cfg.OTBatchTimeout,
+		}
 
-	otelShutdown, err := dpotelgo.SetupOTelSDK(ctx, otelConfig)
+		otelShutdown, err := dpotelgo.SetupOTelSDK(ctx, otelConfig)
 
-	if err != nil {
-		log.Error(ctx, "error setting up OpenTelemetry - hint: ensure OTEL_EXPORTER_OTLP_ENDPOINT is set", err)
+		if err != nil {
+			log.Error(ctx, "error setting up OpenTelemetry - hint: ensure OTEL_EXPORTER_OTLP_ENDPOINT is set", err)
+		}
+		// Handle shutdown properly so nothing leaks.
+		defer func() {
+			err = errs.Join(err, otelShutdown(context.Background()))
+		}()
 	}
-	// Handle shutdown properly so nothing leaks.
-	defer func() {
-		err = errs.Join(err, otelShutdown(context.Background()))
-	}()
 
 	// a channel used to signal when an exit is required
 	errorChannel := make(chan error)
@@ -281,12 +283,20 @@ func startHealthCheck(ctx context.Context, hc *healthcheck.HealthCheck, bindAddr
 	cfg, _ := config.Get()
 
 	router := mux.NewRouter()
-	router.Use(otelmux.Middleware(cfg.OTServiceName))
+
 	router.Path("/health").HandlerFunc(hc.Handler)
 	hc.Start(ctx)
 
-	otelHandler := otelhttp.NewHandler(router, "/")
-	httpServer := dphttp.NewServer(bindAddr, otelHandler)
+	var httpServer *dphttp.Server
+
+	if cfg.OtelEnabled {
+		router.Use(otelmux.Middleware(cfg.OTServiceName))
+		otelHandler := otelhttp.NewHandler(router, "/")
+		httpServer = dphttp.NewServer(bindAddr, otelHandler)
+	} else {
+		httpServer = dphttp.NewServer(bindAddr, router)
+	}
+
 	httpServer.HandleOSSignals = false
 
 	go func() {
