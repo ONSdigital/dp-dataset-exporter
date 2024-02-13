@@ -49,6 +49,7 @@ func TestSpec(t *testing.T) {
 				So(cfg.OTExporterOTLPEndpoint, ShouldEqual, "localhost:4317")
 				So(cfg.OTServiceName, ShouldEqual, "dp-dataset-exporter")
 				So(cfg.OTBatchTimeout, ShouldEqual, 5*time.Second)
+				So(cfg.OtelEnabled, ShouldEqual, false)
 			})
 		})
 	})
