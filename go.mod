@@ -2,7 +2,6 @@ module github.com/ONSdigital/dp-dataset-exporter
 
 go 1.22
 
-toolchain go1.22.0
 
 // to avoid 'sonatype-2021-4899' non-CVE Vulnerability
 exclude github.com/gorilla/sessions v1.2.1
