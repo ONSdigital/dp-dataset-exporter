@@ -2,6 +2,8 @@ module github.com/ONSdigital/dp-dataset-exporter
 
 go 1.22
 
+toolchain go1.22.0
+
 // to avoid 'sonatype-2021-4899' non-CVE Vulnerability
 exclude github.com/gorilla/sessions v1.2.1
 
@@ -12,7 +14,6 @@ replace github.com/prometheus/client_golang => github.com/prometheus/client_gola
 
 //to avoid  [CVE-2022-29153] CWE-918: Server-Side Request Forgery (SSRF)
 exclude github.com/hashicorp/consul/api v1.1.0
-
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.260.1
@@ -114,5 +115,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240624140628-dc46fd24d27d // indirect
 	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
-	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
