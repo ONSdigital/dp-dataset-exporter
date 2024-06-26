@@ -1,6 +1,6 @@
 module github.com/ONSdigital/dp-dataset-exporter
 
-go 1.21
+go 1.22
 
 // to avoid 'sonatype-2021-4899' non-CVE Vulnerability
 exclude github.com/gorilla/sessions v1.2.1
@@ -18,7 +18,7 @@ require (
 	github.com/ONSdigital/dp-graph/v2 v2.17.0
 	github.com/ONSdigital/dp-healthcheck v1.6.3
 	github.com/ONSdigital/dp-net v1.5.0
-	github.com/ONSdigital/dp-otel-go v0.0.7
+	github.com/ONSdigital/dp-otel-go v0.0.8
 	github.com/ONSdigital/dp-s3 v1.10.0
 	github.com/ONSdigital/dp-vault v1.3.1
 	github.com/ONSdigital/go-ns v0.0.0-20210916104633-ac1c1c52327e
