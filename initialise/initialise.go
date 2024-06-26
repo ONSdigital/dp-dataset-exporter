@@ -42,11 +42,17 @@ func (k KafkaProducerName) String() string {
 
 // GetConsumer returns a kafka consumer, which might not be initialised
 func (e *ExternalServiceList) GetConsumer(ctx context.Context, cfg *config.Config) (kafkaConsumer *kafka.ConsumerGroup, err error) {
+	kafkaOffset := kafka.OffsetNewest
+	if cfg.KafkaOffsetOldest {
+		kafkaOffset = kafka.OffsetOldest
+	}
+
 	cConfig := &kafka.ConsumerGroupConfig{
 		KafkaVersion: &cfg.KafkaVersion,
 		BrokerAddrs:  cfg.KafkaAddr,
 		Topic:        cfg.FilterConsumerTopic,
 		GroupName:    cfg.FilterConsumerGroup,
+		Offset:       &kafkaOffset,
 	}
 
 	if cfg.KafkaSecProtocol == "TLS" {

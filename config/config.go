@@ -18,6 +18,7 @@ type Config struct {
 	KafkaSecClientKey          string        `envconfig:"KAFKA_SEC_CLIENT_KEY" json:"-"`
 	KafkaSecSkipVerify         bool          `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
 	KafkaConsumerWorkers       int           `envconfig:"KAFKA_CONSUMER_WORKERS"`
+	KafkaOffsetOldest          bool          `envconfig:"KAFKA_OFFSET_OLDEST"`
 	FilterConsumerGroup        string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
 	FilterConsumerTopic        string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
 	FilterAPIURL               string        `envconfig:"FILTER_API_URL"`
@@ -55,6 +56,7 @@ func Get() (*Config, error) {
 		KafkaAddr:                  []string{"localhost:9092", "localhost:9093", "localhost:9094"},
 		KafkaVersion:               "1.0.2",
 		KafkaConsumerWorkers:       1,
+		KafkaOffsetOldest:          true,
 		FilterConsumerTopic:        "filter-job-submitted",
 		FilterConsumerGroup:        "dp-dataset-exporter",
 		FilterAPIURL:               "http://localhost:22100",

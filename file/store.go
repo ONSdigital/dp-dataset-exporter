@@ -55,12 +55,12 @@ func NewStore(
 	vaultClient VaultClient,
 ) (*Store, error) {
 
-	uploader, err := s3client.NewUploader(region, publicBucket, false)
+	uploader, err := s3client.NewUploader(region, publicBucket)
 	if err != nil {
 		return nil, err
 	}
 
-	cryptoUploader := s3client.NewUploaderWithSession(privateBucket, true, uploader.Session())
+	cryptoUploader := s3client.NewUploaderWithSession(privateBucket, uploader.Session())
 
 	return &Store{
 		Uploader:       uploader,
