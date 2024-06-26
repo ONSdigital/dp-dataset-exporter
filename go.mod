@@ -13,9 +13,6 @@ replace github.com/prometheus/client_golang => github.com/prometheus/client_gola
 //to avoid  [CVE-2022-29153] CWE-918: Server-Side Request Forgery (SSRF)
 exclude github.com/hashicorp/consul/api v1.1.0
 
-replace github.com/hashicorp/vault/api v1.12.2 => github.com/hashicorp/vault/api v1.14.0
-
-replace github.com/hashicorp/vault/api v1.9.1 => github.com/hashicorp/vault/api v1.14.0
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.260.1
@@ -33,7 +30,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
-	github.com/hashicorp/vault/api v1.9.1 // indirect
+	github.com/hashicorp/vault/api v1.14.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1
@@ -117,4 +114,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240624140628-dc46fd24d27d // indirect
 	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
+	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
