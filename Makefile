@@ -4,6 +4,8 @@ BUILD=build
 BUILD_ARCH=$(BUILD)/$(GOOS)-$(GOARCH)
 BIN_DIR?=.
 
+BINPATH ?= build
+
 export GOOS?=$(shell go env GOOS)
 export GOARCH?=$(shell go env GOARCH)
 
@@ -39,12 +41,12 @@ audit:
 
 .PHONY: build
 build:
-	@mkdir -p $(BUILD_ARCH)/$(BIN_DIR)
-	go build $(LDFLAGS) -o $(BUILD_ARCH)/$(BIN_DIR)/dp-dataset-exporter cmd/dp-dataset-exporter/main.go
+	go build -tags 'production' $(LDFLAGS) -o $(BINPATH)/dp-dataset-exporter
 
 .PHONY: debug
 debug acceptance:
-	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR) go run $(LDFLAGS) -race cmd/dp-dataset-exporter/main.go
+	go build -tags 'debug' $(LDFLAGS) -o $(BINPATH)/dp-dataset-exporter
+	HUMAN_LOG=1 VAULT_TOKEN=$(APP_TOKEN) VAULT_ADDR=$(VAULT_ADDR)  DEBUG=1 $(BINPATH)/dp-dataset-exporter
 
 .PHONY: test
 test:

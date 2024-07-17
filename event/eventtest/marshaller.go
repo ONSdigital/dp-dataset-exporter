@@ -14,19 +14,19 @@ var _ event.Marshaller = &MarshallerMock{}
 
 // MarshallerMock is a mock implementation of event.Marshaller.
 //
-// 	func TestSomethingThatUsesMarshaller(t *testing.T) {
+//	func TestSomethingThatUsesMarshaller(t *testing.T) {
 //
-// 		// make and configure a mocked event.Marshaller
-// 		mockedMarshaller := &MarshallerMock{
-// 			MarshalFunc: func(s interface{}) ([]byte, error) {
-// 				panic("mock out the Marshal method")
-// 			},
-// 		}
+//		// make and configure a mocked event.Marshaller
+//		mockedMarshaller := &MarshallerMock{
+//			MarshalFunc: func(s interface{}) ([]byte, error) {
+//				panic("mock out the Marshal method")
+//			},
+//		}
 //
-// 		// use mockedMarshaller in code that requires event.Marshaller
-// 		// and then make assertions.
+//		// use mockedMarshaller in code that requires event.Marshaller
+//		// and then make assertions.
 //
-// 	}
+//	}
 type MarshallerMock struct {
 	// MarshalFunc mocks the Marshal method.
 	MarshalFunc func(s interface{}) ([]byte, error)
@@ -60,7 +60,8 @@ func (mock *MarshallerMock) Marshal(s interface{}) ([]byte, error) {
 
 // MarshalCalls gets all the calls that were made to Marshal.
 // Check the length with:
-//     len(mockedMarshaller.MarshalCalls())
+//
+//	len(mockedMarshaller.MarshalCalls())
 func (mock *MarshallerMock) MarshalCalls() []struct {
 	S interface{}
 } {

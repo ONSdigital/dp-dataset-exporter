@@ -6,6 +6,7 @@ package filtertest
 import (
 	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/filter"
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"sync"
 )
 
@@ -15,23 +16,29 @@ var _ filter.Client = &ClientMock{}
 
 // ClientMock is a mock implementation of filter.Client.
 //
-// 	func TestSomethingThatUsesClient(t *testing.T) {
+//	func TestSomethingThatUsesClient(t *testing.T) {
 //
-// 		// make and configure a mocked filter.Client
-// 		mockedClient := &ClientMock{
-// 			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
-// 				panic("mock out the GetOutputBytes method")
-// 			},
-// 			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
-// 				panic("mock out the UpdateFilterOutputBytes method")
-// 			},
-// 		}
+//		// make and configure a mocked filter.Client
+//		mockedClient := &ClientMock{
+//			CheckerFunc: func(contextMoqParam context.Context, checkState *healthcheck.CheckState) error {
+//				panic("mock out the Checker method")
+//			},
+//			GetOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error) {
+//				panic("mock out the GetOutputBytes method")
+//			},
+//			UpdateFilterOutputBytesFunc: func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, filterJobID string, b []byte) error {
+//				panic("mock out the UpdateFilterOutputBytes method")
+//			},
+//		}
 //
-// 		// use mockedClient in code that requires filter.Client
-// 		// and then make assertions.
+//		// use mockedClient in code that requires filter.Client
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ClientMock struct {
+	// CheckerFunc mocks the Checker method.
+	CheckerFunc func(contextMoqParam context.Context, checkState *healthcheck.CheckState) error
+
 	// GetOutputBytesFunc mocks the GetOutputBytes method.
 	GetOutputBytesFunc func(ctx context.Context, userAuthToken string, serviceAuthToken string, downloadServiceToken string, collectionID string, filterOutputID string) ([]byte, error)
 
@@ -40,6 +47,13 @@ type ClientMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// Checker holds details about calls to the Checker method.
+		Checker []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// CheckState is the checkState argument value.
+			CheckState *healthcheck.CheckState
+		}
 		// GetOutputBytes holds details about calls to the GetOutputBytes method.
 		GetOutputBytes []struct {
 			// Ctx is the ctx argument value.
@@ -71,8 +85,45 @@ type ClientMock struct {
 			B []byte
 		}
 	}
+	lockChecker                 sync.RWMutex
 	lockGetOutputBytes          sync.RWMutex
 	lockUpdateFilterOutputBytes sync.RWMutex
+}
+
+// Checker calls CheckerFunc.
+func (mock *ClientMock) Checker(contextMoqParam context.Context, checkState *healthcheck.CheckState) error {
+	if mock.CheckerFunc == nil {
+		panic("ClientMock.CheckerFunc: method is nil but Client.Checker was just called")
+	}
+	callInfo := struct {
+		ContextMoqParam context.Context
+		CheckState      *healthcheck.CheckState
+	}{
+		ContextMoqParam: contextMoqParam,
+		CheckState:      checkState,
+	}
+	mock.lockChecker.Lock()
+	mock.calls.Checker = append(mock.calls.Checker, callInfo)
+	mock.lockChecker.Unlock()
+	return mock.CheckerFunc(contextMoqParam, checkState)
+}
+
+// CheckerCalls gets all the calls that were made to Checker.
+// Check the length with:
+//
+//	len(mockedClient.CheckerCalls())
+func (mock *ClientMock) CheckerCalls() []struct {
+	ContextMoqParam context.Context
+	CheckState      *healthcheck.CheckState
+} {
+	var calls []struct {
+		ContextMoqParam context.Context
+		CheckState      *healthcheck.CheckState
+	}
+	mock.lockChecker.RLock()
+	calls = mock.calls.Checker
+	mock.lockChecker.RUnlock()
+	return calls
 }
 
 // GetOutputBytes calls GetOutputBytesFunc.
@@ -103,7 +154,8 @@ func (mock *ClientMock) GetOutputBytes(ctx context.Context, userAuthToken string
 
 // GetOutputBytesCalls gets all the calls that were made to GetOutputBytes.
 // Check the length with:
-//     len(mockedClient.GetOutputBytesCalls())
+//
+//	len(mockedClient.GetOutputBytesCalls())
 func (mock *ClientMock) GetOutputBytesCalls() []struct {
 	Ctx                  context.Context
 	UserAuthToken        string
@@ -154,7 +206,8 @@ func (mock *ClientMock) UpdateFilterOutputBytes(ctx context.Context, userAuthTok
 
 // UpdateFilterOutputBytesCalls gets all the calls that were made to UpdateFilterOutputBytes.
 // Check the length with:
-//     len(mockedClient.UpdateFilterOutputBytesCalls())
+//
+//	len(mockedClient.UpdateFilterOutputBytesCalls())
 func (mock *ClientMock) UpdateFilterOutputBytesCalls() []struct {
 	Ctx                  context.Context
 	UserAuthToken        string

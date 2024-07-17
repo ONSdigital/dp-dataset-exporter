@@ -2,12 +2,10 @@ package event
 
 import (
 	"context"
+	"errors"
 
 	kafka "github.com/ONSdigital/dp-kafka/v4"
-	"github.com/pkg/errors"
 )
-
-//go:generate moq -out eventtest/marshaller.go -pkg eventtest . Marshaller
 
 // AvroProducer of output events.
 type AvroProducer struct {

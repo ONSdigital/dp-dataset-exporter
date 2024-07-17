@@ -16,6 +16,23 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+// TODO: remove hello called example test
+// func TestHelloCalledHandler_Handle(t *testing.T) {
+// 	Convey("Given a successful event handler, when Handle is triggered", t, func() {
+// 		eventHandler := &event.ExportHandler{}
+// 		filePath := "/tmp/helloworld.txt"
+// 		os.Remove(filePath)
+// 		err := eventHandler.Handle(testCtx, &config.Config{OutputFilePath: filePath}, &testEvent)
+// 		So(err, ShouldBeNil)
+// 	})
+
+//		Convey("handler returns an error when cannot write to file", t, func() {
+//			eventHandler := &event.ExportHandler{}
+//			filePath := ""
+//			err := eventHandler.Handle(testCtx, &config.Config{OutputFilePath: filePath}, &testEvent)
+//			So(err, ShouldNotBeNil)
+//		})
+//	}
 const (
 	filterOutputId  = "345"
 	fileHRef        = "s3://some/url/123.csv"
@@ -86,6 +103,8 @@ var csvBytes = []byte(`v4_0, a,b,c,
 
 var csvContent = string(csvBytes)
 
+var ctx = context.Background()
+
 func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 	Convey("Given a handler with a mock filter store that returns an error", t, func() {
 
@@ -110,7 +129,7 @@ func TestExportHandler_Handle_FilterStoreGetError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The error from the filter store is returned", func() {
 				So(err, ShouldNotBeNil)
@@ -158,7 +177,7 @@ func TestExportHandler_Handle_ObservationStoreError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The error returned is the error returned from the observation store", func() {
 				So(err, ShouldNotBeNil)
@@ -215,7 +234,7 @@ func TestExportHandler_Handle_FileStoreError(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The error returned is the error returned from the file store", func() {
 				So(err, ShouldNotBeNil)
@@ -277,7 +296,7 @@ func TestExportHandler_Handle_Empty_Results(t *testing.T) {
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The filter state is updated to empty", func() {
 				So(err, ShouldNotBeNil)
@@ -339,7 +358,7 @@ func TestExportHandler_Handle_Instance_Not_Found(t *testing.T) {
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The filter state is updated to empty", func() {
 				So(err, ShouldNotBeNil)
@@ -400,7 +419,7 @@ func TestExportHandler_Handle_FilterStorePutError(t *testing.T) {
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, nil, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The error returned is the error returned from the file store", func() {
 				So(err, ShouldNotBeNil)
@@ -455,7 +474,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		}
 
 		mockedEventProducer := &eventtest.ProducerMock{
-			CSVExportedFunc: func(e *event.CSVExported) error {
+			CSVExportedFunc: func(ctx context.Context, e *event.CSVExported) error {
 				return expectedError
 			},
 		}
@@ -470,7 +489,7 @@ func TestExportHandler_Handle_EventProducerError(t *testing.T) {
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The error returned is the error returned from the file store", func() {
 				So(err, ShouldNotBeNil)
@@ -522,8 +541,14 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 			},
 		}
 
+		// mockedEventProducer := &eventtest.ProducerMock{
+		// 	CSVExportedFunc: func(e *event.CSVExported) error {
+		// 		return nil
+		// 	},
+		// }
+
 		mockedEventProducer := &eventtest.ProducerMock{
-			CSVExportedFunc: func(e *event.CSVExported) error {
+			CSVExportedFunc: func(ctx context.Context, e *event.CSVExported) error {
 				return nil
 			},
 		}
@@ -539,7 +564,7 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 
 		Convey("When handle is called", func() {
 
-			err := handler.Handle(ctx, filterSubmittedEvent)
+			err := handler.Handle(ctx, cfg, filterSubmittedEvent)
 
 			Convey("The error returned is nil", func() {
 				So(err, ShouldBeNil)
@@ -644,7 +669,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 		}
 
 		mockedEventProducer := &eventtest.ProducerMock{
-			CSVExportedFunc: func(e *event.CSVExported) error {
+			CSVExportedFunc: func(ctx context.Context, e *event.CSVExported) error {
 				return nil
 			},
 		}
@@ -664,7 +689,7 @@ func TestExportHandler_Handle_FullFileDownload(t *testing.T) {
 		handler := event.NewExportHandler(mockFilterStore, mockObservationStore, mockedFileStore, mockedEventProducer, datasetAPIMock, cfg)
 
 		Convey("When handle is called", func() {
-			err := handler.Handle(ctx, fullFileDownloadSubmittedEvent)
+			err := handler.Handle(ctx, cfg, fullFileDownloadSubmittedEvent)
 
 			Convey("The error returned is nil", func() {
 				So(err, ShouldBeNil)
@@ -773,7 +798,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
-			err := handler.Handle(ctx, e)
+			err := handler.Handle(ctx, cfg, e)
 
 			Convey("then the expected error is returned", func() {
 				So(err, ShouldResemble, mockErr)
@@ -829,7 +854,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
-			err := handler.Handle(ctx, e)
+			err := handler.Handle(ctx, cfg, e)
 
 			Convey("then the expected error is returned", func() {
 				So(err, ShouldResemble, mockErr)
@@ -887,7 +912,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return nil
 		}
 
-		producerMock.CSVExportedFunc = func(e *event.CSVExported) error {
+		producerMock.CSVExportedFunc = func(ctx context.Context, e *event.CSVExported) error {
 			return nil
 		}
 
@@ -906,7 +931,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
-			err := handler.Handle(ctx, e)
+			err := handler.Handle(ctx, cfg, e)
 
 			Convey("then no error is returned", func() {
 				So(err, ShouldBeNil)
@@ -969,7 +994,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
-			err := handler.Handle(ctx, e)
+			err := handler.Handle(ctx, cfg, e)
 
 			Convey("then the expected error is returned", func() {
 				So(err.Error(), ShouldEqual, "dataset instances error")
@@ -1026,7 +1051,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 			return mockErr
 		}
 
-		producerMock.CSVExportedFunc = func(e *event.CSVExported) error {
+		producerMock.CSVExportedFunc = func(ctx context.Context, e *event.CSVExported) error {
 			return nil
 		}
 
@@ -1045,7 +1070,7 @@ func TestExportHandler_HandlePrePublish(t *testing.T) {
 		handler := event.NewExportHandler(filterStoreMock, observationStoreMock, fileStockMock, producerMock, datasetApiMock, cfg)
 
 		Convey("when handle is called", func() {
-			err := handler.Handle(ctx, e)
+			err := handler.Handle(ctx, cfg, e)
 
 			Convey("then the expected error is returned", func() {
 				So(err.Error(), ShouldResemble, errors.Wrap(mockErr, "error while attempting update version downloads").Error())

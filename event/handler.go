@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"sort"
 	"strconv"
 	"strings"
@@ -12,32 +11,28 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ONSdigital/dp-api-clients-go/headers"
+	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
 	"github.com/ONSdigital/dp-api-clients-go/v2/filter"
-	"github.com/ONSdigital/dp-api-clients-go/v2/headers"
-
-	"github.com/pkg/errors"
-
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/csvw"
 	"github.com/ONSdigital/dp-dataset-exporter/reader"
 	"github.com/ONSdigital/dp-graph/v2/observation"
-
-	"github.com/ONSdigital/dp-api-clients-go/v2/dataset"
 	"github.com/ONSdigital/log.go/v2/log"
+	"github.com/pkg/errors"
 )
-
-//go:generate moq -out eventtest/filter_store.go -pkg eventtest . FilterStore
-//go:generate moq -out eventtest/observation_store.go -pkg eventtest . ObservationStore
-//go:generate moq -out eventtest/file_store.go -pkg eventtest . FileStore
-//go:generate moq -out eventtest/producer.go -pkg eventtest . Producer
-//go:generate moq -out eventtest/datasetapi.go -pkg eventtest . DatasetAPI
 
 var _ Handler = (*ExportHandler)(nil)
 
 const publishedState = "published"
 const metadataExtension = "-metadata.json"
 
-// ExportHandler handles a single CSV export of a filtered dataset.
+type EventGenerator interface {
+	GenerateOutput(ctx context.Context, event *CSVExported) error
+}
+
+// TODO: remove hello called example handler
+// HelloCalledHandler ...
 type ExportHandler struct {
 	filterStore               FilterStore
 	observationStore          ObservationStore
@@ -51,19 +46,6 @@ type ExportHandler struct {
 	serviceAuthToken          string
 }
 
-// DatasetAPI contains functions to call the dataset API.
-type DatasetAPI interface {
-	PutVersion(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, datasetID, edition, version string, m dataset.Version) error
-	GetVersion(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceAuthToken, collectionID, datasetID, edition, version string) (m dataset.Version, err error)
-	GetInstance(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, instanceID, ifMatch string) (m dataset.Instance, eTag string, err error)
-	GetMetadataURL(id, edition, version string) (url string)
-	GetVersionMetadata(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.Metadata, err error)
-	GetOptions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, q *dataset.QueryParams) (m dataset.Options, err error)
-	GetVersionDimensions(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version string) (m dataset.VersionDimensions, err error)
-	GetOptionsInBatches(ctx context.Context, userAuthToken, serviceAuthToken, collectionID, id, edition, version, dimension string, batchSize, maxWorkers int) (m dataset.Options, err error)
-}
-
-// NewExportHandler returns a new instance using the given dependencies.
 func NewExportHandler(
 	filterStore FilterStore,
 	observationStore ObservationStore,
@@ -87,31 +69,8 @@ func NewExportHandler(
 	}
 }
 
-// FilterStore provides existing filter data.
-type FilterStore interface {
-	GetFilter(ctx context.Context, filterID string) (*filter.Model, error)
-	PutCSVData(ctx context.Context, filterID string, downloadItem filter.Download) error
-	PutStateAsEmpty(ctx context.Context, filterJobID string) error
-	PutStateAsError(ctx context.Context, filterJobID string) error
-}
-
-// ObservationStore provides filtered observation data in CSV rows.
-type ObservationStore interface {
-	StreamCSVRows(ctx context.Context, instanceID, filterID string, filters *observation.DimensionFilters, limit *int) (observation.StreamRowReader, error)
-}
-
-// FileStore provides storage for filtered output files.
-type FileStore interface {
-	PutFile(ctx context.Context, reader io.Reader, filename string, isPublished bool) (url string, err error)
-}
-
-// Producer handles producing output events.
-type Producer interface {
-	CSVExported(ctx context.Context, e *CSVExported) error
-}
-
-// Handle the export of a single filter output.
-func (handler *ExportHandler) Handle(ctx context.Context, event *FilterSubmitted) error {
+// Handle takes a single event.
+func (handler *ExportHandler) Handle(ctx context.Context, cfg *config.Config, event *FilterSubmitted) (err error) {
 	var csvExported *CSVExported
 	var logData log.Data
 
@@ -642,3 +601,58 @@ func (handler *ExportHandler) updateVersionLinks(ctx context.Context, event *Fil
 
 	return nil
 }
+
+// // CSVExported produces a new CSV exported event for the given filter output ID.
+// func (handler *ExportHandler) CSVExported(ctx context.Context, e *CSVExported) error {
+// 	// if event == nil {
+// 	// 	return errors.New("event required but was nil")
+// 	// }
+// 	// bytes, err := producer.marshaller.Marshal(event)
+// 	// if err != nil {
+// 	// 	return err
+// 	// }
+
+// 	// producer.messageProducer <- kafka.BytesMessage{Value: bytes, Context: ctx}
+
+// 	// return nil
+
+// 	s := schema.CSVExportedEvent
+
+// 	b, err := s.Marshal(CSVExported{
+// 		FilterID:   e.FilterID,
+// 		Filename:   e.Filename,
+// 		FileURL:    e.FileURL,
+// 		InstanceID: e.InstanceID,
+// 		DatasetID:  e.DatasetID,
+// 		Edition:    e.Edition,
+// 		Version:    e.Version,
+// 		RowCount:   e.RowCount,
+// 	})
+// 	if err != nil {
+// 		return fmt.Errorf("error marshalling csvw created event: %w", err)
+// 	}
+
+// 	// Send bytes to kafka producer output channel
+// 	//	h.producer.Channels().Output <- kafka.BytesMessage{Value: b, Context: ctx}
+// 	handler.eventProducer.Channels().Output <- kafka.BytesMessage{Value: b, Context: ctx}
+// 	return nil
+// }
+
+// // AvroProducer of output events.
+// type AvroProducer struct {
+// 	messageProducer chan kafka.BytesMessage
+// 	marshaller      Marshaller
+// }
+
+// // Marshaller marshals events into messages.
+// type Marshaller interface {
+// 	Marshal(s interface{}) ([]byte, error)
+// }
+
+// // NewAvroProducer returns a new instance of AvroProducer.
+// func NewAvroProducer(messageProducer chan kafka.BytesMessage, marshaller Marshaller) *AvroProducer {
+// 	return &AvroProducer{
+// 		messageProducer: messageProducer,
+// 		marshaller:      marshaller,
+// 	}
+// }
