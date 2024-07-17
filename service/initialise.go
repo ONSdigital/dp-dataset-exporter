@@ -81,16 +81,13 @@ func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vaul
 // GetVault returns a vault client
 func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.Client, err error) {
 	v, err := e.Init.DoGetVault(cfg, retries)
-
 	e.Vault = true
-
 	return v, nil
 }
 
+// GetFilterStore returns a filter client
 func (e *ExternalServiceList) GetFilterStore(cfg *config.Config, serviceAuthToken string) (FilterStore, error) {
-
 	d := e.Init.DoGetFilterStore(cfg, serviceAuthToken)
-
 	e.FilterStore = true
 	return d, nil
 }
@@ -111,6 +108,7 @@ func (e *ExternalServiceList) GetKafkaConsumer(ctx context.Context, cfg *config.
 	return consumer, nil
 }
 
+// GetKafkaConsumer creates a Kafka producer and sets the producer flag to true
 func (e *ExternalServiceList) GetKafkaProducer(ctx context.Context, cfg *config.Config) (dpkafka.IProducer, error) {
 	producer, err := e.Init.DoGetKafkaProducer(ctx, cfg)
 	if err != nil {
@@ -130,23 +128,22 @@ func (e *ExternalServiceList) GetHealthCheck(cfg *config.Config, buildTime, gitC
 	return hc, nil
 }
 
+// DoGetVault creates a vault client
 func (e *Init) DoGetVault(cfg *config.Config, retries int) (client *vault.Client, err error) {
 	client, err = vault.CreateClient(cfg.VaultToken, cfg.VaultAddress, retries)
 	if err != nil {
 		return
 	}
-
 	return client, nil
 }
 
-// GetDatasetAPIClient gets and initialises the DatasetAPI Client
+// DoGetDatasetAPIClient creates a datasetAPI client
 func (e *Init) DoGetDatasetAPIClient(cfg *config.Config) DatasetAPI {
 	d := dataset.NewAPIClient(cfg.DatasetAPIURL)
-
 	return d
 }
 
-// GetDatasetAPIClient gets and initialises the DatasetAPI Client
+// DoGetFileStore creates a connection to s3
 func (e *Init) DoGetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
 	fileStore, err = file.NewStore(
 		cfg.AWSRegion,
@@ -162,14 +159,14 @@ func (e *Init) DoGetFileStore(cfg *config.Config, vaultClient *vault.Client) (fi
 	return fileStore, nil
 }
 
-// GetDatasetAPIClient gets and initialises the DatasetAPI Client
+// DoGetFilterStore creates a connection to the Filter data store
 func (e *Init) DoGetFilterStore(cfg *config.Config, serviceAuthToken string) FilterStore {
 	filterAPIClient := filterCli.New(cfg.FilterAPIURL)
 	f := filter.NewStore(filterAPIClient, serviceAuthToken)
 	return f
 }
 
-// GetDatasetAPIClient gets and initialises the DatasetAPI Client
+// DoGetObservationStore creates a graph DB client
 func (e *Init) DoGetObservationStore(ctx context.Context) (observationStore *graph.DB, err error) {
 	o, err := graph.New(ctx, graph.Subsets{Observation: true})
 	if err != nil {
@@ -217,13 +214,14 @@ func (e *Init) DoGetKafkaConsumer(ctx context.Context, kafkaCfg *config.KafkaCon
 	return kafkaConsumer, nil
 }
 
+// DoGetKafkaProducer creates a kafka producer
 func (e *Init) DoGetKafkaProducer(ctx context.Context, cfg *config.Config) (dpkafka.IProducer, error) {
 	pConfig := &dpkafka.ProducerConfig{
-		BrokerAddrs:  cfg.KafkaConfig.Brokers,
-		Topic:        cfg.KafkaConfig.CSVExportedProducerTopic,
-		KafkaVersion: &cfg.KafkaConfig.Version,
-		//	MaxMessageBytes:   &cfg.Kafka.MaxBytes,
-		//MinBrokersHealthy: &cfg.Kafka.ProducerMinBrokersHealthy,
+		BrokerAddrs:       cfg.KafkaConfig.Brokers,
+		Topic:             cfg.KafkaConfig.CSVExportedProducerTopic,
+		KafkaVersion:      &cfg.KafkaConfig.Version,
+		MaxMessageBytes:   &cfg.KafkaConfig.MaxBytes,
+		MinBrokersHealthy: &cfg.KafkaConfig.ProducerMinBrokersHealthy,
 	}
 
 	if cfg.KafkaConfig.SecProtocol == config.KafkaTLSProtocolFlag {

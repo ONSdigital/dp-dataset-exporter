@@ -16,23 +16,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-// TODO: remove hello called example test
-// func TestHelloCalledHandler_Handle(t *testing.T) {
-// 	Convey("Given a successful event handler, when Handle is triggered", t, func() {
-// 		eventHandler := &event.ExportHandler{}
-// 		filePath := "/tmp/helloworld.txt"
-// 		os.Remove(filePath)
-// 		err := eventHandler.Handle(testCtx, &config.Config{OutputFilePath: filePath}, &testEvent)
-// 		So(err, ShouldBeNil)
-// 	})
-
-//		Convey("handler returns an error when cannot write to file", t, func() {
-//			eventHandler := &event.ExportHandler{}
-//			filePath := ""
-//			err := eventHandler.Handle(testCtx, &config.Config{OutputFilePath: filePath}, &testEvent)
-//			So(err, ShouldNotBeNil)
-//		})
-//	}
 const (
 	filterOutputId  = "345"
 	fileHRef        = "s3://some/url/123.csv"
@@ -540,12 +523,6 @@ func TestExportHandler_Handle_Filter(t *testing.T) {
 				return fileHRef, nil
 			},
 		}
-
-		// mockedEventProducer := &eventtest.ProducerMock{
-		// 	CSVExportedFunc: func(e *event.CSVExported) error {
-		// 		return nil
-		// 	},
-		// }
 
 		mockedEventProducer := &eventtest.ProducerMock{
 			CSVExportedFunc: func(ctx context.Context, e *event.CSVExported) error {

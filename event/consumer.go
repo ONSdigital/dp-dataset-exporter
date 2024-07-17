@@ -11,7 +11,6 @@ import (
 
 //go:generate moq -out mock/handler.go -pkg mock . Handler
 
-// TODO: remove or replace hello called logic with app specific
 // Handler represents a handler for processing a single event.
 type Handler interface {
 	Handle(ctx context.Context, cfg *config.Config, filterSubmitted *FilterSubmitted) error
@@ -70,7 +69,7 @@ func processMessage(ctx context.Context, message kafka.Message, handler Handler,
 	log.Info(ctx, "message committed", log.Data{"event": event})
 }
 
-// unmarshal converts a event instance to []byte.
+// unmarshal converts an event instance to []byte.
 func unmarshal(message kafka.Message) (*FilterSubmitted, error) {
 	var event FilterSubmitted
 	err := schema.FilterSubmittedEvent.Unmarshal(message.GetData(), &event)

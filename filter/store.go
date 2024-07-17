@@ -44,7 +44,6 @@ var ErrFilterAPIError = errors.New("internal error from the filter api")
 var ErrUnrecognisedAPIError = errors.New("unrecognised error from the filter api")
 
 // NewStore returns a new instance of a filter store.
-// func NewStore(cli Client, serviceAuthToken string) *Store {
 func NewStore(cli Client, serviceAuthToken string) *Store {
 	return &Store{cli, serviceAuthToken}
 }

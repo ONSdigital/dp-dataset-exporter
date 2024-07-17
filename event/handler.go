@@ -31,8 +31,6 @@ type EventGenerator interface {
 	GenerateOutput(ctx context.Context, event *CSVExported) error
 }
 
-// TODO: remove hello called example handler
-// HelloCalledHandler ...
 type ExportHandler struct {
 	filterStore               FilterStore
 	observationStore          ObservationStore
@@ -601,58 +599,3 @@ func (handler *ExportHandler) updateVersionLinks(ctx context.Context, event *Fil
 
 	return nil
 }
-
-// // CSVExported produces a new CSV exported event for the given filter output ID.
-// func (handler *ExportHandler) CSVExported(ctx context.Context, e *CSVExported) error {
-// 	// if event == nil {
-// 	// 	return errors.New("event required but was nil")
-// 	// }
-// 	// bytes, err := producer.marshaller.Marshal(event)
-// 	// if err != nil {
-// 	// 	return err
-// 	// }
-
-// 	// producer.messageProducer <- kafka.BytesMessage{Value: bytes, Context: ctx}
-
-// 	// return nil
-
-// 	s := schema.CSVExportedEvent
-
-// 	b, err := s.Marshal(CSVExported{
-// 		FilterID:   e.FilterID,
-// 		Filename:   e.Filename,
-// 		FileURL:    e.FileURL,
-// 		InstanceID: e.InstanceID,
-// 		DatasetID:  e.DatasetID,
-// 		Edition:    e.Edition,
-// 		Version:    e.Version,
-// 		RowCount:   e.RowCount,
-// 	})
-// 	if err != nil {
-// 		return fmt.Errorf("error marshalling csvw created event: %w", err)
-// 	}
-
-// 	// Send bytes to kafka producer output channel
-// 	//	h.producer.Channels().Output <- kafka.BytesMessage{Value: b, Context: ctx}
-// 	handler.eventProducer.Channels().Output <- kafka.BytesMessage{Value: b, Context: ctx}
-// 	return nil
-// }
-
-// // AvroProducer of output events.
-// type AvroProducer struct {
-// 	messageProducer chan kafka.BytesMessage
-// 	marshaller      Marshaller
-// }
-
-// // Marshaller marshals events into messages.
-// type Marshaller interface {
-// 	Marshal(s interface{}) ([]byte, error)
-// }
-
-// // NewAvroProducer returns a new instance of AvroProducer.
-// func NewAvroProducer(messageProducer chan kafka.BytesMessage, marshaller Marshaller) *AvroProducer {
-// 	return &AvroProducer{
-// 		messageProducer: messageProducer,
-// 		marshaller:      marshaller,
-// 	}
-// }
