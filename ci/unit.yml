@@ -6,11 +6,14 @@ image_resource:
   type: docker-image
   source:
     repository: golang
-    tag: 1.22.2-bullseye
+    tag: 1.22-bullseye
 
 inputs:
   - name: dp-dataset-exporter
     path: dp-dataset-exporter
+
+caches:
+  - path: go/
 
 run:
   path: dp-dataset-exporter/ci/scripts/unit.sh
