@@ -35,6 +35,7 @@ github.com/ONSdigital/dp-s3 v1.10.0 h1:DPAUUDxUWm9NnhW2QwOEQHwfi8pG2SqZrSeIdhgQj
 github.com/ONSdigital/dp-s3 v1.10.0/go.mod h1:Ed4EkN88c4YmJNxuyAYrVv8tzc6al9g4F6LP7qcWfgk=
 github.com/ONSdigital/dp-vault v1.3.1 h1:fu56wh7FucMO9xAX4hhzlKZU6Foumd14+el7PduZNFw=
 github.com/ONSdigital/dp-vault v1.3.1/go.mod h1:7eRXvFRROZ34oMMTvRZMy/WKUSHLQTj6ocBEqo021KY=
+github.com/ONSdigital/go-ns v0.0.0-20191104121206-f144c4ec2e58 h1:XHnzoC7TxueLAfkBpblPiwaIxjngGv1VNVZhvE4jY6w=
 github.com/ONSdigital/go-ns v0.0.0-20191104121206-f144c4ec2e58/go.mod h1:iWos35il+NjbvDEqwtB736pyHru0MPFE/LqcwkV1wDc=
 github.com/ONSdigital/go-ns v0.0.0-20210916104633-ac1c1c52327e h1:o+AK5m0lxRIFn4t9ng9x19kez72ErAB0cW9ArT6sAZM=
 github.com/ONSdigital/go-ns v0.0.0-20210916104633-ac1c1c52327e/go.mod h1:BCx4ULp5nT3dT7Mft5iMrp9439JG9lqIlc0JOPmsHTg=

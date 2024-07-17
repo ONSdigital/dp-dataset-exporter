@@ -42,7 +42,7 @@ func main() {
 
 	kafkaProducer, err := kafka.NewProducer(ctx, pConfig)
 	if err != nil {
-		log.Fatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": cfg.KafkaConfig.CSVExportedProducerTopic})
+		log.Fatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": cfg.KafkaConfig.FilterConsumerTopic})
 		os.Exit(1)
 	}
 
@@ -53,17 +53,17 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		e := scanEvent(scanner)
-		log.Info(ctx, "sending hello-called event", log.Data{"helloCalledEvent": e})
+		log.Info(ctx, "sending filter-submitted event", log.Data{"FilterSubmitted": e})
 
 		bytes, err := schema.FilterSubmittedEvent.Marshal(e)
 		if err != nil {
-			log.Fatal(ctx, "hello-called event error", err)
+			log.Fatal(ctx, "filter-submitted event error", err)
 			os.Exit(1)
 		}
 
 		// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
 		if err := kafkaProducer.Initialise(ctx); err != nil {
-			log.Fatal(ctx, "fatal error trying to initialise kafka producer", err, log.Data{"topic": cfg.KafkaConfig.CSVExportedProducerTopic})
+			log.Fatal(ctx, "fatal error trying to initialise kafka producer", err, log.Data{"topic": cfg.KafkaConfig.FilterConsumerTopic})
 			os.Exit(1)
 		}
 
@@ -71,16 +71,32 @@ func main() {
 	}
 }
 
-// scanEvent creates a HelloCalled event according to the user input
+// scanEvent creates a FilterSubmitted event according to the user input
 func scanEvent(scanner *bufio.Scanner) *event.FilterSubmitted {
-	fmt.Println("--- [Send Kafka HelloCalled] ---")
+	fmt.Println("--- [Send Kafka FilterSubmitted] ---")
 
-	fmt.Println("Please type the recipient name")
+	e := &event.FilterSubmitted{}
+
+	fmt.Println("Please type the instance_id")
 	fmt.Printf("$ ")
 	scanner.Scan()
-	name := scanner.Text()
+	e.InstanceID = scanner.Text()
 
-	return &event.FilterSubmitted{
-		FilterID: name,
-	}
+	fmt.Println("Please type the dataset_id")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.DatasetID = scanner.Text()
+
+	fmt.Println("Please type the edition")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.Edition = scanner.Text()
+
+	fmt.Println("Please type the version")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.Version = scanner.Text()
+
+	return e
+
 }
