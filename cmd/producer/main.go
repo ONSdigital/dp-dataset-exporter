@@ -3,59 +3,101 @@ package main
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
-	kafka "github.com/ONSdigital/dp-kafka/v2"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
-func main() {
-	ctx := context.Background()
-	log.Namespace = "dp-dataset-exporter"
+const serviceName = "dp-dataset-exporter"
 
-	config, err := config.Get()
+func main() {
+	log.Namespace = serviceName
+	ctx := context.Background()
+
+	// Get Config
+	cfg, err := config.Get()
 	if err != nil {
 		log.Fatal(ctx, "error getting config", err)
 		os.Exit(1)
 	}
 
 	// Avoid logging the neo4j FileURL as it may contain a password
-	log.Info(ctx, "loaded config", log.Data{"config": config})
+	log.Info(ctx, "loaded config", log.Data{"config": cfg})
 
-	// Create Kafka Producer
-	pChannels := kafka.CreateProducerChannels()
-	pConfig := &kafka.ProducerConfig{KafkaVersion: &config.KafkaVersion}
-	kafkaProducer, err := kafka.NewProducer(ctx, config.KafkaAddr, config.FilterConsumerTopic, pChannels, pConfig)
+	pConfig := &kafka.ProducerConfig{
+		KafkaVersion: &cfg.KafkaConfig.Version,
+	}
+
+	if cfg.KafkaConfig.SecProtocol == config.KafkaTLSProtocolFlag {
+		pConfig.SecurityConfig = kafka.GetSecurityConfig(
+			cfg.KafkaConfig.SecCACerts,
+			cfg.KafkaConfig.SecClientCert,
+			cfg.KafkaConfig.SecClientKey,
+			cfg.KafkaConfig.SecSkipVerify,
+		)
+	}
+
+	kafkaProducer, err := kafka.NewProducer(ctx, pConfig)
 	if err != nil {
-		log.Fatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": config.FilterConsumerTopic})
+		log.Fatal(ctx, "fatal error trying to create kafka producer", err, log.Data{"topic": cfg.KafkaConfig.FilterConsumerTopic})
 		os.Exit(1)
 	}
 
 	// kafka error logging go-routines
-	kafkaProducer.Channels().LogErrors(ctx, "kafka producer")
+	kafkaProducer.LogErrors(ctx)
 
 	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
+	for {
+		e := scanEvent(scanner)
+		log.Info(ctx, "sending filter-submitted event", log.Data{"FilterSubmitted": e})
 
-		filterID := scanner.Text()
-
-		log.Info(ctx, "sending filter output event", log.Data{"filter_ouput_id": filterID})
-
-		event := event.FilterSubmitted{
-			FilterID: filterID,
-		}
-
-		bytes, err := schema.FilterSubmittedEvent.Marshal(event)
+		bytes, err := schema.FilterSubmittedEvent.Marshal(e)
 		if err != nil {
-			log.Fatal(ctx, "filter submitted event error", err)
+			log.Fatal(ctx, "filter-submitted event error", err)
 			os.Exit(1)
 		}
 
 		// Send bytes to Output channel, after calling Initialise just in case it is not initialised.
-		kafkaProducer.Initialise(ctx)
-		kafkaProducer.Channels().Output <- bytes
+		if err := kafkaProducer.Initialise(ctx); err != nil {
+			log.Fatal(ctx, "fatal error trying to initialise kafka producer", err, log.Data{"topic": cfg.KafkaConfig.FilterConsumerTopic})
+			os.Exit(1)
+		}
+
+		kafkaProducer.Channels().Output <- kafka.BytesMessage{Value: bytes, Context: ctx}
 	}
+}
+
+// scanEvent creates a FilterSubmitted event according to the user input
+func scanEvent(scanner *bufio.Scanner) *event.FilterSubmitted {
+	fmt.Println("--- [Send Kafka FilterSubmitted] ---")
+
+	e := &event.FilterSubmitted{}
+
+	fmt.Println("Please type the instance_id")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.InstanceID = scanner.Text()
+
+	fmt.Println("Please type the dataset_id")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.DatasetID = scanner.Text()
+
+	fmt.Println("Please type the edition")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.Edition = scanner.Text()
+
+	fmt.Println("Please type the version")
+	fmt.Printf("$ ")
+	scanner.Scan()
+	e.Version = scanner.Text()
+
+	return e
+
 }

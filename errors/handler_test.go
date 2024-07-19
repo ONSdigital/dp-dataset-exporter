@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ONSdigital/dp-dataset-exporter/errors"
+	kafka "github.com/ONSdigital/dp-kafka/v4"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -14,7 +15,7 @@ var ctx = context.Background()
 func TestSpec(t *testing.T) {
 	Convey("Given an event handler with a mock message producer", t, func() {
 
-		mockOutputMessageChan := make(chan []byte, 1)
+		mockOutputMessageChan := make(chan kafka.BytesMessage, 1)
 		errorHandler := errors.NewKafkaHandler(mockOutputMessageChan)
 
 		Convey("When handle is called", func() {
@@ -28,7 +29,7 @@ func TestSpec(t *testing.T) {
 
 				actualMessage := <-mockOutputMessageChan
 				var actualEvent errors.Event
-				err := errors.EventSchema.Unmarshal(actualMessage, &actualEvent)
+				err := errors.EventSchema.Unmarshal(actualMessage.Value, &actualEvent)
 
 				So(err, ShouldBeNil)
 				So(actualEvent.ServiceName, ShouldEqual, "dp-dataset-exporter")

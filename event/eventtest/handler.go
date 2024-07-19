@@ -5,6 +5,7 @@ package eventtest
 
 import (
 	"context"
+	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"sync"
 )
@@ -15,22 +16,22 @@ var _ event.Handler = &HandlerMock{}
 
 // HandlerMock is a mock implementation of event.Handler.
 //
-// 	func TestSomethingThatUsesHandler(t *testing.T) {
+//	func TestSomethingThatUsesHandler(t *testing.T) {
 //
-// 		// make and configure a mocked event.Handler
-// 		mockedHandler := &HandlerMock{
-// 			HandleFunc: func(ctx context.Context, filterSubmittedEvent *event.FilterSubmitted) error {
-// 				panic("mock out the Handle method")
-// 			},
-// 		}
+//		// make and configure a mocked event.Handler
+//		mockedHandler := &HandlerMock{
+//			HandleFunc: func(ctx context.Context, cfg *config.Config, filterSubmitted *event.FilterSubmitted) error {
+//				panic("mock out the Handle method")
+//			},
+//		}
 //
-// 		// use mockedHandler in code that requires event.Handler
-// 		// and then make assertions.
+//		// use mockedHandler in code that requires event.Handler
+//		// and then make assertions.
 //
-// 	}
+//	}
 type HandlerMock struct {
 	// HandleFunc mocks the Handle method.
-	HandleFunc func(ctx context.Context, filterSubmittedEvent *event.FilterSubmitted) error
+	HandleFunc func(ctx context.Context, cfg *config.Config, filterSubmitted *event.FilterSubmitted) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -38,41 +39,48 @@ type HandlerMock struct {
 		Handle []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// FilterSubmittedEvent is the filterSubmittedEvent argument value.
-			FilterSubmittedEvent *event.FilterSubmitted
+			// Cfg is the cfg argument value.
+			Cfg *config.Config
+			// FilterSubmitted is the filterSubmitted argument value.
+			FilterSubmitted *event.FilterSubmitted
 		}
 	}
 	lockHandle sync.RWMutex
 }
 
 // Handle calls HandleFunc.
-func (mock *HandlerMock) Handle(ctx context.Context, filterSubmittedEvent *event.FilterSubmitted) error {
+func (mock *HandlerMock) Handle(ctx context.Context, cfg *config.Config, filterSubmitted *event.FilterSubmitted) error {
 	if mock.HandleFunc == nil {
 		panic("HandlerMock.HandleFunc: method is nil but Handler.Handle was just called")
 	}
 	callInfo := struct {
-		Ctx                  context.Context
-		FilterSubmittedEvent *event.FilterSubmitted
+		Ctx             context.Context
+		Cfg             *config.Config
+		FilterSubmitted *event.FilterSubmitted
 	}{
-		Ctx:                  ctx,
-		FilterSubmittedEvent: filterSubmittedEvent,
+		Ctx:             ctx,
+		Cfg:             cfg,
+		FilterSubmitted: filterSubmitted,
 	}
 	mock.lockHandle.Lock()
 	mock.calls.Handle = append(mock.calls.Handle, callInfo)
 	mock.lockHandle.Unlock()
-	return mock.HandleFunc(ctx, filterSubmittedEvent)
+	return mock.HandleFunc(ctx, cfg, filterSubmitted)
 }
 
 // HandleCalls gets all the calls that were made to Handle.
 // Check the length with:
-//     len(mockedHandler.HandleCalls())
+//
+//	len(mockedHandler.HandleCalls())
 func (mock *HandlerMock) HandleCalls() []struct {
-	Ctx                  context.Context
-	FilterSubmittedEvent *event.FilterSubmitted
+	Ctx             context.Context
+	Cfg             *config.Config
+	FilterSubmitted *event.FilterSubmitted
 } {
 	var calls []struct {
-		Ctx                  context.Context
-		FilterSubmittedEvent *event.FilterSubmitted
+		Ctx             context.Context
+		Cfg             *config.Config
+		FilterSubmitted *event.FilterSubmitted
 	}
 	mock.lockHandle.RLock()
 	calls = mock.calls.Handle

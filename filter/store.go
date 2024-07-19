@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-api-clients-go/v2/filter"
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 
 	"github.com/ONSdigital/log.go/v2/log"
 )
@@ -18,6 +19,7 @@ import (
 type Client interface {
 	UpdateFilterOutputBytes(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, filterJobID string, b []byte) error
 	GetOutputBytes(ctx context.Context, userAuthToken, serviceAuthToken, downloadServiceToken, collectionID, filterOutputID string) ([]byte, error)
+	Checker(context.Context, *healthcheck.CheckState) error
 }
 
 // Store provides access to stored dimension data using the filter dp-api-client

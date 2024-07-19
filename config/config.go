@@ -7,25 +7,17 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+const KafkaTLSProtocolFlag = "TLS"
+
 // Config values for the application.
 type Config struct {
-	BindAddr                   string        `envconfig:"BIND_ADDR"`
-	KafkaAddr                  []string      `envconfig:"KAFKA_ADDR"`
-	KafkaVersion               string        `envconfig:"KAFKA_VERSION"`
-	KafkaSecProtocol           string        `envconfig:"KAFKA_SEC_PROTO"`
-	KafkaSecCACerts            string        `envconfig:"KAFKA_SEC_CA_CERTS"`
-	KafkaSecClientCert         string        `envconfig:"KAFKA_SEC_CLIENT_CERT"`
-	KafkaSecClientKey          string        `envconfig:"KAFKA_SEC_CLIENT_KEY" json:"-"`
-	KafkaSecSkipVerify         bool          `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
-	KafkaConsumerWorkers       int           `envconfig:"KAFKA_CONSUMER_WORKERS"`
-	FilterConsumerGroup        string        `envconfig:"FILTER_JOB_CONSUMER_GROUP"`
-	FilterConsumerTopic        string        `envconfig:"FILTER_JOB_CONSUMER_TOPIC"`
+	BindAddr                   string `envconfig:"BIND_ADDR"`
+	KafkaConfig                KafkaConfig
 	FilterAPIURL               string        `envconfig:"FILTER_API_URL"`
 	AWSRegion                  string        `envconfig:"AWS_REGION"`
 	S3BucketName               string        `envconfig:"S3_BUCKET_NAME"`
 	S3BucketURL                string        `envconfig:"S3_BUCKET_URL"`
 	S3PrivateBucketName        string        `envconfig:"S3_PRIVATE_BUCKET_NAME"`
-	CSVExportedProducerTopic   string        `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
 	DatasetAPIURL              string        `envconfig:"DATASET_API_URL"`
 	ErrorProducerTopic         string        `envconfig:"ERROR_PRODUCER_TOPIC"`
 	GracefulShutdownTimeout    time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
@@ -41,6 +33,28 @@ type Config struct {
 	ZebedeeURL                 string        `envconfig:"ZEBEDEE_URL"`
 	FullDatasetFilePrefix      string        `envconfig:"FULL_DATASET_FILE_PREFIX"`
 	FilteredDatasetFilePrefix  string        `envconfig:"FILTERED_DATASET_FILE_PREFIX"`
+	OTExporterOTLPEndpoint     string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	OTServiceName              string        `envconfig:"OTEL_SERVICE_NAME"`
+	OTBatchTimeout             time.Duration `envconfig:"OTEL_BATCH_TIMEOUT"`
+	OtelEnabled                bool          `envconfig:"OTEL_ENABLED"`
+}
+
+type KafkaConfig struct {
+	Brokers                   []string `envconfig:"KAFKA_ADDR"`
+	Version                   string   `envconfig:"KAFKA_VERSION"`
+	OffsetOldest              bool     `envconfig:"KAFKA_OFFSET_OLDEST"`
+	SecProtocol               string   `envconfig:"KAFKA_SEC_PROTO"`
+	SecCACerts                string   `envconfig:"KAFKA_SEC_CA_CERTS"`
+	SecClientKey              string   `envconfig:"KAFKA_SEC_CLIENT_KEY"    json:"-"`
+	SecClientCert             string   `envconfig:"KAFKA_SEC_CLIENT_CERT"`
+	SecSkipVerify             bool     `envconfig:"KAFKA_SEC_SKIP_VERIFY"`
+	NumWorkers                int      `envconfig:"KAFKA_NUM_WORKERS"`
+	FilterConsumerGroup       string   `envconfig:"HELLO_CALLED_GROUP"`
+	FilterConsumerTopic       string   `envconfig:"HELLO_CALLED_TOPIC"`
+	CSVExportedProducerTopic  string   `envconfig:"CSV_EXPORTED_PRODUCER_TOPIC"`
+	ConsumerMinBrokersHealthy int      `envconfig:"KAFKA_CONSUMER_MIN_BROKERS_HEALTHY"`
+	MaxBytes                  int      `envconfig:"KAFKA_MAX_BYTES"`
+	ProducerMinBrokersHealthy int      `envconfig:"KAFKA_PRODUCER_MIN_BROKERS_HEALTHY"`
 }
 
 // Get the configuration values from the environment or provide the defaults.
@@ -48,13 +62,7 @@ func Get() (*Config, error) {
 
 	cfg := &Config{
 		BindAddr:                   ":22500",
-		KafkaAddr:                  []string{"localhost:9092", "localhost:9093", "localhost:9094"},
-		KafkaVersion:               "1.0.2",
-		KafkaConsumerWorkers:       1,
-		FilterConsumerTopic:        "filter-job-submitted",
-		FilterConsumerGroup:        "dp-dataset-exporter",
 		FilterAPIURL:               "http://localhost:22100",
-		CSVExportedProducerTopic:   "common-output-created",
 		S3BucketName:               "csv-exported",
 		S3BucketURL:                "",
 		S3PrivateBucketName:        "csv-exported",
@@ -74,6 +82,27 @@ func Get() (*Config, error) {
 		ZebedeeURL:                 "http://localhost:8082",
 		FullDatasetFilePrefix:      "full-datasets/",
 		FilteredDatasetFilePrefix:  "filtered-datasets/",
+		OTExporterOTLPEndpoint:     "localhost:4317",
+		OTServiceName:              "dp-dataset-exporter",
+		OTBatchTimeout:             5 * time.Second,
+		OtelEnabled:                false,
+		KafkaConfig: KafkaConfig{
+			Brokers:                   []string{"localhost:9092", "localhost:9093", "localhost:9094"},
+			Version:                   "1.0.2",
+			OffsetOldest:              true,
+			NumWorkers:                1,
+			FilterConsumerTopic:       "filter-job-submitted",
+			FilterConsumerGroup:       "dp-dataset-exporter",
+			CSVExportedProducerTopic:  "common-output-created",
+			ConsumerMinBrokersHealthy: 1,
+			MaxBytes:                  2000000,
+			ProducerMinBrokersHealthy: 2,
+			SecCACerts:                "",
+			SecClientCert:             "",
+			SecClientKey:              "",
+			SecProtocol:               "",
+			SecSkipVerify:             false,
+		},
 	}
 
 	err := envconfig.Process("", cfg)

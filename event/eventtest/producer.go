@@ -4,6 +4,7 @@
 package eventtest
 
 import (
+	"context"
 	"github.com/ONSdigital/dp-dataset-exporter/event"
 	"sync"
 )
@@ -14,27 +15,29 @@ var _ event.Producer = &ProducerMock{}
 
 // ProducerMock is a mock implementation of event.Producer.
 //
-// 	func TestSomethingThatUsesProducer(t *testing.T) {
+//	func TestSomethingThatUsesProducer(t *testing.T) {
 //
-// 		// make and configure a mocked event.Producer
-// 		mockedProducer := &ProducerMock{
-// 			CSVExportedFunc: func(e *event.CSVExported) error {
-// 				panic("mock out the CSVExported method")
-// 			},
-// 		}
+//		// make and configure a mocked event.Producer
+//		mockedProducer := &ProducerMock{
+//			CSVExportedFunc: func(ctx context.Context, e *event.CSVExported) error {
+//				panic("mock out the CSVExported method")
+//			},
+//		}
 //
-// 		// use mockedProducer in code that requires event.Producer
-// 		// and then make assertions.
+//		// use mockedProducer in code that requires event.Producer
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ProducerMock struct {
 	// CSVExportedFunc mocks the CSVExported method.
-	CSVExportedFunc func(e *event.CSVExported) error
+	CSVExportedFunc func(ctx context.Context, e *event.CSVExported) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// CSVExported holds details about calls to the CSVExported method.
 		CSVExported []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// E is the e argument value.
 			E *event.CSVExported
 		}
@@ -43,29 +46,34 @@ type ProducerMock struct {
 }
 
 // CSVExported calls CSVExportedFunc.
-func (mock *ProducerMock) CSVExported(e *event.CSVExported) error {
+func (mock *ProducerMock) CSVExported(ctx context.Context, e *event.CSVExported) error {
 	if mock.CSVExportedFunc == nil {
 		panic("ProducerMock.CSVExportedFunc: method is nil but Producer.CSVExported was just called")
 	}
 	callInfo := struct {
-		E *event.CSVExported
+		Ctx context.Context
+		E   *event.CSVExported
 	}{
-		E: e,
+		Ctx: ctx,
+		E:   e,
 	}
 	mock.lockCSVExported.Lock()
 	mock.calls.CSVExported = append(mock.calls.CSVExported, callInfo)
 	mock.lockCSVExported.Unlock()
-	return mock.CSVExportedFunc(e)
+	return mock.CSVExportedFunc(ctx, e)
 }
 
 // CSVExportedCalls gets all the calls that were made to CSVExported.
 // Check the length with:
-//     len(mockedProducer.CSVExportedCalls())
+//
+//	len(mockedProducer.CSVExportedCalls())
 func (mock *ProducerMock) CSVExportedCalls() []struct {
-	E *event.CSVExported
+	Ctx context.Context
+	E   *event.CSVExported
 } {
 	var calls []struct {
-		E *event.CSVExported
+		Ctx context.Context
+		E   *event.CSVExported
 	}
 	mock.lockCSVExported.RLock()
 	calls = mock.calls.CSVExported
