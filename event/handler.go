@@ -250,6 +250,7 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 
 var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
 	// Get the names of the dimensions for the DatasetID
+	fmt.Println("GETTING DIMENSIONS")
 	dimensions, err := handler.datasetAPICli.GetVersionDimensions(ctx,
 		"", // userAuthToken
 		handler.serviceAuthToken,
@@ -516,6 +517,7 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 	hReader := reader.New(rReader)
 
 	header, err := hReader.PeekBytes('\n')
+
 	if err != nil {
 		return nil, "", "", 0, errors.Wrap(err, "could not peek")
 	}

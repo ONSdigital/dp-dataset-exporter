@@ -11,7 +11,6 @@ import (
 	"github.com/ONSdigital/dp-graph/v2/graph"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	kafka "github.com/ONSdigital/dp-kafka/v4"
-	vault "github.com/ONSdigital/dp-vault"
 )
 
 //go:generate moq -out mock/initialiser.go -pkg mock . Initialiser
@@ -23,8 +22,7 @@ type Initialiser interface {
 	DoGetDatasetAPIClient(cfg *config.Config) DatasetAPI
 	DoGetFilterStore(cfg *config.Config, serviceAuthToken string) FilterStore
 	DoGetObservationStore(ctx context.Context) (observationStore *graph.DB, err error)
-	DoGetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error)
-	DoGetVault(cfg *config.Config, retries int) (client *vault.Client, err error)
+	DoGetFileStore(cfg *config.Config) (fileStore *file.Store, err error)
 	DoGetHTTPServer(bindAddr string, router http.Handler) HTTPServer
 	DoGetHealthCheck(cfg *config.Config, buildTime, gitCommit, version string) (HealthChecker, error)
 	DoGetKafkaConsumer(ctx context.Context, kafkaCfg *config.KafkaConfig) (kafka.IConsumerGroup, error)

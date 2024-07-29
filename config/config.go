@@ -23,9 +23,6 @@ type Config struct {
 	GracefulShutdownTimeout    time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
 	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
 	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
-	VaultToken                 string        `envconfig:"VAULT_TOKEN"                   json:"-"`
-	VaultAddress               string        `envconfig:"VAULT_ADDR"`
-	VaultPath                  string        `envconfig:"VAULT_PATH"`
 	DownloadServiceURL         string        `envconfig:"DOWNLOAD_SERVICE_URL"`
 	APIDomainURL               string        `envconfig:"API_DOMAIN_URL"`
 	ServiceAuthToken           string        `envconfig:"SERVICE_AUTH_TOKEN"            json:"-"`
@@ -37,6 +34,7 @@ type Config struct {
 	OTServiceName              string        `envconfig:"OTEL_SERVICE_NAME"`
 	OTBatchTimeout             time.Duration `envconfig:"OTEL_BATCH_TIMEOUT"`
 	OtelEnabled                bool          `envconfig:"OTEL_ENABLED"`
+	LocalstackHost             string        `envconfig:"LOCALSTACK_HOST"`
 }
 
 type KafkaConfig struct {
@@ -72,9 +70,6 @@ func Get() (*Config, error) {
 		GracefulShutdownTimeout:    time.Second * 10,
 		HealthCheckInterval:        30 * time.Second,
 		HealthCheckCriticalTimeout: 90 * time.Second,
-		VaultPath:                  "secret/shared/psk",
-		VaultAddress:               "http://localhost:8200",
-		VaultToken:                 "",
 		DownloadServiceURL:         "http://localhost:23600",
 		APIDomainURL:               "http://localhost:23200",
 		ServiceAuthToken:           "0f49d57b-c551-4d33-af1e-a442801dd851",

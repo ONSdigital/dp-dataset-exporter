@@ -13,7 +13,6 @@ import (
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	dpkafka "github.com/ONSdigital/dp-kafka/v4"
 	dphttp "github.com/ONSdigital/dp-net/v2/http"
-	vault "github.com/ONSdigital/dp-vault"
 )
 
 // ExternalServiceList holds the initialiser and initialisation state of external services.
@@ -25,7 +24,6 @@ type ExternalServiceList struct {
 	FilterStore      bool
 	ObservationStore bool
 	FileStore        bool
-	Vault            bool
 	Init             Initialiser
 }
 
@@ -39,7 +37,6 @@ func NewServiceList(initialiser Initialiser) *ExternalServiceList {
 		FilterStore:      false,
 		ObservationStore: false,
 		FileStore:        false,
-		Vault:            false,
 		Init:             initialiser,
 	}
 }
@@ -67,22 +64,15 @@ func (e *ExternalServiceList) GetDatasetAPIClient(cfg *config.Config) (DatasetAP
 }
 
 // GetFileStore returns an initialised connection to file store
-func (e *ExternalServiceList) GetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
+func (e *ExternalServiceList) GetFileStore(cfg *config.Config) (fileStore *file.Store, err error) {
 
-	f, err := e.Init.DoGetFileStore(cfg, vaultClient)
+	f, err := e.Init.DoGetFileStore(cfg)
 	if err != nil {
 		return nil, err
 	}
 	e.FileStore = true
 
 	return f, nil
-}
-
-// GetVault returns a vault client
-func (e *ExternalServiceList) GetVault(cfg *config.Config, retries int) (client *vault.Client, err error) {
-	v, err := e.Init.DoGetVault(cfg, retries)
-	e.Vault = true
-	return v, nil
 }
 
 // GetFilterStore returns a filter client
@@ -128,15 +118,6 @@ func (e *ExternalServiceList) GetHealthCheck(cfg *config.Config, buildTime, gitC
 	return hc, nil
 }
 
-// DoGetVault creates a vault client
-func (e *Init) DoGetVault(cfg *config.Config, retries int) (client *vault.Client, err error) {
-	client, err = vault.CreateClient(cfg.VaultToken, cfg.VaultAddress, retries)
-	if err != nil {
-		return
-	}
-	return client, nil
-}
-
 // DoGetDatasetAPIClient creates a datasetAPI client
 func (e *Init) DoGetDatasetAPIClient(cfg *config.Config) DatasetAPI {
 	d := dataset.NewAPIClient(cfg.DatasetAPIURL)
@@ -144,14 +125,13 @@ func (e *Init) DoGetDatasetAPIClient(cfg *config.Config) DatasetAPI {
 }
 
 // DoGetFileStore creates a connection to s3
-func (e *Init) DoGetFileStore(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
+func (e *Init) DoGetFileStore(cfg *config.Config) (fileStore *file.Store, err error) {
+
 	fileStore, err = file.NewStore(
 		cfg.AWSRegion,
 		cfg.S3BucketURL,
 		cfg.S3BucketName,
 		cfg.S3PrivateBucketName,
-		cfg.VaultPath,
-		vaultClient,
 	)
 	if err != nil {
 		return

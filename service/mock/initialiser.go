@@ -10,7 +10,6 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/service"
 	"github.com/ONSdigital/dp-graph/v2/graph"
 	kafka "github.com/ONSdigital/dp-kafka/v4"
-	vault "github.com/ONSdigital/dp-vault"
 	"net/http"
 	"sync"
 )
@@ -63,7 +62,7 @@ type InitialiserMock struct {
 	DoGetDatasetAPIClientFunc func(cfg *config.Config) service.DatasetAPI
 
 	// DoGetFileStoreFunc mocks the DoGetFileStore method.
-	DoGetFileStoreFunc func(cfg *config.Config, vaultClient *vault.Client) (*file.Store, error)
+	DoGetFileStoreFunc func(cfg *config.Config) (*file.Store, error)
 
 	// DoGetFilterStoreFunc mocks the DoGetFilterStore method.
 	DoGetFilterStoreFunc func(cfg *config.Config, serviceAuthToken string) service.FilterStore
@@ -83,9 +82,6 @@ type InitialiserMock struct {
 	// DoGetObservationStoreFunc mocks the DoGetObservationStore method.
 	DoGetObservationStoreFunc func(ctx context.Context) (*graph.DB, error)
 
-	// DoGetVaultFunc mocks the DoGetVault method.
-	DoGetVaultFunc func(cfg *config.Config, retries int) (*vault.Client, error)
-
 	// calls tracks calls to the methods.
 	calls struct {
 		// DoGetDatasetAPIClient holds details about calls to the DoGetDatasetAPIClient method.
@@ -97,8 +93,6 @@ type InitialiserMock struct {
 		DoGetFileStore []struct {
 			// Cfg is the cfg argument value.
 			Cfg *config.Config
-			// VaultClient is the vaultClient argument value.
-			VaultClient *vault.Client
 		}
 		// DoGetFilterStore holds details about calls to the DoGetFilterStore method.
 		DoGetFilterStore []struct {
@@ -144,13 +138,6 @@ type InitialiserMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 		}
-		// DoGetVault holds details about calls to the DoGetVault method.
-		DoGetVault []struct {
-			// Cfg is the cfg argument value.
-			Cfg *config.Config
-			// Retries is the retries argument value.
-			Retries int
-		}
 	}
 	lockDoGetDatasetAPIClient sync.RWMutex
 	lockDoGetFileStore        sync.RWMutex
@@ -160,7 +147,6 @@ type InitialiserMock struct {
 	lockDoGetKafkaConsumer    sync.RWMutex
 	lockDoGetKafkaProducer    sync.RWMutex
 	lockDoGetObservationStore sync.RWMutex
-	lockDoGetVault            sync.RWMutex
 }
 
 // DoGetDatasetAPIClient calls DoGetDatasetAPIClientFunc.
@@ -196,21 +182,15 @@ func (mock *InitialiserMock) DoGetDatasetAPIClientCalls() []struct {
 }
 
 // DoGetFileStore calls DoGetFileStoreFunc.
-func (mock *InitialiserMock) DoGetFileStore(cfg *config.Config, vaultClient *vault.Client) (*file.Store, error) {
+func (mock *InitialiserMock) DoGetFileStore(cfg *config.Config) (*file.Store, error) {
 	if mock.DoGetFileStoreFunc == nil {
 		panic("InitialiserMock.DoGetFileStoreFunc: method is nil but Initialiser.DoGetFileStore was just called")
 	}
-	callInfo := struct {
-		Cfg         *config.Config
-		VaultClient *vault.Client
-	}{
-		Cfg:         cfg,
-		VaultClient: vaultClient,
-	}
+	
 	mock.lockDoGetFileStore.Lock()
-	mock.calls.DoGetFileStore = append(mock.calls.DoGetFileStore, callInfo)
+	mock.calls.DoGetFileStore = append(mock.calls.DoGetFileStore)
 	mock.lockDoGetFileStore.Unlock()
-	return mock.DoGetFileStoreFunc(cfg, vaultClient)
+	return mock.DoGetFileStoreFunc(cfg)
 }
 
 // DoGetFileStoreCalls gets all the calls that were made to DoGetFileStore.
@@ -219,11 +199,9 @@ func (mock *InitialiserMock) DoGetFileStore(cfg *config.Config, vaultClient *vau
 //	len(mockedInitialiser.DoGetFileStoreCalls())
 func (mock *InitialiserMock) DoGetFileStoreCalls() []struct {
 	Cfg         *config.Config
-	VaultClient *vault.Client
 } {
 	var calls []struct {
 		Cfg         *config.Config
-		VaultClient *vault.Client
 	}
 	mock.lockDoGetFileStore.RLock()
 	calls = mock.calls.DoGetFileStore
@@ -451,38 +429,3 @@ func (mock *InitialiserMock) DoGetObservationStoreCalls() []struct {
 	return calls
 }
 
-// DoGetVault calls DoGetVaultFunc.
-func (mock *InitialiserMock) DoGetVault(cfg *config.Config, retries int) (*vault.Client, error) {
-	if mock.DoGetVaultFunc == nil {
-		panic("InitialiserMock.DoGetVaultFunc: method is nil but Initialiser.DoGetVault was just called")
-	}
-	callInfo := struct {
-		Cfg     *config.Config
-		Retries int
-	}{
-		Cfg:     cfg,
-		Retries: retries,
-	}
-	mock.lockDoGetVault.Lock()
-	mock.calls.DoGetVault = append(mock.calls.DoGetVault, callInfo)
-	mock.lockDoGetVault.Unlock()
-	return mock.DoGetVaultFunc(cfg, retries)
-}
-
-// DoGetVaultCalls gets all the calls that were made to DoGetVault.
-// Check the length with:
-//
-//	len(mockedInitialiser.DoGetVaultCalls())
-func (mock *InitialiserMock) DoGetVaultCalls() []struct {
-	Cfg     *config.Config
-	Retries int
-} {
-	var calls []struct {
-		Cfg     *config.Config
-		Retries int
-	}
-	mock.lockDoGetVault.RLock()
-	calls = mock.calls.DoGetVault
-	mock.lockDoGetVault.RUnlock()
-	return calls
-}
