@@ -250,7 +250,6 @@ var SortFilter = func(ctx context.Context, handler *ExportHandler, event *Filter
 
 var CreateFilterForAll = func(ctx context.Context, handler *ExportHandler, event *FilterSubmitted, isPublished bool) (*observation.DimensionFilters, error) {
 	// Get the names of the dimensions for the DatasetID
-	fmt.Println("GETTING DIMENSIONS")
 	dimensions, err := handler.datasetAPICli.GetVersionDimensions(ctx,
 		"", // userAuthToken
 		handler.serviceAuthToken,
