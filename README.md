@@ -58,6 +58,7 @@ environment variables, or with a link to a configuration guide.
 | OTEL_SERVICE_NAME            | dp-dataset-exporter                  | Label of service for OpenTelemetry service
 | OTEL_BATCH_TIMEOUT           | 5s                                   | Timeout for OpenTelemetry
 | OTEL_ENABLED                 | false                                | Feature flag to enable OpenTelemetry
+| LOCALSTACK_HOST              | http://localhost:4566                | The address of the localsatck host if running locally 
 
 Notes:
 
