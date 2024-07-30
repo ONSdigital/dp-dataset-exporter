@@ -121,7 +121,7 @@ func Run(ctx context.Context, serviceList *ExternalServiceList, buildTime, gitCo
 		return nil, err
 	}
 
-	if err := registerCheckers(ctx, hc, consumer, producer, *observationStore, datasetAPICli, filterStore, fileStore.Uploader, fileStore.CryptoUploader, health.NewClient("Zebedee", cfg.ZebedeeURL)); err != nil {
+	if err := registerCheckers(ctx, hc, consumer, producer, *observationStore, datasetAPICli, filterStore, fileStore.Uploader, fileStore.PrivateUploader, health.NewClient("Zebedee", cfg.ZebedeeURL)); err != nil {
 		return nil, errors.Wrap(err, "unable to register checkers")
 	}
 

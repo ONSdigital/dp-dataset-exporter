@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
-	"github.com/ONSdigital/dp-dataset-exporter/config"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	s3client "github.com/ONSdigital/dp-s3"
 	"github.com/ONSdigital/log.go/v2/log"
@@ -35,11 +34,11 @@ type VaultClient interface {
 
 // Store provides file storage via S3.
 type Store struct {
-	Uploader       Uploader
-	CryptoUploader Uploader
-	PublicURL      string
-	PublicBucket   string
-	privateBucket  string
+	Uploader        Uploader
+	PrivateUploader Uploader
+	PublicURL       string
+	PublicBucket    string
+	privateBucket   string
 }
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
@@ -48,6 +47,7 @@ func NewStore(
 	publicURL,
 	publicBucket,
 	privateBucket string,
+	localstackHost string,
 ) (*Store, error) {
 
 	uploader, err := s3client.NewUploader(region, publicBucket)
@@ -55,17 +55,12 @@ func NewStore(
 		return nil, err
 	}
 
-	var cryptoUploader *s3client.Uploader
+	var privateUploader *s3client.Uploader
 
-	cfg, err := config.Get()
-	if err != nil {
-		return nil, err
-	}
-
-	if cfg.LocalstackHost != "" {
+	if localstackHost != "" {
 		s, err := session.NewSession(&aws.Config{
-			Endpoint:         aws.String(cfg.LocalstackHost),
-			Region:           aws.String(cfg.AWSRegion),
+			Endpoint:         aws.String(localstackHost),
+			Region:           aws.String(region),
 			S3ForcePathStyle: aws.Bool(true),
 			Credentials:      credentials.NewStaticCredentials("test", "test", ""),
 		})
@@ -74,9 +69,9 @@ func NewStore(
 			return nil, err
 		}
 
-		cryptoUploader = s3client.NewUploaderWithSession(privateBucket, s)
+		privateUploader = s3client.NewUploaderWithSession(privateBucket, s)
 	} else {
-		cryptoUploader = s3client.NewUploaderWithSession(privateBucket, uploader.Session())
+		privateUploader = s3client.NewUploaderWithSession(privateBucket, uploader.Session())
 	}
 
 	if err != nil {
@@ -84,11 +79,11 @@ func NewStore(
 	}
 
 	return &Store{
-		Uploader:       uploader,
-		CryptoUploader: cryptoUploader,
-		PublicURL:      publicURL,
-		PublicBucket:   publicBucket,
-		privateBucket:  privateBucket,
+		Uploader:        uploader,
+		PrivateUploader: privateUploader,
+		PublicURL:       publicURL,
+		PublicBucket:    publicBucket,
+		privateBucket:   privateBucket,
 	}, nil
 }
 
@@ -119,7 +114,7 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			"name":   filename,
 		})
 
-		result, err = store.CryptoUploader.Upload(&s3manager.UploadInput{
+		result, err = store.PrivateUploader.Upload(&s3manager.UploadInput{
 			Body:   reader,
 			Bucket: &store.privateBucket,
 			Key:    &filename,

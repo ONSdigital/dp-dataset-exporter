@@ -132,6 +132,7 @@ func (e *Init) DoGetFileStore(cfg *config.Config) (fileStore *file.Store, err er
 		cfg.S3BucketURL,
 		cfg.S3BucketName,
 		cfg.S3PrivateBucketName,
+		cfg.LocalstackHost,
 	)
 	if err != nil {
 		return

@@ -48,9 +48,6 @@ environment variables, or with a link to a configuration guide.
 | HEALTHCHECK_CRITICAL_TIMEOUT | 90s                                  | The time taken for the health changes from warning state to critical due to subsystem check failures
 | GRACEFUL_SHUTDOWN_TIMEOUT    | time.Second * 10                     | How long to wait for the service to shutdown gracefully
 | DOWNLOAD_SERVICE_URL         | http://localhost:23600               | The URL of the download service
-| VAULT_ADDR                   | http://localhost:8200                | The address of vault
-| VAULT_TOKEN                  | -                                    | Use `make debug` to set a vault token
-| VAULT_PATH                   | secret/shared/psk                    | The vault path to store psks
 | SERVICE_AUTH_TOKEN           | 0f49d57b-c551-4d33-af1e-a442801dd851 | The service token for this app
 | ZEBEDEE_URL                  | http://localhost:8082                | The URL to zebedee
 | AWS_ACCESS_KEY_ID            | -                                    | The AWS access key credential
