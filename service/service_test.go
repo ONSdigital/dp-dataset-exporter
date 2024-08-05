@@ -16,7 +16,6 @@ import (
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	kafka "github.com/ONSdigital/dp-kafka/v4"
 	"github.com/ONSdigital/dp-kafka/v4/kafkatest"
-	vault "github.com/ONSdigital/dp-vault"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -121,12 +120,8 @@ func TestRun(t *testing.T) {
 
 		}
 
-		funcDoGetVaultClient := func(cfg *config.Config, retries int) (*vault.Client, error) {
-			return &vault.Client{}, nil
-		}
-
-		funcDoGetFileStore := func(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
-			f, err := file.NewStore("", "", "", "", "", nil)
+		funcDoGetFileStore := func(cfg *config.Config) (fileStore *file.Store, err error) {
+			f, err := file.NewStore("", "", "", "", "")
 			if err != nil {
 				return nil, err
 			}
@@ -153,7 +148,6 @@ func TestRun(t *testing.T) {
 				DoGetDatasetAPIClientFunc: funcDoGetDatasetAPIClient,
 				DoGetFilterStoreFunc:      funcDoGetFilterStoreClient,
 				DoGetObservationStoreFunc: funcDoGetGraphDB,
-				DoGetVaultFunc:            funcDoGetVaultClient,
 				DoGetFileStoreFunc:        funcDoGetFileStore,
 			}
 			svcErrors := make(chan error, 1)
@@ -168,7 +162,6 @@ func TestRun(t *testing.T) {
 				So(svcList.FilterStore, ShouldBeFalse)
 				So(svcList.DatasetAPI, ShouldBeFalse)
 				So(svcList.ObservationStore, ShouldBeFalse)
-				So(svcList.Vault, ShouldBeFalse)
 				So(svcList.FileStore, ShouldBeFalse)
 			})
 		})
@@ -182,7 +175,6 @@ func TestRun(t *testing.T) {
 				DoGetDatasetAPIClientFunc: funcDoGetDatasetAPIClient,
 				DoGetFilterStoreFunc:      funcDoGetFilterStoreClient,
 				DoGetObservationStoreFunc: funcDoGetGraphDB,
-				DoGetVaultFunc:            funcDoGetVaultClient,
 				DoGetFileStoreFunc:        funcDoGetFileStore,
 			}
 			svcErrors := make(chan error, 1)
@@ -197,7 +189,6 @@ func TestRun(t *testing.T) {
 				So(svcList.FilterStore, ShouldBeTrue)
 				So(svcList.DatasetAPI, ShouldBeTrue)
 				So(svcList.ObservationStore, ShouldBeTrue)
-				So(svcList.Vault, ShouldBeTrue)
 				So(svcList.FileStore, ShouldBeTrue)
 			})
 		})
@@ -210,7 +201,6 @@ func TestRun(t *testing.T) {
 				DoGetDatasetAPIClientFunc: funcDoGetDatasetAPIClient,
 				DoGetFilterStoreFunc:      funcDoGetFilterStoreClient,
 				DoGetObservationStoreFunc: funcDoGetGraphDB,
-				DoGetVaultFunc:            funcDoGetVaultClient,
 				DoGetFileStoreFunc:        funcDoGetFileStore,
 				DoGetKafkaProducerFunc:    funcDoGetKafkaProducerOk,
 			}
@@ -228,12 +218,11 @@ func TestRun(t *testing.T) {
 				So(svcList.FilterStore, ShouldBeTrue)
 				So(svcList.DatasetAPI, ShouldBeTrue)
 				So(svcList.ObservationStore, ShouldBeTrue)
-				So(svcList.Vault, ShouldBeTrue)
 				So(svcList.FileStore, ShouldBeTrue)
 			})
 
 			Convey("The checkers are registered and the healthcheck and http server started", func() {
-				So(len(hcMock.AddCheckCalls()), ShouldEqual, 9)
+				So(len(hcMock.AddCheckCalls()), ShouldEqual, 8)
 				So(hcMock.AddCheckCalls()[0].Name, ShouldResemble, "Kafka consumer")
 				So(len(initMock.DoGetHTTPServerCalls()), ShouldEqual, 1)
 				So(initMock.DoGetHTTPServerCalls()[0].BindAddr, ShouldEqual, ":22500")
@@ -260,7 +249,6 @@ func TestRun(t *testing.T) {
 				DoGetFilterStoreFunc:      funcDoGetFilterStoreClient,
 				DoGetDatasetAPIClientFunc: funcDoGetDatasetAPIClient,
 				DoGetObservationStoreFunc: funcDoGetGraphDB,
-				DoGetVaultFunc:            funcDoGetVaultClient,
 				DoGetFileStoreFunc:        funcDoGetFileStore,
 			}
 			svcErrors := make(chan error, 1)
@@ -276,9 +264,8 @@ func TestRun(t *testing.T) {
 				So(svcList.FilterStore, ShouldBeTrue)
 				So(svcList.DatasetAPI, ShouldBeTrue)
 				So(svcList.ObservationStore, ShouldBeTrue)
-				So(svcList.Vault, ShouldBeTrue)
 				So(svcList.FileStore, ShouldBeTrue)
-				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 9)
+				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 8)
 				So(hcMockAddFail.AddCheckCalls()[0].Name, ShouldResemble, "Kafka consumer")
 			})
 		})
@@ -337,12 +324,8 @@ func TestClose(t *testing.T) {
 
 		}
 
-		funcDoGetVaultClient := func(cfg *config.Config, retries int) (*vault.Client, error) {
-			return &vault.Client{}, nil
-		}
-
-		funcDoGetFileStore := func(cfg *config.Config, vaultClient *vault.Client) (fileStore *file.Store, err error) {
-			f, err := file.NewStore("", "", "", "", "", nil)
+		funcDoGetFileStore := func(cfg *config.Config) (fileStore *file.Store, err error) {
+			f, err := file.NewStore("", "", "", "", "")
 			if err != nil {
 				return nil, err
 			}
@@ -373,7 +356,6 @@ func TestClose(t *testing.T) {
 				DoGetFilterStoreFunc:      funcDoGetFilterStoreClient,
 				DoGetDatasetAPIClientFunc: funcDoGetDatasetAPIClient,
 				DoGetObservationStoreFunc: funcDoGetGraphDB,
-				DoGetVaultFunc:            funcDoGetVaultClient,
 				DoGetFileStoreFunc:        funcDoGetFileStore,
 			}
 
@@ -414,7 +396,6 @@ func TestClose(t *testing.T) {
 				DoGetFilterStoreFunc:      funcDoGetFilterStoreClient,
 				DoGetDatasetAPIClientFunc: funcDoGetDatasetAPIClient,
 				DoGetObservationStoreFunc: funcDoGetGraphDB,
-				DoGetVaultFunc:            funcDoGetVaultClient,
 				DoGetFileStoreFunc:        funcDoGetFileStore,
 			}
 

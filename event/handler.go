@@ -516,6 +516,7 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 	hReader := reader.New(rReader)
 
 	header, err := hReader.PeekBytes('\n')
+
 	if err != nil {
 		return nil, "", "", 0, errors.Wrap(err, "could not peek")
 	}

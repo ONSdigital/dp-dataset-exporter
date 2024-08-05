@@ -2,13 +2,12 @@ package file
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"net/url"
-	"path"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
@@ -23,7 +22,6 @@ import (
 // Uploader represents the methods required to upload to s3 with and without encryption
 type Uploader interface {
 	Upload(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
-	UploadWithPSK(input *s3manager.UploadInput, psk []byte) (*s3manager.UploadOutput, error)
 	Session() *session.Session
 	BucketName() string
 	Checker(ctx context.Context, state *healthcheck.CheckState) error
@@ -36,13 +34,11 @@ type VaultClient interface {
 
 // Store provides file storage via S3.
 type Store struct {
-	Uploader       Uploader
-	CryptoUploader Uploader
-	PublicURL      string
-	PublicBucket   string
-	privateBucket  string
-	VaultPath      string
-	VaultClient    VaultClient
+	Uploader        Uploader
+	PrivateUploader Uploader
+	PublicURL       string
+	PublicBucket    string
+	privateBucket   string
 }
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
@@ -50,9 +46,8 @@ func NewStore(
 	region,
 	publicURL,
 	publicBucket,
-	privateBucket,
-	vaultPath string,
-	vaultClient VaultClient,
+	privateBucket string,
+	localstackHost string,
 ) (*Store, error) {
 
 	uploader, err := s3client.NewUploader(region, publicBucket)
@@ -60,16 +55,35 @@ func NewStore(
 		return nil, err
 	}
 
-	cryptoUploader := s3client.NewUploaderWithSession(privateBucket, uploader.Session())
+	var privateUploader *s3client.Uploader
+
+	if localstackHost != "" {
+		s, err := session.NewSession(&aws.Config{
+			Endpoint:         aws.String(localstackHost),
+			Region:           aws.String(region),
+			S3ForcePathStyle: aws.Bool(true),
+			Credentials:      credentials.NewStaticCredentials("test", "test", ""),
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		privateUploader = s3client.NewUploaderWithSession(privateBucket, s)
+	} else {
+		privateUploader = s3client.NewUploaderWithSession(privateBucket, uploader.Session())
+	}
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &Store{
-		Uploader:       uploader,
-		CryptoUploader: cryptoUploader,
-		PublicURL:      publicURL,
-		PublicBucket:   publicBucket,
-		privateBucket:  privateBucket,
-		VaultPath:      vaultPath,
-		VaultClient:    vaultClient,
+		Uploader:        uploader,
+		PrivateUploader: privateUploader,
+		PublicURL:       publicURL,
+		PublicBucket:    publicBucket,
+		privateBucket:   privateBucket,
 	}, nil
 }
 
@@ -100,41 +114,15 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			"name":   filename,
 		})
 
-		psk, err := createPSK()
-		if err != nil {
-			return "", err
-		}
-		vaultPath := store.VaultPath + "/" + path.Base(filename)
-		vaultKey := "key"
-
-		log.Info(ctx, "writing key to vault", log.Data{
-			"vault_path": vaultPath,
-		})
-		if err := store.VaultClient.WriteKey(vaultPath, vaultKey, hex.EncodeToString(psk)); err != nil {
-			return "", err
-		}
-
-		result, err = store.CryptoUploader.UploadWithPSK(&s3manager.UploadInput{
+		result, err = store.PrivateUploader.Upload(&s3manager.UploadInput{
 			Body:   reader,
 			Bucket: &store.privateBucket,
 			Key:    &filename,
-		}, psk)
+		})
 		if err != nil {
 			return "", err
 		}
-
-		log.Info(ctx, "writing key to vault", log.Data{
-			"result.Location": result.Location,
-			"vault_path":      vaultPath,
-		})
 	}
 
 	return url.PathUnescape(result.Location)
-}
-
-func createPSK() ([]byte, error) {
-	key := make([]byte, 16)
-	_, err := rand.Read(key)
-
-	return key, err
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/ONSdigital/dp-dataset-exporter/schema"
 	"github.com/ONSdigital/dp-graph/v2/graph"
 	kafka "github.com/ONSdigital/dp-kafka/v4"
-	vault "github.com/ONSdigital/dp-vault"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -89,13 +88,7 @@ func Run(ctx context.Context, serviceList *ExternalServiceList, buildTime, gitCo
 		return nil, err
 	}
 
-	vaultCli, err := serviceList.GetVault(cfg, 3)
-	if err != nil {
-		log.Fatal(ctx, "failed to initialise vault", err)
-		return nil, err
-	}
-
-	fileStore, err := serviceList.GetFileStore(cfg, vaultCli)
+	fileStore, err := serviceList.GetFileStore(cfg)
 	if err != nil {
 		log.Fatal(ctx, "failed to initialise dataset api", err)
 		return nil, err
@@ -128,7 +121,7 @@ func Run(ctx context.Context, serviceList *ExternalServiceList, buildTime, gitCo
 		return nil, err
 	}
 
-	if err := registerCheckers(ctx, hc, consumer, producer, *vaultCli, *observationStore, datasetAPICli, filterStore, fileStore.Uploader, fileStore.CryptoUploader, health.NewClient("Zebedee", cfg.ZebedeeURL)); err != nil {
+	if err := registerCheckers(ctx, hc, consumer, producer, *observationStore, datasetAPICli, filterStore, fileStore.Uploader, fileStore.PrivateUploader, health.NewClient("Zebedee", cfg.ZebedeeURL)); err != nil {
 		return nil, errors.Wrap(err, "unable to register checkers")
 	}
 
@@ -218,7 +211,7 @@ func (svc *Service) Close(ctx context.Context) error {
 }
 
 func registerCheckers(ctx context.Context, hc HealthChecker,
-	consumer kafka.IConsumerGroup, producer kafka.IProducer, vaultCli vault.Client, observationCli graph.DB, datasetCli DatasetAPI, filterStore FilterStore, publicUploader, privateUploader file.Uploader, zebedeeCli *health.Client) (err error) {
+	consumer kafka.IConsumerGroup, producer kafka.IProducer, observationCli graph.DB, datasetCli DatasetAPI, filterStore FilterStore, publicUploader, privateUploader file.Uploader, zebedeeCli *health.Client) (err error) {
 	hasErrors := false
 
 	if err := hc.AddCheck("Kafka consumer", consumer.Checker); err != nil {
@@ -229,11 +222,6 @@ func registerCheckers(ctx context.Context, hc HealthChecker,
 	if err := hc.AddCheck("Kafka producer", producer.Checker); err != nil {
 		hasErrors = true
 		log.Error(ctx, "error adding check for Kafka producer", err)
-	}
-
-	if err := hc.AddCheck("Vault", vaultCli.Checker); err != nil {
-		hasErrors = true
-		log.Error(ctx, "error adding check for Vault", err)
 	}
 
 	if err := hc.AddCheck("Observation store", observationCli.Checker); err != nil {
