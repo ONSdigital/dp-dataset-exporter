@@ -6,7 +6,6 @@ require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.260.1
 	github.com/ONSdigital/dp-graph/v2 v2.18.0
 	github.com/ONSdigital/dp-healthcheck v1.6.3
-	github.com/ONSdigital/dp-s3 v1.10.0
 	github.com/ONSdigital/go-ns v0.0.0-20191104121206-f144c4ec2e58
 	github.com/ONSdigital/log.go/v2 v2.4.3
 	github.com/aws/aws-sdk-go v1.54.19
@@ -23,6 +22,7 @@ require (
 require (
 	github.com/ONSdigital/dp-kafka/v4 v4.1.0
 	github.com/ONSdigital/dp-net/v2 v2.11.2
+	github.com/ONSdigital/dp-s3/v2 v2.1.0
 )
 
 require (
