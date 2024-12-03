@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	s3client "github.com/ONSdigital/dp-s3"
+	s3client "github.com/ONSdigital/dp-s3/v2"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
@@ -50,12 +50,13 @@ func NewStore(
 	localstackHost string,
 ) (*Store, error) {
 
-	uploader, err := s3client.NewUploader(region, publicBucket)
+	uploader, err := s3client.NewClient(region, publicBucket)
+
 	if err != nil {
 		return nil, err
 	}
 
-	var privateUploader *s3client.Uploader
+	var privateUploader *s3client.Client
 
 	if localstackHost != "" {
 		s, err := session.NewSession(&aws.Config{
@@ -69,9 +70,9 @@ func NewStore(
 			return nil, err
 		}
 
-		privateUploader = s3client.NewUploaderWithSession(privateBucket, s)
+		privateUploader = s3client.NewClientWithSession(privateBucket, s)
 	} else {
-		privateUploader = s3client.NewUploaderWithSession(privateBucket, uploader.Session())
+		privateUploader = s3client.NewClientWithSession(privateBucket, uploader.Session())
 	}
 
 	if err != nil {
