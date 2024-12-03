@@ -6,23 +6,18 @@ require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.260.1
 	github.com/ONSdigital/dp-graph/v2 v2.18.0
 	github.com/ONSdigital/dp-healthcheck v1.6.3
+	github.com/ONSdigital/dp-kafka/v4 v4.1.0
+	github.com/ONSdigital/dp-net/v2 v2.11.2
+	github.com/ONSdigital/dp-s3/v2 v2.1.0
 	github.com/ONSdigital/go-ns v0.0.0-20191104121206-f144c4ec2e58
 	github.com/ONSdigital/log.go/v2 v2.4.3
 	github.com/aws/aws-sdk-go v1.54.19
 	github.com/gorilla/mux v1.8.1
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.8.1
 	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.53.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0
-)
-
-require (
-	github.com/ONSdigital/dp-kafka/v4 v4.1.0
-	github.com/ONSdigital/dp-net/v2 v2.11.2
-	github.com/ONSdigital/dp-s3/v2 v2.1.0
 )
 
 require (
@@ -44,6 +39,8 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
