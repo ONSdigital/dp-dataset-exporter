@@ -21,7 +21,6 @@ require (
 )
 
 require (
-	github.com/ONSdigital/dp-api-clients-go v1.43.0
 	github.com/ONSdigital/dp-kafka/v4 v4.1.0
 	github.com/ONSdigital/dp-net/v2 v2.11.2
 )
