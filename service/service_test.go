@@ -120,8 +120,8 @@ func TestRun(t *testing.T) {
 
 		}
 
-		funcDoGetFileStore := func(cfg *config.Config) (fileStore *file.Store, err error) {
-			f, err := file.NewStore("", "", "", "", "")
+		funcDoGetFileStore := func(ctx context.Context, cfg *config.Config) (fileStore *file.Store, err error) {
+			f, err := file.NewStore(ctx, "", "", "", "", "")
 			if err != nil {
 				return nil, err
 			}
@@ -324,8 +324,8 @@ func TestClose(t *testing.T) {
 
 		}
 
-		funcDoGetFileStore := func(cfg *config.Config) (fileStore *file.Store, err error) {
-			f, err := file.NewStore("", "", "", "", "")
+		funcDoGetFileStore := func(ctx context.Context, cfg *config.Config) (fileStore *file.Store, err error) {
+			f, err := file.NewStore(ctx, "", "", "", "", "")
 			if err != nil {
 				return nil, err
 			}

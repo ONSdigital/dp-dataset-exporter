@@ -88,7 +88,7 @@ func Run(ctx context.Context, serviceList *ExternalServiceList, buildTime, gitCo
 		return nil, err
 	}
 
-	fileStore, err := serviceList.GetFileStore(cfg)
+	fileStore, err := serviceList.GetFileStore(ctx, cfg)
 	if err != nil {
 		log.Fatal(ctx, "failed to initialise dataset api", err)
 		return nil, err

@@ -64,9 +64,9 @@ func (e *ExternalServiceList) GetDatasetAPIClient(cfg *config.Config) (DatasetAP
 }
 
 // GetFileStore returns an initialised connection to file store
-func (e *ExternalServiceList) GetFileStore(cfg *config.Config) (fileStore *file.Store, err error) {
+func (e *ExternalServiceList) GetFileStore(ctx context.Context, cfg *config.Config) (fileStore *file.Store, err error) {
 
-	f, err := e.Init.DoGetFileStore(cfg)
+	f, err := e.Init.DoGetFileStore(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +125,10 @@ func (e *Init) DoGetDatasetAPIClient(cfg *config.Config) DatasetAPI {
 }
 
 // DoGetFileStore creates a connection to s3
-func (e *Init) DoGetFileStore(cfg *config.Config) (fileStore *file.Store, err error) {
+func (e *Init) DoGetFileStore(ctx context.Context, cfg *config.Config) (fileStore *file.Store, err error) {
 
 	fileStore, err = file.NewStore(
+		ctx,
 		cfg.AWSRegion,
 		cfg.S3BucketURL,
 		cfg.S3BucketName,

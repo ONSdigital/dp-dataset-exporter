@@ -6,13 +6,14 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
-	s3client "github.com/ONSdigital/dp-s3/v2"
+	s3client "github.com/ONSdigital/dp-s3/v3"
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
@@ -21,8 +22,8 @@ import (
 
 // Uploader represents the methods required to upload to s3 with and without encryption
 type Uploader interface {
-	Upload(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
-	Session() *session.Session
+	Upload(ctx context.Context, input *s3.PutObjectInput, options ...func(*manager.Uploader)) (*manager.UploadOutput, error)
+	Config() aws.Config
 	BucketName() string
 	Checker(ctx context.Context, state *healthcheck.CheckState) error
 }
@@ -34,8 +35,8 @@ type VaultClient interface {
 
 // Store provides file storage via S3.
 type Store struct {
-	Uploader        Uploader
-	PrivateUploader Uploader
+	Uploader        *s3client.Client
+	PrivateUploader *s3client.Client
 	PublicURL       string
 	PublicBucket    string
 	privateBucket   string
@@ -43,14 +44,15 @@ type Store struct {
 
 // NewStore returns a new store instance for the given AWS region and S3 bucket name.
 func NewStore(
+	ctx context.Context,
 	region,
 	publicURL,
 	publicBucket,
-	privateBucket string,
+	privateBucket,
 	localstackHost string,
 ) (*Store, error) {
 
-	uploader, err := s3client.NewClient(region, publicBucket)
+	uploader, err := s3client.NewClient(ctx, region, publicBucket)
 
 	if err != nil {
 		return nil, err
@@ -59,24 +61,20 @@ func NewStore(
 	var privateUploader *s3client.Client
 
 	if localstackHost != "" {
-		s, err := session.NewSession(&aws.Config{
-			Endpoint:         aws.String(localstackHost),
-			Region:           aws.String(region),
-			S3ForcePathStyle: aws.Bool(true),
-			Credentials:      credentials.NewStaticCredentials("test", "test", ""),
-		})
-
+		awsConfig, err := awsConfig.LoadDefaultConfig(ctx,
+			awsConfig.WithRegion(region),
+			awsConfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("test", "test", "")),
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		privateUploader = s3client.NewClientWithSession(privateBucket, s)
+		privateUploader = s3client.NewClientWithConfig(privateBucket, awsConfig, func(o *s3.Options) {
+			o.BaseEndpoint = aws.String(localstackHost)
+			o.UsePathStyle = true
+		})
 	} else {
-		privateUploader = s3client.NewClientWithSession(privateBucket, uploader.Session())
-	}
-
-	if err != nil {
-		return nil, err
+		privateUploader = s3client.NewClientWithConfig(privateBucket, uploader.Config())
 	}
 
 	return &Store{
@@ -90,7 +88,7 @@ func NewStore(
 
 // PutFile stores the contents of the given reader to a csv file of given the supplied name.
 func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename string, isPublished bool) (uploadedFileURL string, err error) {
-	var result *s3manager.UploadOutput
+	var result *manager.UploadOutput
 
 	if isPublished {
 		log.Info(ctx, "uploading public file to S3", log.Data{
@@ -98,7 +96,7 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			"name":   filename,
 		})
 
-		result, err = store.Uploader.Upload(&s3manager.UploadInput{
+		result, err = store.Uploader.Upload(ctx, &s3.PutObjectInput{
 			Body:   reader,
 			Bucket: &store.PublicBucket,
 			Key:    &filename,
@@ -115,7 +113,7 @@ func (store *Store) PutFile(ctx context.Context, reader io.Reader, filename stri
 			"name":   filename,
 		})
 
-		result, err = store.PrivateUploader.Upload(&s3manager.UploadInput{
+		result, err = store.PrivateUploader.Upload(ctx, &s3.PutObjectInput{
 			Body:   reader,
 			Bucket: &store.privateBucket,
 			Key:    &filename,
