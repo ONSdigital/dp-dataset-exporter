@@ -32,27 +32,6 @@ var (
 	errHealthcheck   = errors.New("healthCheck error")
 )
 
-const (
-	filterOutputId  = "345"
-	fileHRef        = "s3://some/url/123.csv"
-	associatedState = "associated"
-
-	downloadServiceURL        = "http://download-service"
-	apiDomainURL              = "http://api-example"
-	fullDatasetFilePrefix     = "full-dataset"
-	filteredDatasetFilePrefix = "filtered-dataset"
-	serviceAuthToken          = "serviceAuthToken"
-)
-
-// testing Config struct
-var cfg = &config.Config{
-	DownloadServiceURL:        downloadServiceURL,
-	APIDomainURL:              apiDomainURL,
-	FullDatasetFilePrefix:     fullDatasetFilePrefix,
-	FilteredDatasetFilePrefix: filteredDatasetFilePrefix,
-	ServiceAuthToken:          serviceAuthToken,
-}
-
 var funcDoGetKafkaConsumerErr = func(ctx context.Context, kafkaCfg *config.KafkaConfig) (kafka.IConsumerGroup, error) {
 	return nil, errKafkaConsumer
 }

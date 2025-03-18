@@ -52,6 +52,10 @@ debug acceptance:
 test:
 	go test -cover -race ./...
 
+.PHONY: lint
+lint:
+	golangci-lint run ./...
+
 .PHONY: vault
 vault:
 	@echo "$(VAULT_POLICY)"
