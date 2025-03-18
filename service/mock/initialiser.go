@@ -27,7 +27,7 @@ var _ service.Initialiser = &InitialiserMock{}
 //			DoGetDatasetAPIClientFunc: func(cfg *config.Config) service.DatasetAPI {
 //				panic("mock out the DoGetDatasetAPIClient method")
 //			},
-//			DoGetFileStoreFunc: func(cfg *config.Config, vaultClient *vault.Client) (*file.Store, error) {
+//			DoGetFileStoreFunc: func(ctx context.Context, cfg *config.Config) (*file.Store, error) {
 //				panic("mock out the DoGetFileStore method")
 //			},
 //			DoGetFilterStoreFunc: func(cfg *config.Config, serviceAuthToken string) service.FilterStore {
@@ -48,9 +48,6 @@ var _ service.Initialiser = &InitialiserMock{}
 //			DoGetObservationStoreFunc: func(ctx context.Context) (*graph.DB, error) {
 //				panic("mock out the DoGetObservationStore method")
 //			},
-//			DoGetVaultFunc: func(cfg *config.Config, retries int) (*vault.Client, error) {
-//				panic("mock out the DoGetVault method")
-//			},
 //		}
 //
 //		// use mockedInitialiser in code that requires service.Initialiser
@@ -62,7 +59,7 @@ type InitialiserMock struct {
 	DoGetDatasetAPIClientFunc func(cfg *config.Config) service.DatasetAPI
 
 	// DoGetFileStoreFunc mocks the DoGetFileStore method.
-	DoGetFileStoreFunc func(cfg *config.Config) (*file.Store, error)
+	DoGetFileStoreFunc func(ctx context.Context, cfg *config.Config) (*file.Store, error)
 
 	// DoGetFilterStoreFunc mocks the DoGetFilterStore method.
 	DoGetFilterStoreFunc func(cfg *config.Config, serviceAuthToken string) service.FilterStore
@@ -91,6 +88,8 @@ type InitialiserMock struct {
 		}
 		// DoGetFileStore holds details about calls to the DoGetFileStore method.
 		DoGetFileStore []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// Cfg is the cfg argument value.
 			Cfg *config.Config
 		}
@@ -182,15 +181,21 @@ func (mock *InitialiserMock) DoGetDatasetAPIClientCalls() []struct {
 }
 
 // DoGetFileStore calls DoGetFileStoreFunc.
-func (mock *InitialiserMock) DoGetFileStore(cfg *config.Config) (*file.Store, error) {
+func (mock *InitialiserMock) DoGetFileStore(ctx context.Context, cfg *config.Config) (*file.Store, error) {
 	if mock.DoGetFileStoreFunc == nil {
 		panic("InitialiserMock.DoGetFileStoreFunc: method is nil but Initialiser.DoGetFileStore was just called")
 	}
-	
+	callInfo := struct {
+		Ctx context.Context
+		Cfg *config.Config
+	}{
+		Ctx: ctx,
+		Cfg: cfg,
+	}
 	mock.lockDoGetFileStore.Lock()
-	mock.calls.DoGetFileStore = append(mock.calls.DoGetFileStore)
+	mock.calls.DoGetFileStore = append(mock.calls.DoGetFileStore, callInfo)
 	mock.lockDoGetFileStore.Unlock()
-	return mock.DoGetFileStoreFunc(cfg)
+	return mock.DoGetFileStoreFunc(ctx, cfg)
 }
 
 // DoGetFileStoreCalls gets all the calls that were made to DoGetFileStore.
@@ -198,10 +203,12 @@ func (mock *InitialiserMock) DoGetFileStore(cfg *config.Config) (*file.Store, er
 //
 //	len(mockedInitialiser.DoGetFileStoreCalls())
 func (mock *InitialiserMock) DoGetFileStoreCalls() []struct {
-	Cfg         *config.Config
+	Ctx context.Context
+	Cfg *config.Config
 } {
 	var calls []struct {
-		Cfg         *config.Config
+		Ctx context.Context
+		Cfg *config.Config
 	}
 	mock.lockDoGetFileStore.RLock()
 	calls = mock.calls.DoGetFileStore
@@ -428,4 +435,3 @@ func (mock *InitialiserMock) DoGetObservationStoreCalls() []struct {
 	mock.lockDoGetObservationStore.RUnlock()
 	return calls
 }
-
