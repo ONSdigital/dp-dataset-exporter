@@ -51,13 +51,7 @@ func NewStore(
 	privateBucket,
 	localstackHost string,
 ) (*Store, error) {
-
-	uploader, err := s3client.NewClient(ctx, region, publicBucket)
-
-	if err != nil {
-		return nil, err
-	}
-
+	var publicUploader *s3client.Client
 	var privateUploader *s3client.Client
 
 	if localstackHost != "" {
@@ -69,16 +63,26 @@ func NewStore(
 			return nil, err
 		}
 
+		publicUploader = s3client.NewClientWithConfig(publicBucket, awsConfig, func(o *s3.Options) {
+			o.BaseEndpoint = aws.String(localstackHost)
+			o.UsePathStyle = true
+		})
+
 		privateUploader = s3client.NewClientWithConfig(privateBucket, awsConfig, func(o *s3.Options) {
 			o.BaseEndpoint = aws.String(localstackHost)
 			o.UsePathStyle = true
 		})
 	} else {
-		privateUploader = s3client.NewClientWithConfig(privateBucket, uploader.Config())
+		awsConfig, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion(region))
+		if err != nil {
+			return nil, err
+		}
+		publicUploader = s3client.NewClientWithConfig(publicBucket, awsConfig)
+		privateUploader = s3client.NewClientWithConfig(privateBucket, awsConfig)
 	}
 
 	return &Store{
-		Uploader:        uploader,
+		Uploader:        publicUploader,
 		PrivateUploader: privateUploader,
 		PublicURL:       publicURL,
 		PublicBucket:    publicBucket,
