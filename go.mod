@@ -8,6 +8,7 @@ require (
 	github.com/ONSdigital/dp-healthcheck v1.6.3
 	github.com/ONSdigital/dp-kafka/v4 v4.1.0
 	github.com/ONSdigital/dp-net/v2 v2.22.0
+	github.com/ONSdigital/dp-s3/v3 v3.2.0
 	github.com/ONSdigital/go-ns v0.0.0-20241030091535-cc1b11756418
 	github.com/ONSdigital/log.go/v2 v2.4.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.66
@@ -38,7 +39,6 @@ require (
 )
 
 require (
-	github.com/ONSdigital/dp-s3/v3 v3.1.0
 	github.com/ONSdigital/golang-neo4j-bolt-driver v0.0.0-20241121114036-9f4b82bb9d37 // indirect
 	github.com/ONSdigital/graphson v0.3.0 // indirect
 	github.com/ONSdigital/gremgo-neptune v1.1.0 // indirect
