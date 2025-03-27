@@ -14,19 +14,19 @@ var _ file.VaultClient = &VaultClientMock{}
 
 // VaultClientMock is a mock implementation of file.VaultClient.
 //
-// 	func TestSomethingThatUsesVaultClient(t *testing.T) {
+//	func TestSomethingThatUsesVaultClient(t *testing.T) {
 //
-// 		// make and configure a mocked file.VaultClient
-// 		mockedVaultClient := &VaultClientMock{
-// 			WriteKeyFunc: func(path string, key string, value string) error {
-// 				panic("mock out the WriteKey method")
-// 			},
-// 		}
+//		// make and configure a mocked file.VaultClient
+//		mockedVaultClient := &VaultClientMock{
+//			WriteKeyFunc: func(path string, key string, value string) error {
+//				panic("mock out the WriteKey method")
+//			},
+//		}
 //
-// 		// use mockedVaultClient in code that requires file.VaultClient
-// 		// and then make assertions.
+//		// use mockedVaultClient in code that requires file.VaultClient
+//		// and then make assertions.
 //
-// 	}
+//	}
 type VaultClientMock struct {
 	// WriteKeyFunc mocks the WriteKey method.
 	WriteKeyFunc func(path string, key string, value string) error
@@ -68,7 +68,8 @@ func (mock *VaultClientMock) WriteKey(path string, key string, value string) err
 
 // WriteKeyCalls gets all the calls that were made to WriteKey.
 // Check the length with:
-//     len(mockedVaultClient.WriteKeyCalls())
+//
+//	len(mockedVaultClient.WriteKeyCalls())
 func (mock *VaultClientMock) WriteKeyCalls() []struct {
 	Path  string
 	Key   string

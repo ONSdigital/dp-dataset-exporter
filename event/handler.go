@@ -505,12 +505,11 @@ func (handler *ExportHandler) generateFullCSV(ctx context.Context, event *Filter
 	}
 
 	rReader := observation.NewReader(csvRowReader)
-	defer func() (*dataset.Download, string, string, int32, error) {
+	defer func() {
 		closeErr := rReader.Close(ctx)
 		if closeErr != nil {
 			log.Error(ctx, "error closing observation reader", closeErr)
 		}
-		return nil, "", "", 0, closeErr
 	}()
 
 	hReader := reader.New(rReader)

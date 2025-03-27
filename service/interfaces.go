@@ -22,7 +22,7 @@ type Initialiser interface {
 	DoGetDatasetAPIClient(cfg *config.Config) DatasetAPI
 	DoGetFilterStore(cfg *config.Config, serviceAuthToken string) FilterStore
 	DoGetObservationStore(ctx context.Context) (observationStore *graph.DB, err error)
-	DoGetFileStore(cfg *config.Config) (fileStore *file.Store, err error)
+	DoGetFileStore(ctx context.Context, cfg *config.Config) (fileStore *file.Store, err error)
 	DoGetHTTPServer(bindAddr string, router http.Handler) HTTPServer
 	DoGetHealthCheck(cfg *config.Config, buildTime, gitCommit, version string) (HealthChecker, error)
 	DoGetKafkaConsumer(ctx context.Context, kafkaCfg *config.KafkaConfig) (kafka.IConsumerGroup, error)

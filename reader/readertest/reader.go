@@ -14,19 +14,19 @@ var _ reader.WrappedReader = &WrappedReaderMock{}
 
 // WrappedReaderMock is a mock implementation of reader.WrappedReader.
 //
-// 	func TestSomethingThatUsesWrappedReader(t *testing.T) {
+//	func TestSomethingThatUsesWrappedReader(t *testing.T) {
 //
-// 		// make and configure a mocked reader.WrappedReader
-// 		mockedWrappedReader := &WrappedReaderMock{
-// 			ReadFunc: func(p []byte) (int, error) {
-// 				panic("mock out the Read method")
-// 			},
-// 		}
+//		// make and configure a mocked reader.WrappedReader
+//		mockedWrappedReader := &WrappedReaderMock{
+//			ReadFunc: func(p []byte) (int, error) {
+//				panic("mock out the Read method")
+//			},
+//		}
 //
-// 		// use mockedWrappedReader in code that requires reader.WrappedReader
-// 		// and then make assertions.
+//		// use mockedWrappedReader in code that requires reader.WrappedReader
+//		// and then make assertions.
 //
-// 	}
+//	}
 type WrappedReaderMock struct {
 	// ReadFunc mocks the Read method.
 	ReadFunc func(p []byte) (int, error)
@@ -60,7 +60,8 @@ func (mock *WrappedReaderMock) Read(p []byte) (int, error) {
 
 // ReadCalls gets all the calls that were made to Read.
 // Check the length with:
-//     len(mockedWrappedReader.ReadCalls())
+//
+//	len(mockedWrappedReader.ReadCalls())
 func (mock *WrappedReaderMock) ReadCalls() []struct {
 	P []byte
 } {
