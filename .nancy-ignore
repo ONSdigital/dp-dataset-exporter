@@ -1,3 +1,0 @@
-CVE-2021-3121 # no upgrade path as yet for https://github.com/hashicorp/vault/releases/tag/sdk%2Fv0.2.0
-CVE-2019-5736 # as above
-CVE-2024-2660   # pkg:golang/github.com/hashicorp/vault/api@v1.14.0 - at latest version of the golang package yet still has the vulnerability
